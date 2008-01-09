@@ -37,6 +37,7 @@
 
 #include <wx/clipbrd.h>
 #include <wx/svg/dcsvg.h>
+#include <wx/dcps.h>
 
 #include "TimingView.h"
 #include "TimingWindow.h"
@@ -68,6 +69,7 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
     EVT_MENU(TIMING_ID_EDITTEXT,        TimingView::OnSelectTextTool)
     EVT_MENU(TIMING_ID_EXPORT_BITMAP,   TimingView::OnExportBitmap)
     EVT_MENU(TIMING_ID_EXPORT_SVG,      TimingView::OnExportSVG)
+    EVT_MENU(TIMING_ID_EXPORT_PS,       TimingView::OnExportPS)
 END_EVENT_TABLE()
 
 void TimingView::OnEditClock(wxCommandEvent& event)
@@ -352,3 +354,25 @@ void TimingView::OnExportSVG(wxCommandEvent& event)
 
     delete svgdc;
 }
+
+void TimingView::OnExportPS(wxCommandEvent& event)
+{
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("SVG files (*.ps)|*.ps"), wxSAVE | wxOVERWRITE_PROMPT);
+    if ( dlg.ShowModal() != wxID_OK )
+        return;
+    wxString filename = dlg.GetPath();
+    if ( filename.empty() )
+        return;
+
+    wxPoint s = window->GetBitmapSize();
+    wxPostScriptDC *psdc = new wxPostScriptDC(filename);
+
+    psdc->SetBrush(*wxWHITE_BRUSH);
+    psdc->SetPen(*wxBLACK_PEN);
+    //svgdc->DrawRectangle(0, 0, s.x, s.y);
+    window->Draw(*psdc, true);
+
+    delete psdc;
+}
+
+

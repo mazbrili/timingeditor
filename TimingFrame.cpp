@@ -238,7 +238,7 @@ void TimingFrame::InitToolBar(wxToolBar* toolBar)
     toolBar->AddTool(TIMING_ID_GLASS_N, _T("Zoom out"), wxBitmap(glassntool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom out"), _T("Zoom out the Document"));
     toolBar->AddTool(TIMING_ID_GLASS_P, _T("Zoom in"), wxBitmap(glassptool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom in"), _T("Zoom in the Document"));
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_DISCONTINUATION, _T("Edit discontinuation"), wxBitmap(tri_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Edit discontinuation"), _T("Edit discontinuations (on the time axis)"));
+    toolBar->AddTool(TIMING_ID_DISCONTINUATION, _T("Edit time compressors"), wxBitmap(tri_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Edit time compressors"), _T("Edit time compressors by clicking on the bottom axis"));
     toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Draw vertical line"), _T("Draw vertical line"));
     toolBar->AddTool(TIMING_ID_HARROW, _T("Draw a hotizontal arrow"),  wxBitmap(harrow_cur_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Draw a hotizontal arrow"),_T("Draw a hotizontal arrow") );
     toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text labels"), wxBitmap(textedit_cur_xpm),  wxNullBitmap, wxITEM_NORMAL, _T("Edit text labels"),_T("Edit text labels") );

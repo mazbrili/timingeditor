@@ -62,6 +62,7 @@ class TimingView: public wxView
 
         void OnExportBitmap(wxCommandEvent& event);
         void OnExportSVG(wxCommandEvent& event);
+        void OnExportPS(wxCommandEvent& event);
 
     private:
         DECLARE_DYNAMIC_CLASS(TimingView)
