@@ -222,6 +222,7 @@ public:
     void OnSelectRulerTool(void);
     void OnSelectHArrowTool(void);
     void OnSelectTextTool(void);
+    void OnSelectNeutralTool(void);
 
 public:
     wxView *view;

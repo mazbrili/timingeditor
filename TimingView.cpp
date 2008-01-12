@@ -66,6 +66,7 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
     EVT_MENU(TIMING_ID_DISCONTINUATION, TimingView::OnInsertDiscontTool)
     EVT_MENU(TIMING_ID_RULER,           TimingView::OnSelectRuler)
     EVT_MENU(TIMING_ID_HARROW,          TimingView::OnSelectHArrow)
+    EVT_MENU(TIMING_ID_NEUTRAL,         TimingView::OnSelectNeutral)
     EVT_MENU(TIMING_ID_EDITTEXT,        TimingView::OnSelectTextTool)
     EVT_MENU(TIMING_ID_EXPORT_BITMAP,   TimingView::OnExportBitmap)
     EVT_MENU(TIMING_ID_EXPORT_SVG,      TimingView::OnExportSVG)
@@ -298,6 +299,11 @@ void TimingView::OnSelectHArrow(wxCommandEvent& event)
 void TimingView::OnSelectTextTool(wxCommandEvent& event)
 {
     window->OnSelectTextTool();
+}
+
+void TimingView::OnSelectNeutral(wxCommandEvent& event)
+{
+    window->OnSelectNeutralTool();
 }
 
 void TimingView::OnExportBitmap(wxCommandEvent& event)

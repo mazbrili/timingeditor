@@ -57,6 +57,7 @@
 #include "art/ruler_cur.xpm"
 #include "art/harrow_cur.xpm"
 #include "art/textedit_cur.xpm"
+#include "art/cross.xpm"
 
 
 
@@ -76,6 +77,7 @@ BEGIN_EVENT_TABLE(TimingFrame, wxDocMDIParentFrame )
     EVT_UPDATE_UI(TIMING_ID_RULER,           TimingFrame::OnUpdateDiscont)
     EVT_UPDATE_UI(TIMING_ID_HARROW,          TimingFrame::OnUpdateDiscont)
     EVT_UPDATE_UI(TIMING_ID_EDITTEXT,        TimingFrame::OnUpdateDiscont)
+    EVT_UPDATE_UI(TIMING_ID_NEUTRAL,         TimingFrame::OnUpdateDiscont)
 END_EVENT_TABLE()
 
 
@@ -238,10 +240,11 @@ void TimingFrame::InitToolBar(wxToolBar* toolBar)
     toolBar->AddTool(TIMING_ID_GLASS_N, _T("Zoom out"), wxBitmap(glassntool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom out"), _T("Zoom out the Document"));
     toolBar->AddTool(TIMING_ID_GLASS_P, _T("Zoom in"), wxBitmap(glassptool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom in"), _T("Zoom in the Document"));
     toolBar->AddSeparator();
+    toolBar->AddTool(TIMING_ID_NEUTRAL, _T("Select"), wxBitmap(cross_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Select"), _T(" Select something or change signal/bus"));
     toolBar->AddTool(TIMING_ID_DISCONTINUATION, _T("Edit time compressors"), wxBitmap(tri_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Edit time compressors"), _T("Edit time compressors by clicking on the bottom axis"));
     toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Draw vertical line"), _T("Draw vertical line"));
-    toolBar->AddTool(TIMING_ID_HARROW, _T("Draw a hotizontal arrow"),  wxBitmap(harrow_cur_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Draw a hotizontal arrow"),_T("Draw a hotizontal arrow") );
-    toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text labels"), wxBitmap(textedit_cur_xpm),  wxNullBitmap, wxITEM_NORMAL, _T("Edit text labels"),_T("Edit text labels") );
+    toolBar->AddTool(TIMING_ID_HARROW, _T("Draw hotizontal arrow"),  wxBitmap(harrow_cur_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Draw a hotizontal arrow"),_T("Draw a hotizontal arrow") );
+    toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm),  wxNullBitmap, wxITEM_NORMAL, _T("Edit text labels"),_T("Edit text labels") );
     toolBar->AddSeparator();
     toolBar->AddTool(wxID_ABOUT, _T("Help"), wxBitmap( help_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Help"), _T("Show info about this application"));
     toolBar->Realize();

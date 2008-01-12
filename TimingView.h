@@ -55,6 +55,7 @@ class TimingView: public wxView
         void OnSelectRuler(wxCommandEvent& event);
         void OnSelectHArrow(wxCommandEvent& event);
         void OnSelectTextTool(wxCommandEvent& event);
+        void OnSelectNeutral(wxCommandEvent& event);
 
         void OnAddClock(wxCommandEvent& event);
         void OnAddSignal(wxCommandEvent& event);

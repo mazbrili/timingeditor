@@ -1,4 +1,5 @@
 You can click on the signal to change its state.
+You have unlimited undo/redo capabilities.
 You can click on the bullet on the left to select a signal.
 You can move the bullet on the left to move the trace horizontally.
 You can right-click on the bullets on the left to edit a clock or delete a trace.

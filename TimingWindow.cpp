@@ -3115,6 +3115,55 @@ void TimingWindow::OnSelectTextTool(void)
 
     this->Refresh();
 }
+void TimingWindow::OnSelectNeutralTool(void)
+{
+    if (!view) return;
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
+
+
+    switch ( WindowState )
+    {
+        case EditingDiscontinuity:
+        case InsertingVLineWaitingSecondPoint:
+        case InsertingVLineWaitingFirstPoint:
+        case InsertingHArrowWaitingFirstPoint:
+        case InsertingHArrowWaitingSecondPoint:
+        case SelectingText:
+        case TextFieldSelected:
+            SetCursor(*wxCROSS_CURSOR);
+            SetNeutralState();
+            editingNumber = -1;
+            scrollingleft = false;
+            scrollingright = false;
+            scrolltimer.Stop();
+            break;
+        default:
+        case Neutral:
+        case VLineIsMarked:
+        case ChangingVLineLengthLower:
+        case ChangingVLineLengthUpper:
+        case AxisIsMarked:
+        case EditAxisLeft:
+        case EditAxisRight:
+        case EditSignal:
+        case MovingSignal:
+        case ChangingUpperSpace:
+        case ChangingLowerSpace:
+        case HArrowIsMarked:
+        case ChangingHArrowLengthLeft:
+        case ChangingHArrowLengthRight:
+        case HArrowMovingText:
+        case MovingHArrow:
+        case MovingVLine:
+        case SignalIsSelected:
+            break;
+    }
+
+    Refresh();
+
+}
+
 /*void TimingWindow::InsertDroppedText(wxString str)
 {
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
