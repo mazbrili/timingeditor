@@ -2476,8 +2476,8 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                                 if ( off >= heightOffsets[k] &&
                                      off <  heightOffsets[k+1] )
                                 {
-                                    kmax = k;
-                                    kmin = k+1;
+                                    if ( kmax > k ) kmax = k;
+                                    if ( kmin < k+1 ) kmin = k+1;
                                 }
                             }
                         }
