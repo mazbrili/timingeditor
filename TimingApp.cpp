@@ -222,6 +222,7 @@ wxMDIChildFrame *TimingApp::CreateChildFrame(wxDocument *doc, wxView *view)
     //file_menu->AppendSeparator();
     file_menu->Append(TIMING_ID_EXPORT_BITMAP, _T("Export to PNG"), _T("export diagramm to a bitmap in PNG format"));
     file_menu->Append(TIMING_ID_EXPORT_SVG, _T("Export to SVG"), _T("export diagram to a scalable vector graphic"));
+    file_menu->Append(TIMING_ID_EXPORT_PS, _T("Export to PS"), _T("export diagram to postscript format"));
     file_menu->AppendSeparator();
     file_menu->Append(wxID_EXIT, _T("&Quit\tAlt-F4"), _T("Quit the application"));
     //file history

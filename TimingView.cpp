@@ -357,7 +357,7 @@ void TimingView::OnExportSVG(wxCommandEvent& event)
 
 void TimingView::OnExportPS(wxCommandEvent& event)
 {
-    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("SVG files (*.ps)|*.ps"), wxSAVE | wxOVERWRITE_PROMPT);
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("PostScrip files (*.ps)|*.ps"), wxSAVE | wxOVERWRITE_PROMPT);
     if ( dlg.ShowModal() != wxID_OK )
         return;
     wxString filename = dlg.GetPath();
@@ -365,8 +365,16 @@ void TimingView::OnExportPS(wxCommandEvent& event)
         return;
 
     wxPoint s = window->GetBitmapSize();
-    wxPostScriptDC *psdc = new wxPostScriptDC(filename);
+    //wxPostScriptDC *psdc = new wxPostScriptDC(filename);
+    wxPrintData g_printData;
+    g_printData.SetFilename(filename);
+    wxPostScriptDC *psdc = new wxPostScriptDC(g_printData);
 
+    psdc->StartDoc(_T("Printing PS"));
+    //psdc->SetUserScale(1.0,1.0);
+    //psdc->SetBackground(*wxTRANSPARENT_BRUSH);
+    psdc->Clear();
+    psdc->SetBackgroundMode(wxTRANSPARENT);
     psdc->SetBrush(*wxWHITE_BRUSH);
     psdc->SetPen(*wxBLACK_PEN);
     //svgdc->DrawRectangle(0, 0, s.x, s.y);
