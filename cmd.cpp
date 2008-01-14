@@ -124,9 +124,9 @@ bool ChangeLength::Do(void)
     delVlineCom.clear();
     if ( m_newLength < m_doc->length)
     {
-        std::vector<VLine>::iterator it;
+        //std::vector<VLine>::iterator it;
         wxInt32 k;
-        it = m_doc->vertlines.begin();
+        //it = m_doc->vertlines.begin();
         for (  k = 0 ; k < m_doc->vertlines.size(); ++k )
         {
             if ( m_doc->vertlines[k].vpos > m_newLength )
@@ -190,16 +190,16 @@ ChangeSignal::ChangeSignal(TimingDocument *doc, wxInt32 changingSigNr, Signal ne
     m_changingSigNr(changingSigNr),
     m_newSig(newSig)
 {
-    if ( !m_newSig.IsClock && m_newSig.IsBus )
-    {
-        wxInt32 k = 0;
-        for ( wxInt32 n = 0 ; n < m_newSig.values.size() ; ++n )
-            if ( m_newSig.values[n] == one || m_newSig.values[n] == zero )
-                if ( n == 0 || m_newSig.values[n-1] != m_newSig.values[n])
-                    k++;
+//    if ( !m_newSig.IsClock && m_newSig.IsBus )
+//    {
+//        wxInt32 k = 0;
+//        for ( wxInt32 n = 0 ; n < m_newSig.values.size() ; ++n )
+//            if ( m_newSig.values[n] == one || m_newSig.values[n] == zero )
+//                if ( n == 0 || m_newSig.values[n-1] != m_newSig.values[n])
+//                    k++;
         //while ( k < m_newSig.TextValues.size() )
         //    m_newSig.TextValues.pop_back();
-    }
+//    }
 }
 
 ChangeSignal::~ChangeSignal(){}
@@ -224,14 +224,54 @@ DeleteSignalCommand::DeleteSignalCommand(TimingDocument *doc, wxInt32 deletedSig
     m_deletedSigNr(deletedSigNr)
 {
 }
-DeleteSignalCommand::~DeleteSignalCommand(){}
+DeleteSignalCommand::~DeleteSignalCommand()
+{
+    DeleteVLineCommand *dvlc;
+    for (wxInt32 k = 0 ; k < delVlineCom.size() ; ++k )
+    {
+        dvlc = delVlineCom[k];
+        if ( dvlc ) delete dvlc;
+    }
+}
 bool DeleteSignalCommand::Do(void)
 {
+    // delete vertical lines which are only connected to the deleted signal
+    delVlineCom.clear();
+    for (wxInt32  k = 0 ; k < m_doc->vertlines.size(); ++k )
+    {
+        if ( m_doc->vertlines[k].EndPos == m_deletedSigNr &&
+            m_doc->vertlines[k].StartPos == m_deletedSigNr )
+        {
+            //std::vector<DeleteVLineCommand*> delVlineCom;
+            DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
+            delVlineCom.push_back(cmd);
+            cmd->Do();
+            k = -1;
+        }
+    }
+
+    // delete the signal
     m_sig = m_doc->signals[m_deletedSigNr];
     std::vector<Signal>::iterator it = m_doc->signals.begin();
     for ( wxInt32 n = 0 ; n < m_deletedSigNr ; ++n)
         ++it;
     m_doc->signals.erase(it);
+
+
+    // change the vertical lines connected to this signal
+    vlines = m_doc->vertlines;
+    //std::vector<HArrow> harrows;
+    for ( wxInt32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    {
+        if ( m_doc->vertlines[n].StartPos > m_deletedSigNr)
+            m_doc->vertlines[n].StartPos = m_doc->vertlines[n].StartPos-1;
+        if ( m_doc->vertlines[n].EndPos >= m_deletedSigNr)
+            m_doc->vertlines[n].EndPos = m_doc->vertlines[n].EndPos-1;
+
+//        else if (m_deletedSigNr == m_doc->signals.size() -1 &&
+//         m_doc->vertlines[n].EndPos == m_deletedSigNr + 1 )
+//            m_doc->vertlines[n].EndPos --;
+    }
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -243,6 +283,17 @@ bool DeleteSignalCommand::Undo(void)
     for ( wxInt32 n = 0 ; n < m_deletedSigNr ; ++n)
         it++;
     m_doc->signals.insert(it, 1, m_sig);
+
+    m_doc->vertlines = vlines;
+
+    while ( delVlineCom.size() )
+    {
+        DeleteVLineCommand *cmd = delVlineCom.back();
+        cmd->Undo();
+        delete cmd;
+        delVlineCom.pop_back();
+
+    }
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -288,6 +339,9 @@ AddSignalCommand::AddSignalCommand(TimingDocument *doc, wxInt32 selectedSigNr, S
 AddSignalCommand::~AddSignalCommand(){}
 bool AddSignalCommand::Do(void)
 {
+    vlines.clear();
+    vlines = m_doc->vertlines;
+
     if ( m_selectedSigNr == -1 )
         m_doc->signals.push_back(m_sig);
     else
@@ -296,6 +350,14 @@ bool AddSignalCommand::Do(void)
         for ( wxInt32 n = 0 ; n < m_selectedSigNr ; ++n)
             it++;
         m_doc->signals.insert(it, 1, m_sig);
+
+        for ( wxInt32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+        {
+            if ( m_doc->vertlines[n].StartPos >= m_selectedSigNr )
+                 m_doc->vertlines[n].StartPos++;
+            if ( m_doc->vertlines[n].EndPos >= m_selectedSigNr )
+                m_doc->vertlines[n].EndPos++;
+        }
     }
 
     m_doc->Modify(true);
@@ -313,6 +375,11 @@ bool AddSignalCommand::Undo(void)
             it++;
         m_doc->signals.erase(it);
     }
+
+
+    m_doc->vertlines = vlines;
+
+
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;

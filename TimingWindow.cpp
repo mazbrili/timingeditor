@@ -1024,6 +1024,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     }
     dc.SetTextBackground(bgcol);
     dc.SetBackgroundMode(wxTRANSPARENT);
+    dc.SetPen(defPen);
 
 
     /// drawing discontinuities

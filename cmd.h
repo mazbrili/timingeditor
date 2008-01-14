@@ -117,6 +117,9 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_deletedSigNr;
     Signal m_sig;
+    std::vector<VLine> vlines;
+    std::vector<HArrow> harrows;
+    std::vector<DeleteVLineCommand*> delVlineCom;
 };
 class ChangeClockParamCommand : public wxCommand
 {
@@ -154,6 +157,7 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_selectedSigNr;
     Signal m_sig;
+    std::vector<VLine> vlines;
 };
 class AddDiscontCommand : public wxCommand
 {
