@@ -204,7 +204,7 @@ private:
 
 
 public:
-    wxInt32 GetSelectedSignalNr(){ return editingNumber; }
+    wxInt32 GetSelectedSignalNr();
     void OnDragEnter(void);
     void OnDragLeave(void);
     wxDragResult OnDragOver(wxPoint pt, wxDragResult def);

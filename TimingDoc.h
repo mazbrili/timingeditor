@@ -72,6 +72,7 @@ public:
     wxInt32 fromVLine;
     wxInt32 toVLine;
     wxInt32 pos;
+    wxInt32 signalnmbr;
     wxString text;
     wxPoint textoffset;
 
@@ -125,6 +126,9 @@ class TimingDocument: public wxDocument
         std::vector<VLine> vertlines;
         std::vector<HArrow> harrows;
         //std::vector<SplArrow> splarrows;
+
+        wxInt32 SignalHeight;
+        wxInt32 MinimumSignalDistance;
 
     protected:
         bool DoSaveDocument(const wxString& file);

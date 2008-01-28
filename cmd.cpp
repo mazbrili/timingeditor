@@ -260,7 +260,6 @@ bool DeleteSignalCommand::Do(void)
 
     // change the vertical lines connected to this signal
     vlines = m_doc->vertlines;
-    //std::vector<HArrow> harrows;
     for ( wxInt32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
     {
         if ( m_doc->vertlines[n].StartPos > m_deletedSigNr)
@@ -272,6 +271,31 @@ bool DeleteSignalCommand::Do(void)
 //         m_doc->vertlines[n].EndPos == m_deletedSigNr + 1 )
 //            m_doc->vertlines[n].EndPos --;
     }
+
+    harrows = m_doc->harrows;
+    for ( std::vector<HArrow>::iterator it = m_doc->harrows.begin();
+        it != m_doc->harrows.end();)
+    {
+        //HArrow &ha = *it;
+        if ( it->signalnmbr == m_deletedSigNr )
+        {
+            m_doc->harrows.erase(it);
+            it = m_doc->harrows.begin();
+            continue;
+        }
+        it++;
+    }
+    for ( std::vector<HArrow>::iterator it = m_doc->harrows.begin();
+        it != m_doc->harrows.end();
+        it++)
+    {
+        if ( it->signalnmbr > m_deletedSigNr )
+        {
+            it->signalnmbr--;
+        }
+    }
+
+
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -294,6 +318,8 @@ bool DeleteSignalCommand::Undo(void)
         delVlineCom.pop_back();
 
     }
+
+    m_doc->harrows = harrows;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -341,6 +367,7 @@ bool AddSignalCommand::Do(void)
 {
     vlines.clear();
     vlines = m_doc->vertlines;
+    harrows = m_doc->harrows;
 
     if ( m_selectedSigNr == -1 )
         m_doc->signals.push_back(m_sig);
@@ -357,6 +384,12 @@ bool AddSignalCommand::Do(void)
                  m_doc->vertlines[n].StartPos++;
             if ( m_doc->vertlines[n].EndPos >= m_selectedSigNr )
                 m_doc->vertlines[n].EndPos++;
+        }
+
+        for ( wxInt32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+        {
+            if ( m_doc->harrows[n].signalnmbr >= m_selectedSigNr)
+                m_doc->harrows[n].signalnmbr++;
         }
     }
 
@@ -378,6 +411,7 @@ bool AddSignalCommand::Undo(void)
 
 
     m_doc->vertlines = vlines;
+    m_doc->harrows = harrows;
 
 
     m_doc->Modify(true);
@@ -440,25 +474,6 @@ bool RemoveDiscontCommand::Undo(void)
 
 }
 
-ChangeTwo::ChangeTwo(wxCommand *first, wxCommand *second):
-    wxCommand(true, _T("changing text")),
-    m_first(first),
-    m_second(second)
-{
-}
-bool ChangeTwo::Do(void)
-{
-    if ( m_first->Do() )
-        return m_second->Do();
-    return false;
-}
-bool ChangeTwo::Undo(void)
-{
-    if ( m_second->Undo() )
-        return m_first->Undo();
-    return false;
-}
-
 MoveSignalPosCommand::MoveSignalPosCommand(TimingDocument *doc, wxInt32 selectedSigNr, wxInt32 targetPos)
     : wxCommand(true, _T("moving signal position")),
     m_doc(doc),
@@ -467,14 +482,11 @@ MoveSignalPosCommand::MoveSignalPosCommand(TimingDocument *doc, wxInt32 selected
 {}
 
 MoveSignalPosCommand::~MoveSignalPosCommand(){}
-bool MoveSignalPosCommand::Do(void)
+bool MoveSignalPosCommand::DoMove(void)
 {
-    if ( m_selectedSigNr == m_targetPos )
-        return false;
-
     Signal sig = m_doc->signals[m_selectedSigNr];
 
-    if ( m_targetPos == m_doc->signals.size() )
+    if ( m_targetPos == m_doc->signals.size() ) // moved to end of vector
     {
         m_doc->signals.push_back(sig);
         std::vector<Signal>::iterator it = m_doc->signals.begin();
@@ -515,7 +527,132 @@ bool MoveSignalPosCommand::Do(void)
             m_targetPos = tmp+1;
         }
     }
+    return true;
+}
+bool MoveSignalPosCommand::Do(void)
+{
 
+
+    vlines.clear();
+    vlines = m_doc->vertlines;
+    harrows = m_doc->harrows;
+
+    /// prepaire vertlines
+    for ( wxInt32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    {
+        if ( m_doc->vertlines[n].StartPos == m_selectedSigNr)
+        {
+            if (m_selectedSigNr > m_targetPos )
+                m_doc->vertlines[n].StartPos = m_targetPos;
+            else
+                m_doc->vertlines[n].StartPos = m_targetPos-1;
+        }
+        else
+        {
+            if (m_doc->vertlines[n].StartPos < m_selectedSigNr &&
+                m_doc->vertlines[n].StartPos >= m_targetPos )
+            {
+                m_doc->vertlines[n].StartPos++;
+            }
+            else
+            {
+                if (m_doc->vertlines[n].StartPos > m_selectedSigNr &&
+                    m_doc->vertlines[n].StartPos < m_targetPos )
+                {
+                    m_doc->vertlines[n].StartPos--;
+                }
+            }
+        }
+
+
+
+        if ( m_doc->vertlines[n].EndPos == m_selectedSigNr )
+        {
+            if (m_selectedSigNr < m_targetPos )
+                m_doc->vertlines[n].EndPos = m_targetPos-1;
+            else
+                m_doc->vertlines[n].EndPos = m_targetPos;
+
+        }
+        else
+        {
+            if (m_doc->vertlines[n].EndPos > m_selectedSigNr &&
+                m_doc->vertlines[n].EndPos < m_targetPos)
+            {
+                m_doc->vertlines[n].EndPos--;
+            }
+            else
+            {
+                if (m_doc->vertlines[n].EndPos < m_selectedSigNr &&
+                    m_doc->vertlines[n].EndPos >= m_targetPos)
+                {
+                    m_doc->vertlines[n].EndPos++;
+                }
+            }
+        }
+
+        if ( m_doc->vertlines[n].EndPos < m_doc->vertlines[n].StartPos )
+        {
+            wxInt32 t = m_doc->vertlines[n].EndPos;
+            m_doc->vertlines[n].EndPos = m_doc->vertlines[n].StartPos;
+            m_doc->vertlines[n].StartPos = t;
+        }
+    }
+
+    /// prepaire harrows;
+    for ( wxInt32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+    {
+        if ( m_doc->harrows[n].signalnmbr == m_selectedSigNr )
+        {
+            if ( m_selectedSigNr > m_targetPos )
+                m_doc->harrows[n].signalnmbr = m_targetPos;
+            else
+                m_doc->harrows[n].signalnmbr = m_targetPos-1;
+        }
+        else
+        {
+            if ( m_doc->harrows[n].signalnmbr < m_selectedSigNr &&
+                m_doc->harrows[n].signalnmbr >= m_targetPos )
+            {
+                m_doc->harrows[n].signalnmbr++;
+            }
+            else
+            {
+                if ( m_doc->harrows[n].signalnmbr > m_selectedSigNr &&
+                    m_doc->harrows[n].signalnmbr < m_targetPos )
+                {
+                    m_doc->harrows[n].signalnmbr--;
+                }
+            }
+        }
+        /// check that arrow is not pointing alongside a vertical line (on the left end)
+        if ( m_doc->vertlines[m_doc->harrows[n].fromVLine].StartPos > m_doc->harrows[n].signalnmbr ||
+            m_doc->vertlines[m_doc->harrows[n].fromVLine].EndPos < m_doc->harrows[n].signalnmbr )
+        {
+            //add a vline for the arrow
+            VLine vl;
+            vl.EndPos = m_doc->harrows[n].signalnmbr;
+            vl.StartPos = m_doc->harrows[n].signalnmbr;
+            vl.vpos = m_doc->vertlines[m_doc->harrows[n].fromVLine].vpos;
+            m_doc->vertlines.push_back(vl);
+            m_doc->harrows[n].fromVLine = m_doc->vertlines.size()-1;
+        }
+        /// check that arrow is not pointing alongside a vertical line (on the right end)
+        if ( m_doc->vertlines[m_doc->harrows[n].toVLine].StartPos > m_doc->harrows[n].signalnmbr ||
+            m_doc->vertlines[m_doc->harrows[n].toVLine].EndPos < m_doc->harrows[n].signalnmbr )
+        {
+            //add a vline for the arrow
+            VLine vl;
+            vl.EndPos = m_doc->harrows[n].signalnmbr;
+            vl.StartPos = m_doc->harrows[n].signalnmbr;
+            vl.vpos = m_doc->vertlines[m_doc->harrows[n].toVLine].vpos;
+            m_doc->vertlines.push_back(vl);
+            m_doc->harrows[n].toVLine = m_doc->vertlines.size()-1;
+        }
+    }
+
+
+    DoMove();
 
 
     m_doc->Modify(true);
@@ -524,7 +661,15 @@ bool MoveSignalPosCommand::Do(void)
 }
 bool MoveSignalPosCommand::Undo(void)
 {
-    return Do();
+    //return Do();
+
+    DoMove();
+    m_doc->vertlines = vlines;
+    m_doc->harrows = harrows;
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
 }
 
 
@@ -538,6 +683,51 @@ ChangeSpaceCommand::ChangeSpaceCommand(TimingDocument *doc, wxInt32 selectedSign
 ChangeSpaceCommand::~ChangeSpaceCommand(){}
 bool ChangeSpaceCommand::Do(void)
 {
+    harrows.clear();
+    harrows = m_doc->harrows;
+
+    for ( wxUint32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+    {
+        if ( m_doc->harrows[n].signalnmbr == m_selectedSignal )
+        {
+            if ( m_upper )
+            {
+                //if ( m_doc->signals[m_selectedSignal].prespace > m_newLength )
+                //    m_doc->harrows[n].pos -= (m_doc->signals[m_selectedSignal].prespace - m_newLength);
+                if ( m_doc->signals[m_selectedSignal].prespace < m_newLength )
+                    m_doc->harrows[n].pos += (-m_doc->signals[m_selectedSignal].prespace + m_newLength);
+                else
+                {
+                    m_doc->harrows[n].pos -= (m_doc->signals[m_selectedSignal].prespace - m_newLength);
+                    if ( m_doc->harrows[n].pos < 0 ) m_doc->harrows[n].pos = 0;
+                }
+
+            }
+            else
+            {
+                //if ( m_doc->signals[m_selectedSignal].space > m_newLength )
+                //    m_doc->harrows[n].pos -= (m_doc->signals[m_selectedSignal].space - m_newLength);
+                wxUint32 p = m_doc->signals[m_selectedSignal].prespace +
+                            m_doc->SignalHeight +
+                            m_doc->MinimumSignalDistance +
+                            m_newLength;
+                if ( //m_doc->signals[m_selectedSignal].space > m_newLength &&
+                    m_doc->harrows[n].pos > p )
+                    m_doc->harrows[n].pos = p;
+
+            }
+        }
+    }
+
+    DoChangeSpace();
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+
+bool ChangeSpaceCommand::DoChangeSpace(void)
+{
     if ( !m_upper )
     {
         wxInt32 tmp = m_doc->signals[m_selectedSignal].space;
@@ -550,13 +740,19 @@ bool ChangeSpaceCommand::Do(void)
         m_doc->signals[m_selectedSignal].prespace = m_newLength;
         m_newLength = tmp;
     }
+    return true;
+}
+
+bool ChangeSpaceCommand::Undo(void)
+{
+
+    DoChangeSpace();
+
+    m_doc->harrows = harrows;
+
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
-}
-bool ChangeSpaceCommand::Undo(void)
-{
-    return Do();
 }
 
 ChangeLengthLeft::ChangeLengthLeft(TimingDocument *doc, wxInt32 newLength)
@@ -800,13 +996,14 @@ bool ChangeVLineCommand::Undo(void)
 }
 
 
-ChangeHArrowCommand::ChangeHArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 newLeft, wxInt32 newRight)
+ChangeHArrowCommand::ChangeHArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 sigindex, wxInt32 newLeft, wxInt32 newRight)
     : wxCommand(true, _T("change horizontal Arrow")),
     m_doc(doc),
     m_nmbr(nmbr),
     m_newPos(pos),
     m_newLeft(newLeft),
-    m_newRight(newRight)
+    m_newRight(newRight),
+    m_newPosIndex(sigindex)
 {}
 ChangeHArrowCommand::~ChangeHArrowCommand(){}
 bool ChangeHArrowCommand::Do(void)
@@ -826,6 +1023,10 @@ bool ChangeHArrowCommand::Do(void)
     tmp = m_doc->harrows[m_nmbr].pos;
     m_doc->harrows[m_nmbr].pos = m_newPos;
     m_newPos = tmp;
+
+    tmp = m_doc->harrows[m_nmbr].signalnmbr;
+    m_doc->harrows[m_nmbr].signalnmbr = m_newPosIndex;
+    m_newPosIndex = tmp;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();

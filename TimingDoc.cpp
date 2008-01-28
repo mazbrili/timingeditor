@@ -51,6 +51,8 @@ TimingDocument::TimingDocument(void)
     :m_readOnly( false )
 {
     length = 24;
+    SignalHeight = 20;
+    MinimumSignalDistance = 10;
 
     VLine line;
 
@@ -68,9 +70,10 @@ TimingDocument::TimingDocument(void)
     HArrow ar;
     ar.fromVLine = 0;
     ar.toVLine = 1;
-    ar.pos = 100;
     ar.text = _T("t_1");
     ar.textoffset = wxPoint(0, -10);
+    ar.signalnmbr = 0;
+    ar.pos = 10;
     harrows.push_back(ar);
 
     /*std::vector<HArrow> horiarrows;*/
@@ -181,7 +184,7 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     wxUint32 ui;
 
     /// store file format version first
-    i = 1;
+    i = 2;
     store << i;
 
     ///
@@ -219,6 +222,10 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
         i = *it;
         store << i;
     }
+
+    // new with version 2:
+    store << SignalHeight;
+    store << MinimumSignalDistance;
     return true;
 }
 
@@ -232,7 +239,7 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
 
     /// get file format version first
     load >> i;
-    if ( i == 1 )
+    if ( i == 1 || i == 2 )
     {
         load >> length;
 
@@ -275,14 +282,25 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
             discontinuities.insert(i);
 
         }
-
-        return true;
+        SignalHeight = 20;
+        MinimumSignalDistance = 10;
     }
-    else
+
+    if ( i == 2)
+    {
+        load >> SignalHeight;
+        load >> MinimumSignalDistance;
+    }
+
+    if ( i > 2)
     {
         // unknown format version
         return false;
     }
+
+
+
+    return true;
 }
 
 //class TimingCommandProcessor;
@@ -468,7 +486,7 @@ bool HArrow::serialize(wxDataOutputStream &store)
     wxInt32 i;
 
     /// version
-    i = 1;
+    i = 2;
     store << i;
 
     store << fromVLine;
@@ -481,6 +499,8 @@ bool HArrow::serialize(wxDataOutputStream &store)
     i = textoffset.y;
     store << i;
 
+    store << signalnmbr;
+
     return true;
 }
 bool HArrow::deserialize(wxDataInputStream &load)
@@ -488,7 +508,7 @@ bool HArrow::deserialize(wxDataInputStream &load)
     wxInt32 i;
 
     load >> i;
-    if ( i == 1 )
+    if ( i == 1 || i == 2 )
     {
         load >> fromVLine;
         load >> toVLine;
@@ -496,8 +516,14 @@ bool HArrow::deserialize(wxDataInputStream &load)
         load >> text;
         load >> i; textoffset.x = i;
         load >> i; textoffset.y = i;
-        return true;
+        signalnmbr = 0;
     }
-    else
-        return false; // wrong format version
+    if ( i == 2 )
+    {
+        load >> signalnmbr;
+    }
+
+    if ( i > 2 ) return false; // wrong format version
+
+    return true;
 }

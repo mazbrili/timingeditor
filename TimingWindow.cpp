@@ -143,12 +143,10 @@ bool TimingWindow::CanPaste(void)
     return false;
 }
 
-const int DistanceToTimeline = 25;
-const int DistanceFromTimeline = 20;
-const int SignalHeight       = 20;
-const int MinimumSignalDistance = 10;
-const int manipXoffset = 20;
-const int manipRadius = 4;
+const int DistanceToTimeline    = 25;
+const int DistanceFromTimeline  = 20;
+const int manipXoffset          = 20;
+const int manipRadius           = 4;
 
 wxPoint TimingWindow::GetBitmapSize()
 {
@@ -160,6 +158,7 @@ wxPoint TimingWindow::GetBitmapSize()
 
 void TimingWindow::Draw(wxDC& dc, bool exporting)
 {
+
     if (!view)
         return;
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
@@ -225,7 +224,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
 
         h = dc.GetCharHeight();
 
-        wxCoord ny =  offset.y + SignalHeight/2 - h/2+MinimumSignalDistance/2;
+        wxCoord ny =  offset.y + doc->SignalHeight/2 - h/2+doc->MinimumSignalDistance/2;
         heightOffsets.push_back(offset.y);
         ny += doc->signals[k].prespace;
         wxPoint off(nx, ny );
@@ -284,8 +283,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
         ++textNumber;
 
-        offset.y += SignalHeight;
-        offset.y += MinimumSignalDistance;
+        offset.y += doc->SignalHeight;
+        offset.y += doc->MinimumSignalDistance;
         offset.y += doc->signals[k].space;
         offset.y += doc->signals[k].prespace;
 
@@ -374,7 +373,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                 dc.SetPen(*wxLIGHT_GREY_PEN);
             }
             dc.DrawCircle(manipXoffset,
-                heightOffsets[n] + SignalHeight/2+MinimumSignalDistance/2+ doc->signals[n].prespace,
+                heightOffsets[n] + doc->SignalHeight/2+doc->MinimumSignalDistance/2+ doc->signals[n].prespace,
                 manipRadius
             );
             if ( WindowState == SignalIsSelected && editingNumber == n )
@@ -404,12 +403,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
             {
                 dc.DrawRoundedRectangle(manipXoffset - 2*manipRadius, heightOffsets[editingNumber],
                 axisStop-(manipXoffset - 2*manipRadius)+10,
-                SignalHeight + MinimumSignalDistance + newSpace + doc->signals[editingNumber].prespace,
+                doc->SignalHeight + doc->MinimumSignalDistance + newSpace + doc->signals[editingNumber].prespace,
                 10.0);
                 /// the end
                 editingPoint[0] = wxPoint(
                     (manipXoffset - 2*manipRadius)+(axisStop-(manipXoffset - 2*manipRadius)+10)/2,
-                    heightOffsets[editingNumber] + SignalHeight + MinimumSignalDistance + newSpace + doc->signals[editingNumber].prespace
+                    heightOffsets[editingNumber] + doc->SignalHeight + doc->MinimumSignalDistance + newSpace + doc->signals[editingNumber].prespace
                 );
                 /// the start
                 editingPoint[1] = wxPoint(
@@ -422,12 +421,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                 dc.DrawRoundedRectangle(manipXoffset - 2*manipRadius, heightOffsets[editingNumber] +
                     doc->signals[editingNumber].prespace - newSpace,
                 axisStop-(manipXoffset - 2*manipRadius)+10,
-                    SignalHeight + MinimumSignalDistance + newSpace + doc->signals[editingNumber].space,
+                    doc->SignalHeight + doc->MinimumSignalDistance + newSpace + doc->signals[editingNumber].space,
                 10.0);
                 /// the end
                 editingPoint[0] = wxPoint(
                     (manipXoffset - 2*manipRadius)+(axisStop-(manipXoffset - 2*manipRadius)+10)/2,
-                    heightOffsets[editingNumber] + SignalHeight + MinimumSignalDistance + doc->signals[editingNumber].prespace + doc->signals[editingNumber].space
+                    heightOffsets[editingNumber] + doc->SignalHeight + doc->MinimumSignalDistance + doc->signals[editingNumber].prespace + doc->signals[editingNumber].space
                 );
                 /// the start
                 editingPoint[1] = wxPoint(
@@ -440,12 +439,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         {
             dc.DrawRoundedRectangle(manipXoffset - 2*manipRadius, heightOffsets[editingNumber],
                 axisStop-(manipXoffset - 2*manipRadius)+10,
-                SignalHeight + MinimumSignalDistance + doc->signals[editingNumber].space + doc->signals[editingNumber].prespace,
+                doc->SignalHeight + doc->MinimumSignalDistance + doc->signals[editingNumber].space + doc->signals[editingNumber].prespace,
                 10.0);
             /// the end
             editingPoint[0] = wxPoint(
                 (manipXoffset - 2*manipRadius)+(axisStop-(manipXoffset - 2*manipRadius)+10)/2,
-                    heightOffsets[editingNumber] + SignalHeight + MinimumSignalDistance +
+                    heightOffsets[editingNumber] + doc->SignalHeight + doc->MinimumSignalDistance +
                     doc->signals[editingNumber].space+
                     doc->signals[editingNumber].prespace
             );
@@ -498,7 +497,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
     {
         offset.x = signalNamesWidth;
-        offset.y = heightOffsets[n]+MinimumSignalDistance/2+ doc->signals[n].prespace;
+        offset.y = heightOffsets[n]+doc->MinimumSignalDistance/2+ doc->signals[n].prespace;
         Signal sig;
         if ( WindowState == EditSignal && editingNumber == n && editingValB != -1 ) sig = editingSignal;
         else sig = doc->signals[n];
@@ -514,20 +513,20 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                     if ( k == 0 && n == 0)
                     {
                         dc.DrawLine(
-                            offset.x, offset.y + SignalHeight,
+                            offset.x, offset.y + doc->SignalHeight,
                             offset.x, offset.y
                         );
                     }
                     if ( val ) // one
                     {
                         dc.DrawLine(
-                            offset.x, offset.y + SignalHeight,
-                            offset.x + transitionWidth*transitionsPerGridStep, offset.y + SignalHeight
+                            offset.x, offset.y + doc->SignalHeight,
+                            offset.x + transitionWidth*transitionsPerGridStep, offset.y + doc->SignalHeight
                         );
                         if ( ++n == sig.ticks )
                         {
                             dc.DrawLine(
-                                offset.x + transitionWidth*transitionsPerGridStep, offset.y + SignalHeight,
+                                offset.x + transitionWidth*transitionsPerGridStep, offset.y + doc->SignalHeight,
                                 offset.x+transitionWidth*transitionsPerGridStep, offset.y
                             );
                             val = !val;
@@ -544,7 +543,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                         {
                             dc.DrawLine(
                                 offset.x+transitionWidth*transitionsPerGridStep, offset.y,
-                                offset.x + transitionWidth*transitionsPerGridStep, offset.y + SignalHeight
+                                offset.x + transitionWidth*transitionsPerGridStep, offset.y + doc->SignalHeight
                             );
                             val = !val;
                             n = 0;
@@ -571,8 +570,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                 {
                     case zero:
                         dc.DrawLine(
-                            offset.x, offset.y+SignalHeight,
-                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight
+                            offset.x, offset.y+doc->SignalHeight,
+                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight
                         );
 
                         if ( k != doc->length -1 )
@@ -580,22 +579,22 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             switch ( sig.values[k+1])
                             {
                                 case zero:
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight);
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight);
                                     break;
                                 case one:
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
                                         offset.x+transitionWidth*transitionsPerGridStep, offset.y);
                                     break;
                                 case hz :
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight/2);
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight/2);
                                     break;
                                 case u:
                                 default:
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight);
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight);
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
                                         offset.x+transitionWidth*transitionsPerGridStep, offset.y);
                             }
                         }
@@ -611,7 +610,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             {
                                 case zero:
                                     dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight);
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight);
                                     break;
                                 case one:
                                     dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
@@ -619,43 +618,43 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                     break;
                                 case hz :
                                     dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight/2);
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight/2);
                                     break;
                                 case u:
                                 default:
                                     dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
                                         offset.x+transitionWidth*transitionsPerGridStep, offset.y);
                                     dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight);
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight);
                             }
                         }
                         break;
                     case hz :
                         dc.DrawLine(
-                            offset.x, offset.y+SignalHeight/2,
-                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2
+                            offset.x, offset.y+doc->SignalHeight/2,
+                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2
                         );
                         if ( k != doc->length -1 )
                         {
                             switch ( sig.values[k+1])
                             {
                                 case zero:
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight);
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight);
                                     break;
                                 case one:
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
                                         offset.x+transitionWidth*transitionsPerGridStep, offset.y);
                                     break;
                                 case hz :
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight/2);
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight/2);
                                     break;
                                 case u:
                                 default:
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
-                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+SignalHeight);
-                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
+                                        offset.x+transitionWidth*transitionsPerGridStep, offset.y+doc->SignalHeight);
+                                    dc.DrawLine(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
                                         offset.x+transitionWidth*transitionsPerGridStep, offset.y);
                             }
                         }
@@ -663,8 +662,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                     case u:
                     default:
                         dc.DrawLine(
-                            offset.x, offset.y+SignalHeight,
-                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight
+                            offset.x, offset.y+doc->SignalHeight,
+                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight
                         );
                         dc.DrawLine(
                             offset.x, offset.y,
@@ -676,17 +675,17 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             {
                                 case zero:
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight
                                     );
                                     dc.DrawLine(
                                         offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight
+                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight
                                     );
                                     break;
                                 case one:
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
                                         offset.x+transitionWidth*(transitionsPerGridStep), offset.y
                                     );
                                     dc.DrawLine(
@@ -696,19 +695,19 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                     break;
                                 case hz:
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight/2
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight/2
                                     );
                                     dc.DrawLine(
                                         offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight/2
+                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight/2
                                     );
                                     break;
                                 case u:
                                 default:
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y+SignalHeight
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y+doc->SignalHeight
                                     );
                                     dc.DrawLine(
                                         offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
@@ -733,8 +732,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                     case zero:
                     case one:
                         dc.DrawLine(
-                            offset.x, offset.y + SignalHeight,
-                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + SignalHeight
+                            offset.x, offset.y + doc->SignalHeight,
+                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + doc->SignalHeight
                         );
                         dc.DrawLine(
                             offset.x, offset.y,
@@ -745,8 +744,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             if ( sig.values[k+1] == sig.values[k])
                             {
                                 dc.DrawLine(
-                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + SignalHeight,
-                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + SignalHeight
+                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + doc->SignalHeight,
+                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + doc->SignalHeight
                                 );
                                 dc.DrawLine(
                                     offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
@@ -756,12 +755,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             else if ( sig.values[k+1] == hz )
                             {
                                 dc.DrawLine(
-                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + SignalHeight,
-                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + SignalHeight/2
+                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + doc->SignalHeight,
+                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + doc->SignalHeight/2
                                 );
                                 dc.DrawLine(
                                     offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y+ SignalHeight/2
+                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y+ doc->SignalHeight/2
                                 );
                             }
                             else if ( sig.values[k+1] == u )
@@ -769,31 +768,31 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                 dc.SetBrush(*wxLIGHT_GREY_BRUSH);
                                 dc.SetPen(*wxLIGHT_GREY_PEN);
                                 wxPoint rec[3];
-                                rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y + SignalHeight);
-                                rec[1] = wxPoint(offset.x+transitionWidth*(-0.5+transitionsPerGridStep), offset.y + SignalHeight/2);
+                                rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y + doc->SignalHeight);
+                                rec[1] = wxPoint(offset.x+transitionWidth*(-0.5+transitionsPerGridStep), offset.y + doc->SignalHeight/2);
                                 rec[2] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y);
                                 dc.DrawPolygon(3, rec);
                                 //dc.SetPen(wxNullPen);
                                 //dc.SetPen(*wxBLACK_PEN);
                                 dc.SetPen(boldPen);
                                 dc.DrawLine(
-                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + SignalHeight,
+                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + doc->SignalHeight,
                                     offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y
                                 );
                                 dc.DrawLine(
                                     offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + SignalHeight
+                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + doc->SignalHeight
                                 );
                             }
                             else
                             {
                                 dc.DrawLine(
-                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + SignalHeight,
+                                    offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y + doc->SignalHeight,
                                     offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y
                                 );
                                 dc.DrawLine(
                                     offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + SignalHeight
+                                    offset.x+transitionWidth*(transitionsPerGridStep  ), offset.y + doc->SignalHeight
                                 );
                             }
 
@@ -818,7 +817,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             wxCoord h = dc.GetCharHeight();
 
                             textoff.x  += offset.x;
-                            textoff.y  += offset.y + SignalHeight/2 - h/2;
+                            textoff.y  += offset.y + doc->SignalHeight/2 - h/2;
 
                             dc.DrawText(text, textoff.x, textoff.y );
                             textOffsets.push_back(textoff);
@@ -865,8 +864,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                         break;
                     case hz :
                         dc.DrawLine(
-                            offset.x, offset.y+SignalHeight/2,
-                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2
+                            offset.x, offset.y+doc->SignalHeight/2,
+                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2
                         );
                         if ( k != doc->length -1 )
                         {
@@ -878,8 +877,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                     dc.SetBrush(*wxLIGHT_GREY_BRUSH);
                                     dc.SetPen(*wxLIGHT_GREY_PEN);
                                     wxPoint rec[3];
-                                    rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2);
-                                    rec[1] = wxPoint(offset.x+transitionWidth*transitionsPerGridStep,     offset.y+SignalHeight);
+                                    rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2);
+                                    rec[1] = wxPoint(offset.x+transitionWidth*transitionsPerGridStep,     offset.y+doc->SignalHeight);
                                     rec[2] = wxPoint(offset.x+transitionWidth*transitionsPerGridStep,     offset.y);
                                     dc.DrawPolygon(3, rec);
 
@@ -890,18 +889,18 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                 case one:
                                 case zero:
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
-                                        offset.x+transitionWidth* transitionsPerGridStep,    offset.y+SignalHeight
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
+                                        offset.x+transitionWidth* transitionsPerGridStep,    offset.y+doc->SignalHeight
                                     );
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
                                         offset.x+transitionWidth* transitionsPerGridStep,    offset.y
                                     );
                                     break;
                                 case hz :
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight/2,
-                                        offset.x+transitionWidth*transitionsPerGridStep,     offset.y+SignalHeight/2
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight/2,
+                                        offset.x+transitionWidth*transitionsPerGridStep,     offset.y+doc->SignalHeight/2
                                     );
                                     break;
                             }
@@ -913,8 +912,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             dc.SetBrush(*wxLIGHT_GREY_BRUSH);
                             dc.SetPen(*wxLIGHT_GREY_PEN);
                             wxPoint rec[4];
-                            rec[0] = wxPoint(offset.x+1, offset.y+SignalHeight);
-                            rec[1] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight);
+                            rec[0] = wxPoint(offset.x+1, offset.y+doc->SignalHeight);
+                            rec[1] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight);
                             rec[2] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y);
                             rec[3] = wxPoint(offset.x+1, offset.y);
                             dc.DrawPolygon(4, rec);
@@ -923,8 +922,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                             dc.SetPen(boldPen);
                         }
                         dc.DrawLine(
-                            offset.x, offset.y+SignalHeight,
-                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight
+                            offset.x, offset.y+doc->SignalHeight,
+                            offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight
                         );
                         dc.DrawLine(
                             offset.x, offset.y,
@@ -940,8 +939,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                         dc.SetBrush(*wxLIGHT_GREY_BRUSH);
                                         dc.SetPen(*wxLIGHT_GREY_PEN);
                                         wxPoint rec[3];
-                                        rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight);
-                                        rec[1] = wxPoint(offset.x+transitionWidth*(-0.5+transitionsPerGridStep), offset.y+SignalHeight/2);
+                                        rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight);
+                                        rec[1] = wxPoint(offset.x+transitionWidth*(-0.5+transitionsPerGridStep), offset.y+doc->SignalHeight/2);
                                         rec[2] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y);
                                         dc.DrawPolygon(3, rec);
                                         //dc.SetPen(wxNullPen);
@@ -949,12 +948,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                         dc.SetPen(boldPen);
                                     }
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
                                         offset.x+transitionWidth*(transitionsPerGridStep),   offset.y
                                     );
                                     dc.DrawLine(
                                         offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                        offset.x+transitionWidth*(transitionsPerGridStep),   offset.y+SignalHeight
+                                        offset.x+transitionWidth*(transitionsPerGridStep),   offset.y+doc->SignalHeight
                                     );
                                     break;
                                 case hz:
@@ -962,8 +961,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                         dc.SetBrush(*wxLIGHT_GREY_BRUSH);
                                         dc.SetPen(*wxLIGHT_GREY_PEN);
                                         wxPoint rec[3];
-                                        rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight);
-                                        rec[1] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight/2);
+                                        rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight);
+                                        rec[1] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight/2);
                                         rec[2] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y);
                                         dc.DrawPolygon(3, rec);
                                         //dc.SetPen(wxNullPen);
@@ -971,12 +970,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                         dc.SetPen(boldPen);
                                     }
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight/2
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight/2
                                     );
                                     dc.DrawLine(
                                         offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
-                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight/2
+                                        offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight/2
                                     );
                                     break;
                                 case u:
@@ -985,8 +984,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                         dc.SetBrush(*wxLIGHT_GREY_BRUSH);
                                         dc.SetPen(*wxLIGHT_GREY_PEN);
                                         wxPoint rec[4];
-                                        rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight);
-                                        rec[1] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y+SignalHeight);
+                                        rec[0] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight);
+                                        rec[1] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y+doc->SignalHeight);
                                         rec[2] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep), offset.y);
                                         rec[3] = wxPoint(offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y);
                                         dc.DrawPolygon(4, rec);
@@ -995,8 +994,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                         dc.SetPen(boldPen);
                                     }
                                     dc.DrawLine(
-                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+SignalHeight,
-                                        offset.x+transitionWidth*(transitionsPerGridStep),   offset.y+SignalHeight
+                                        offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y+doc->SignalHeight,
+                                        offset.x+transitionWidth*(transitionsPerGridStep),   offset.y+doc->SignalHeight
                                     );
                                     dc.DrawLine(
                                         offset.x+transitionWidth*(transitionsPerGridStep-1), offset.y,
@@ -1055,16 +1054,16 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                     (0.5 + *it) * transitionWidth * transitionsPerGridStep
                     - 2
                     ;
-            offset.y = heightOffsets[n]+MinimumSignalDistance/2 + doc->signals[n].prespace;
+            offset.y = heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->signals[n].prespace;
             for ( wxInt32 n = 0 ; n < 4 ; ++n )
             {
                 wxPoint ind(n,0);
                 wxPoint points[] =
                 {
-                    offset + ind + wxPoint(+3, -0.2*SignalHeight),
-                    offset + ind + wxPoint(+0, +0.2*SignalHeight),
-                    offset + ind + wxPoint(+7, +0.8*SignalHeight),
-                    offset + ind + wxPoint(+0, +1.2*SignalHeight)
+                    offset + ind + wxPoint(+3, -0.2*doc->SignalHeight),
+                    offset + ind + wxPoint(+0, +0.2*doc->SignalHeight),
+                    offset + ind + wxPoint(+7, +0.8*doc->SignalHeight),
+                    offset + ind + wxPoint(+0, +1.2*doc->SignalHeight)
                 };
                 if ( n == 0 || n == 3) //dc.SetPen(wxNullPen);
                     dc.SetPen(*wxBLACK_PEN);
@@ -1195,9 +1194,13 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         HArrow &ha = doc->harrows[n];
         wxPoint offset(signalNamesWidth + doc->vertlines[ha.fromVLine].vpos * transitionWidth * transitionsPerGridStep,
         //        heightOffsets[doc->vertlines[ha.fromVLine].StartPos] + ha.pos);
-                distancfortimeline + ha.pos);
+                ///distancfortimeline + ha.pos);
+                ha.pos + heightOffsets[ha.signalnmbr]);
         if ( editingNumber == n && WindowState == MovingHArrow )
-            offset.y = editingValA + DistanceToTimeline + DistanceFromTimeline;
+        {
+            //offset.y = editingValA + DistanceToTimeline + DistanceFromTimeline;
+            offset.y = editingValA + heightOffsets[editingValB];
+        }
         wxPoint tooffset(signalNamesWidth + doc->vertlines[ha.toVLine].vpos * transitionWidth * transitionsPerGridStep,
             offset.y);
 
@@ -1275,15 +1278,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         dc.GetTextExtent(text, &wid, &hei);
         textSizes.push_back( wxPoint(wid,hei) );
 
-        /// chang position of caret
-//        if ( WindowState == TextFieldSelected && editingNumber == textNumber )
-//        {
-//            wxCoord w, h;
-//            if ( editingValA > text.Length() )
-//                 editingValA = text.Length();
-//            dc.GetTextExtent(text.Mid(0, editingValA), &w, &h);
-//            caret->Move(textoff.x+w, textoff.y);
-        /// chang position of caret
+        /// change position of caret
         if ( WindowState == TextFieldSelected && editingNumber == textNumber )
         {
             wxCoord w, h;
@@ -1358,7 +1353,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     {
         wxPoint offset(signalNamesWidth + doc->vertlines[editingNumber].vpos * transitionWidth * transitionsPerGridStep,
         //        heightOffsets[doc->vertlines[ha.fromVLine].StartPos] + ha.pos);
-                DistanceToTimeline + DistanceFromTimeline + editingValA);
+                editingValA + heightOffsets[editingValC]);
         wxPoint tooffset;
         tooffset.y = offset.y;
         if ( editingValB == -1)
@@ -1523,8 +1518,8 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             editingNumber = -1;
             for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
             {
-                if ( pt.x >= manipXoffset - 2*manipRadius && pt.y >= heightOffsets[n]+MinimumSignalDistance/2 + SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
-                    pt.x <=  manipXoffset + 2*manipRadius && pt.y <= heightOffsets[n]+MinimumSignalDistance/2 + SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
+                if ( pt.x >= manipXoffset - 2*manipRadius && pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
+                    pt.x <=  manipXoffset + 2*manipRadius && pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
                 {
                     newstate = SignalIsSelected;
                     editingNumber = n;
@@ -1536,8 +1531,8 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
             {
                 if ( ! doc->signals[n].IsClock )
-                    if ( pt.y >= heightOffsets[n]+MinimumSignalDistance/2+ doc->signals[n].prespace && pt.x >= axisStart &&
-                        pt.y <= heightOffsets[n]+MinimumSignalDistance/2 + doc->signals[n].prespace + SignalHeight && pt.x <= axisStop )
+                    if ( pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2+ doc->signals[n].prespace && pt.x >= axisStart &&
+                        pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->signals[n].prespace + doc->SignalHeight && pt.x <= axisStop )
                     {
                         newstate = EditSignal;
                         //editingSignalNr
@@ -1786,7 +1781,16 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 {
                     newstate = InsertingHArrowWaitingSecondPoint;
                     editingNumber = k;
-                    editingValA = pt.y - DistanceToTimeline - DistanceFromTimeline;
+                    //editingValA = pt.y - DistanceToTimeline - DistanceFromTimeline;
+                    for ( editingValC = 0 ; editingValC < heightOffsets.size() ; ++editingValC )
+                    {
+                        if ( pt.y < heightOffsets[editingValC] )
+                        {
+                            editingValC--;
+                            editingValA = pt.y - heightOffsets[editingValC];
+                            break;
+                        }
+                    }
                     editingValB = - 1;
                     dorefresh = true;
                     break;
@@ -2052,7 +2056,9 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
             break;
         case MovingSignal:
             /// moving signals horizontally
-            if (  editingValA != -1 )
+            if (editingValA != -1 &&
+                editingNumber != editingValA &&
+                editingNumber +1 != editingValA)
             {
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 cmdproc->Submit(new MoveSignalPosCommand(
@@ -2153,6 +2159,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                 newha.textoffset.x = 5;
                 newha.textoffset.y = -10;
                 newha.pos = editingValA;
+                newha.signalnmbr = editingValC;
 
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 cmdproc->Submit(new AddHArrowCommand(
@@ -2166,7 +2173,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
             {
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 cmdproc->Submit(new ChangeHArrowCommand(doc, editingNumber,
-                    editingValA , doc->harrows[editingNumber].fromVLine, doc->harrows[editingNumber].toVLine)
+                    editingValA, editingValB, doc->harrows[editingNumber].fromVLine, doc->harrows[editingNumber].toVLine)
                 );
             }
             newstate = HArrowIsMarked;
@@ -2178,6 +2185,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 cmdproc->Submit(new ChangeHArrowCommand(doc, editingNumber,
                     doc->harrows[editingNumber].pos,
+                    doc->harrows[editingNumber].signalnmbr,
                     editingValA, editingValB)
                 );
             }
@@ -2242,8 +2250,8 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
 
     editingNumber = -1;
     for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
-        if ( pt.x >= manipXoffset - 2*manipRadius && pt.y >= heightOffsets[n]+MinimumSignalDistance/2 + SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
-            pt.x <=  manipXoffset + 2*manipRadius && pt.y <= heightOffsets[n]+MinimumSignalDistance/2 + SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
+        if ( pt.x >= manipXoffset - 2*manipRadius && pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
+            pt.x <=  manipXoffset + 2*manipRadius && pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
         {
             editingNumber = n;
             WindowState = SignalIsSelected;
@@ -2349,7 +2357,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                 wxInt32 editingSignalPosStart = editingValA;
                 wxInt32 editingSignalPosStop = editingValB;
                 if ( pt.y >= heightOffsets[editingNumber] + doc->signals[editingNumber].prespace && pt.x >= axisStart &&
-                    pt.y <= heightOffsets[editingNumber] + doc->signals[editingNumber].prespace + SignalHeight && pt.x <= axisStop )
+                    pt.y <= heightOffsets[editingNumber] + doc->signals[editingNumber].prespace + doc->SignalHeight && pt.x <= axisStop )
                 {
                     wxCoord p = pt.x - axisStart;
                     editingSignalPosStop = p / (transitionWidth * transitionsPerGridStep);
@@ -2393,10 +2401,20 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                 for ( n = 0 ; n < doc->signals.size() ; ++n)
                     if ( pt.y < (heightOffsets[n] + heightOffsets[n+1])/2 )
                         break;
+                if (editingNumber != n &&
+                    editingNumber +1 != n )
+                {
+                    if ( editingValA != n )
+                        dorefresh = true;
+                    editingValA = n;
+                }
+                else
+                {
+                    if ( editingValA != -1 )
+                        dorefresh = true;
+                    editingValA = -1;
+                }
 
-                if ( editingValA != n )
-                    dorefresh = true;
-                editingValA = n;
             }
             break;
         case ChangingUpperSpace:
@@ -2414,11 +2432,11 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
             {
                 wxCoord p = pt.y;
                 if ( p <= (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
-                                SignalHeight + MinimumSignalDistance ) )
+                                doc->SignalHeight + doc->MinimumSignalDistance ) )
                         editingValA = 0;
                     else
                         editingValA = p - (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
-                                SignalHeight + MinimumSignalDistance );
+                                doc->SignalHeight + doc->MinimumSignalDistance );
             }
             break;
         case InsertingVLineWaitingSecondPoint:
@@ -2468,8 +2486,8 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                             //heightOffsets[
                             //    doc->vertlines[doc->harrows[j].fromVLine].StartPos
                             //] +
-                            DistanceToTimeline + DistanceFromTimeline +
-                            doc->harrows[j].pos;
+                            //DistanceToTimeline + DistanceFromTimeline +
+                            doc->harrows[j].pos + heightOffsets[doc->harrows[j].signalnmbr];
 
                             wxInt32 k;
                             for ( k = 0 ; k < n ; ++k )
@@ -2526,25 +2544,53 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
         case MovingHArrow:
             if ( event.LeftIsDown() )
             {
+                ///offset.y = editingValA + heightOffsets[editingValB];
                 wxCoord top, bottom, tmp;
+                wxInt32 topline;
+                wxInt32 bottomline;
                 top = heightOffsets[doc->vertlines[doc->harrows[editingNumber].fromVLine].StartPos];
+                topline = doc->vertlines[doc->harrows[editingNumber].fromVLine].StartPos;
                 tmp = heightOffsets[doc->vertlines[doc->harrows[editingNumber].toVLine].StartPos];
-                if ( tmp > top ) top = tmp;
+                if ( tmp > top )
+                {
+                    top = tmp;
+                    topline = doc->vertlines[doc->harrows[editingNumber].toVLine].StartPos;
+                }
                 bottom = heightOffsets[doc->vertlines[doc->harrows[editingNumber].fromVLine].EndPos+1];
+                bottomline = doc->vertlines[doc->harrows[editingNumber].fromVLine].EndPos;
                 tmp = heightOffsets[doc->vertlines[doc->harrows[editingNumber].toVLine].EndPos+1];
-                if ( tmp < bottom ) bottom = tmp;
+                if ( tmp < bottom )
+                {
+                    bottom = tmp;
+                    bottomline = doc->vertlines[doc->harrows[editingNumber].toVLine].EndPos;
+                }
 
                 if ( pt.y < top )
                 {
-                    editingValA = top - DistanceToTimeline - DistanceFromTimeline;
+                    editingValA = 0;
+                    editingValB = topline;
                 }
                 else if ( pt.y > bottom )
                 {
-                    editingValA = bottom - DistanceToTimeline - DistanceFromTimeline;
+                    //editingValA = bottom - heightOffsets[0];
+                    editingValA =   doc->signals[bottomline].prespace +
+                                    doc->signals[bottomline].space +
+                                    doc->SignalHeight +
+                                    doc->MinimumSignalDistance;
+                    editingValA = bottom-heightOffsets[bottomline];
+                    editingValB = bottomline;
                 }
                 else
                 {
-                    editingValA = pt.y - DistanceToTimeline - DistanceFromTimeline;
+                    wxInt32 k = 0;
+                    for ( k = topline; k <= bottomline ; k++)
+                    {
+                        if ( heightOffsets[k+1] > pt.y )
+                            break;
+                    }
+                    editingValB = k;
+
+                    editingValA = pt.y - heightOffsets[editingValB];
                 }
             }
             break;
@@ -2552,7 +2598,8 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
             /// check if user mover over a vertical line
             for ( wxInt32 k = 0 ; k < VLineOffsets.size() ; ++k )
             {
-                wxInt32 pos = DistanceToTimeline + DistanceFromTimeline + editingValA;
+                //wxInt32 pos = DistanceToTimeline + DistanceFromTimeline + editingValA;
+                wxInt32 pos = heightOffsets[editingValC] + editingValA;
                 if (pt.x >= VLineOffsets[k].x - 3 &&
                     pt.x <= VLineOffsets[k].x + 3 &&
                     pt.y >= VLineOffsets[k].y &&
@@ -3032,6 +3079,7 @@ void TimingWindow::OnSelectInsertDiscontTool(void)
 
     SetCursor(newcursor);
 
+    SetNeutralState();
     WindowState = EditingDiscontinuity;
     editingNumber = -1;
     scrollingleft = false;
@@ -3058,6 +3106,7 @@ void TimingWindow::OnSelectRulerTool(void)
 
     SetCursor(newcursor);
 
+    SetNeutralState();
     WindowState = InsertingVLineWaitingFirstPoint;
     editingNumber = -1;
     scrollingleft = false;
@@ -3083,6 +3132,7 @@ void TimingWindow::OnSelectHArrowTool(void)
 
     SetCursor(newcursor);
 
+    SetNeutralState();
     WindowState = InsertingHArrowWaitingFirstPoint;
     editingNumber = -1;
     scrollingleft = false;
@@ -3108,6 +3158,7 @@ void TimingWindow::OnSelectTextTool(void)
 
     SetCursor(newcursor);
 
+    SetNeutralState();
     WindowState = SelectingText;
     editingNumber = -1;
     scrollingleft = false;
@@ -3562,7 +3613,12 @@ bool TimingWindow::HArrowIsSelected(void)
     return false;
 }
 
-
+wxInt32 TimingWindow::GetSelectedSignalNr()
+{
+    if ( IsSignalSelected() )
+        return editingNumber;
+    return -1;
+}
 
 
 

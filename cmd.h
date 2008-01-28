@@ -83,17 +83,6 @@ protected:
     std::set<wxInt32> discont;
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
-class ChangeTwo : public wxCommand
-{
-public:
-    ChangeTwo(wxCommand *first, wxCommand *second);
-    ~ChangeTwo(){}
-    bool Do(void);
-    bool Undo(void);
-protected:
-    wxCommand *m_first;
-    wxCommand *m_second;
-};
 class ChangeSignal : public wxCommand
 {
 public:
@@ -145,6 +134,9 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_selectedSigNr;
     wxInt32 m_targetPos;
+    std::vector<VLine> vlines;
+    std::vector<HArrow> harrows;
+    bool DoMove(void);
 };
 class AddSignalCommand : public wxCommand
 {
@@ -158,6 +150,7 @@ protected:
     wxInt32 m_selectedSigNr;
     Signal m_sig;
     std::vector<VLine> vlines;
+    std::vector<HArrow> harrows;
 };
 class AddDiscontCommand : public wxCommand
 {
@@ -193,6 +186,8 @@ protected:
     wxInt32 m_selectedSignal;
     wxInt32 m_newLength;
     bool m_upper;
+    std::vector<HArrow> harrows;
+    bool DoChangeSpace(void);
 };
 class AddVLineCommand : public wxCommand
 {
@@ -233,7 +228,7 @@ protected:
 class ChangeHArrowCommand : public wxCommand
 {
 public:
-    ChangeHArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 newLeft, wxInt32 newRight);
+    ChangeHArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 sigindex, wxInt32 newLeft, wxInt32 newRight);
     ~ChangeHArrowCommand();
     bool Do(void);
     bool Undo(void);
@@ -243,6 +238,7 @@ protected:
     wxInt32 m_newPos;
     wxInt32 m_newLeft;
     wxInt32 m_newRight;
+    wxInt32 m_newPosIndex;
 };
 class DeleteHArrowCommand : public wxCommand
 {
