@@ -226,7 +226,9 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     // new with version 2:
     store << SignalHeight;
     store << MinimumSignalDistance;
-    return true;
+
+
+    return outp.Close();
 }
 
 bool TimingDocument::DoOpenDocument(const wxString& file)
@@ -278,9 +280,9 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         load >> ui;
         for ( wxUint32 n = 0 ; n < ui ; ++n )
         {
-            load >> i;
-            discontinuities.insert(i);
-
+            wxInt32 dis;
+            load >> dis;
+            discontinuities.insert(dis);
         }
         SignalHeight = 20;
         MinimumSignalDistance = 10;
@@ -288,8 +290,13 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
 
     if ( i == 2)
     {
-        load >> SignalHeight;
-        load >> MinimumSignalDistance;
+        wxInt32 height;
+        load >> height;
+        SignalHeight = height;
+
+        wxInt32 dist;
+        load >> dist;
+        MinimumSignalDistance = dist;
     }
 
     if ( i > 2)
@@ -510,12 +517,15 @@ bool HArrow::deserialize(wxDataInputStream &load)
     load >> i;
     if ( i == 1 || i == 2 )
     {
+        wxInt32 k;
         load >> fromVLine;
         load >> toVLine;
         load >> pos;
         load >> text;
-        load >> i; textoffset.x = i;
-        load >> i; textoffset.y = i;
+        load >> k;
+            textoffset.x = k;
+        load >> k;
+            textoffset.y = k;
         signalnmbr = 0;
     }
     if ( i == 2 )
