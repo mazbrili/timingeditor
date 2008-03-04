@@ -59,6 +59,7 @@ public:
     wxInt32 prespace;
 
     wxString name;
+    wxString buswidth;
 
     std::map<int, wxString> TextValues;
 

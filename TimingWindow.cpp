@@ -155,152 +155,171 @@ wxPoint TimingWindow::GetBitmapSize()
         heightOffsets[heightOffsets.size()-1] - DistanceToTimeline - DistanceFromTimeline
     );
 }
+void TimingWindow::InitTextDrawing()
+{
+    textOffsets.clear();
+    textSizes.clear();
+    texts.clear();
+    textNumber = 0;
+}
+
+wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
+{
+    texts.push_back(str);
+    wxCoord w, h;//, desc;
+    if ( WindowState == TextFieldSelected  &&  editingNumber == textNumber )
+    {
+        str = editingText;
+    }
+    else
+    {
+        if ( str.IsEmpty() )
+        {
+            str = _T(" ");
+            dc.GetTextExtent(str, &w, &h);
+            offset.x -= w/2;
+        }
+    }
+    dc.DrawText(str, offset.x, offset.y);
+    textOffsets.push_back( offset );
+    dc.GetTextExtent(str, &w, &h);
+    wxPoint size(w, h);
+    textSizes.push_back( size );
+
+    /// chang position of caret
+    if ( WindowState == TextFieldSelected && editingNumber == textNumber )
+    {
+        wxCoord w, h;//, desc;
+
+        if ( editingValA > str.Length() )
+             editingValA = str.Length();
+        dc.GetTextExtent(str.Mid(0, editingValA), &w, &h);
+        wxCoord xx, yy;
+        CalcScrolledPosition( offset.x+w, offset.y, &xx, &yy);
+        caret->Move(xx, yy);
+        //caret->Move(off.x+w, off.y);
+
+        /// highlight selected text
+        if ( editingValB != -1 && editingValC != -1 )
+        {
+            wxCoord dx, dy, lx;
+            if ( editingValB < editingValC )
+            {
+                dc.GetTextExtent(str.Mid(0, editingValB), &dx, &dy);
+                dc.GetTextExtent(str.Mid(editingValB, editingValC-editingValB), &lx, &dy);
+            }
+            else
+            {
+                dc.GetTextExtent(str.Mid(0, editingValC), &dx, &dy);
+                dc.GetTextExtent(str.Mid(editingValC, editingValB-editingValC), &lx, &dy);
+            }
+            dx += offset.x;
+            dy = dc.GetCharHeight();
+            dc.Blit(dx, offset.y, lx, dy, &dc, 0, 0, wxINVERT);
+        }
+    }
+    ++textNumber;
+
+    return wxPoint(w, h);
+}
 
 void TimingWindow::Draw(wxDC& dc, bool exporting)
 {
-
-    if (!view)
-        return;
+    if (!view) return;
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc )
-        return;
+    if ( !doc ) return;
 
     dc.SetFont(font);
 
     wxSize virtsize(0,0);
-    textOffsets.clear();
-    textSizes.clear();
-    texts.clear();
     //textStringPtrs.clear();
     heightOffsets.clear();
-
-    wxInt32 textNumber = 0;
+    InitTextDrawing();
 
     wxColour bgcol = dc.GetTextBackground();
     wxColour col( 0xe0, 0xe0, 0xe0 );
-    if ( !exporting && ( WindowState == SelectingText ||
-                  WindowState == TextFieldSelected) )
+    if ( !exporting &&
+        ( WindowState == SelectingText ||  WindowState == TextFieldSelected) )
     {
         dc.SetBackgroundMode(wxSOLID);
         dc.SetTextBackground(col);
     }
 
-
     wxCoord width = 0;
-    wxPoint offset;
+    wxPoint offset(0, 0);
     if ( !exporting )
-    {
-        offset = wxPoint(
-            40,
-            DistanceToTimeline + DistanceFromTimeline
-        );
-    }
+        offset = wxPoint(40, DistanceToTimeline + DistanceFromTimeline );
     else
-    {
-        offset = wxPoint(
-            0,//40
-            0//DistanceToTimeline + DistanceFromTimeline
-        );
-    }
+        offset = wxPoint( 0, 0);
 
     /// drawing signal names:
     for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
     {
-        wxString str = doc->signals[k].name;
-
-        wxCoord nx = offset.x;
-
-        texts.push_back(str);
-        if ( WindowState == TextFieldSelected && editingNumber == textNumber )
-            str = editingText;
-        else if ( str.IsEmpty() /*&& WindowState != TextFieldSelected*/  )
-        {
-            str = _T(" ");
-            wxCoord w, h;
-            dc.GetTextExtent(str, &w, &h);
-            nx -= w/2;
-        }
-        wxCoord w, h;//, desc;
-
-        h = dc.GetCharHeight();
-
-        wxCoord ny =  offset.y + doc->SignalHeight/2 - h/2+doc->MinimumSignalDistance/2;
+        /// remember position
         heightOffsets.push_back(offset.y);
-        ny += doc->signals[k].prespace;
-        wxPoint off(nx, ny );
-        dc.DrawText(str, off.x, off.y);
-        textOffsets.push_back(off);
-        dc.GetTextExtent(str, &w, &h);
-        wxPoint siz(w,h);
-        textSizes.push_back( siz );
+
+        wxString str = doc->signals[k].name;
+        wxPoint textoff(offset.x,
+            offset.y +
+            doc->SignalHeight/2 +
+            doc->MinimumSignalDistance/2 +
+            doc->signals[k].prespace -
+            dc.GetCharHeight()/2
+        );
+        wxPoint siz = DrawEditableText(dc, str, textoff);
 
         if ( doc->signals[k].IsBus )
         {
             dc.SetTextBackground(bgcol);
             dc.SetBackgroundMode(wxTRANSPARENT);
-            dc.DrawText(_T(" [ ]"), off.x+w, off.y);
-            if ( !exporting &&
-                ( WindowState == SelectingText ||
-                  WindowState == TextFieldSelected) )
+            wxString str = _T(" [");
+            dc.DrawText(str, textoff.x + siz.x, textoff.y);
+            wxCoord w, h;
+            dc.GetTextExtent(str, &w, &h);
+            if ( !exporting && ( WindowState == SelectingText || WindowState == TextFieldSelected) )
             {
                 dc.SetBackgroundMode(wxSOLID);
                 dc.SetTextBackground(col);
             }
-        }
 
-        if ( width < w )
-            width = w;
+            str = doc->signals[k].buswidth;
+            wxPoint bwoff(textoff.x + siz.x+w+2, textoff.y);
+            wxPoint s = DrawEditableText(dc, str, bwoff);
 
-        /// chang position of caret
-        if ( WindowState == TextFieldSelected && editingNumber == textNumber )
-        {
-            if ( editingValA > str.Length() )
-                 editingValA = str.Length();
-            dc.GetTextExtent(str.Mid(0, editingValA), &w, &h);
-            wxCoord xx, yy;
-            CalcScrolledPosition( off.x+w, off.y, &xx, &yy);
-            caret->Move(xx, yy);
-            //caret->Move(off.x+w, off.y);
-
-            /// highlight selected text
-            if ( editingValB != -1 && editingValC != -1 )
+            dc.SetTextBackground(bgcol);
+            dc.SetBackgroundMode(wxTRANSPARENT);
+            str = _T(" ]");
+            dc.DrawText(str, bwoff.x + s.x, bwoff.y);
+            if ( !exporting && ( WindowState == SelectingText || WindowState == TextFieldSelected) )
             {
-                wxCoord dx, dy, lx;
-                if ( editingValB < editingValC )
-                {
-                    dc.GetTextExtent(str.Mid(0, editingValB), &dx, &dy);
-                    dc.GetTextExtent(str.Mid(editingValB, editingValC-editingValB), &lx, &dy);
-                }
-                else
-                {
-                    dc.GetTextExtent(str.Mid(0, editingValC), &dx, &dy);
-                    dc.GetTextExtent(str.Mid(editingValC, editingValB-editingValC), &lx, &dy);
-                }
-                dx += off.x;
-                dy = dc.GetCharHeight();
-                dc.Blit(dx, off.y, lx, dy, &dc, 0, 0, wxINVERT);
+                dc.SetBackgroundMode(wxSOLID);
+                dc.SetTextBackground(col);
             }
-        }
-        ++textNumber;
 
+            siz.x += s.x;
+        }
+        /// remember maximum width
+        if ( width < siz.x ) width = siz.x;
+
+
+        /// update position for next signal
         offset.y += doc->SignalHeight;
         offset.y += doc->MinimumSignalDistance;
         offset.y += doc->signals[k].space;
         offset.y += doc->signals[k].prespace;
-
     }
-    heightOffsets.push_back(offset.y);
     dc.SetTextBackground(bgcol);
     dc.SetBackgroundMode(wxTRANSPARENT);
 
+    /// remember last offset
+    heightOffsets.push_back(offset.y);
+
+    /// where to start the waves and how big will the virtual window be
     signalNamesWidth = offset.x + width + 20;
     if ( virtsize.y < offset.y ) virtsize.y = offset.y;
-    /// end of drawing signal names
-
-
 
     /// drawing the timeline
-    if (  !exporting )
+    if ( !exporting ) //DrawTimeLine( dc, doc, width );
     {
         wxInt32 gridWidth = transitionsPerGridStep * transitionWidth;
         wxInt32 gridSteps = doc->length;
@@ -358,11 +377,11 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                 dc.DrawRectangle(signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength -3, DistanceToTimeline-3, 7, 7);
             }
         }
-        width += 20 + gridWidth * gridSteps;// + 3;
+        width += 20 + gridWidth * gridSteps;
     }
 
     /// points to manipulate the signal (through right click)
-    if (  !exporting )
+    if ( !exporting ) //DrawSignalPoints(dc, doc);
     {
         dc.SetBrush(*wxBLACK_BRUSH);
         for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
@@ -385,7 +404,6 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
         dc.SetBrush(wxNullBrush);
     }
-
 
     /// drawing around the selected signal
     //if ( selectedSignal != -1 )
@@ -800,66 +818,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                         if ( k == 0 || sig.values[k] != sig.values[k-1] )
                         {
                             /// the text:
-                            wxPoint textoff(2,0);
-                            wxString text = sig.TextValues[k];//[i]; //
-
-                            texts.push_back(text);
-                            if (WindowState == TextFieldSelected &&
-                                editingNumber == textNumber )
-                                text = editingText;
-                            else if ( text.IsEmpty() )
-                            {
-                                text = _T(" ");
-                                wxCoord w, h;
-                                dc.GetTextExtent(text, &w, &h);
-                                textoff.x -= w/2;
-                            }
-                            wxCoord h = dc.GetCharHeight();
-
-                            textoff.x  += offset.x;
-                            textoff.y  += offset.y + doc->SignalHeight/2 - h/2;
-
-                            dc.DrawText(text, textoff.x, textoff.y );
-                            textOffsets.push_back(textoff);
-                            wxCoord wid, hei;
-                            dc.GetTextExtent(text, &wid, &hei);
-                            textSizes.push_back( wxPoint(wid,hei) );
-                            //textStringPtrs.push_back( &(doc->harrows[n].text) );
-
-                            /// chang position of caret
-                            if ( WindowState == TextFieldSelected && editingNumber == textNumber )
-                            {
-                                wxCoord w, h;
-                                if ( editingValA > text.Length() )
-                                     editingValA = text.Length();
-                                dc.GetTextExtent(text.Mid(0, editingValA), &w, &h);
-                                //caret->Move(textoff.x+w, textoff.y);
-                                wxCoord xx, yy;
-                                CalcScrolledPosition( textoff.x+w, textoff.y, &xx, &yy);
-                                caret->Move(xx, yy);
-                                //caret->Move(off.x+w, off.y);
-                                /// highlight selected text
-                                if ( editingValB != -1 && editingValC != -1 )
-                                {
-                                    wxCoord dx, dy, lx;
-                                    if ( editingValB < editingValC )
-                                    {
-                                        dc.GetTextExtent(text.Mid(0, editingValB), &dx, &dy);
-                                        dc.GetTextExtent(text.Mid(editingValB, editingValC-editingValB), &lx, &dy);
-                                    }
-                                    else
-                                    {
-                                        dc.GetTextExtent(text.Mid(0, editingValC), &dx, &dy);
-                                        dc.GetTextExtent(text.Mid(editingValC, editingValB-editingValC), &lx, &dy);
-                                    }
-                                    dx += textoff.x;
-                                    dy = dc.GetCharHeight();
-                                    dc.Blit(dx, textoff.y, lx, dy, &dc, 0, 0, wxINVERT);
-                                }
-                            }
-                            ++textNumber;
-
-                            //i++;
+                            wxPoint textoff(
+                                2 + offset.x,
+                                offset.y + doc->SignalHeight/2 -
+                                dc.GetCharHeight()/2
+                            );
+                            DrawEditableText(dc, sig.TextValues[k], textoff);
                         }
                         break;
                     case hz :
@@ -1025,7 +989,6 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     dc.SetBackgroundMode(wxTRANSPARENT);
     dc.SetPen(defPen);
 
-
     /// drawing discontinuities
     std::set<wxInt32>::iterator it;
     for ( it = doc->discontinuities.begin() ; it != doc->discontinuities.end() ; it++)
@@ -1078,7 +1041,6 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
     }
 
-
     /// change the size of the scrollable window
     if ( virtsize.x < (width + 500) ) virtsize.x = (width + 500);
     SetVirtualSize(virtsize);
@@ -1087,10 +1049,6 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     /// drawing the vertical lines
     VLineOffsets.clear();
     VLineToOffset.clear();
-    //wxPen vlinepen(*wxBLACK, 1, wxDOT);
-    /*wxSOLID wxTRANSPARENT wxDOT wxLONG_DASH wxSHORT_DASH
-    wxDOT_DASH*/
-    //dc.SetPen(vlinepen);
     for ( wxInt32 k = 0 ; k < doc->vertlines.size() ; ++k)
     {
         wxPoint offset(signalNamesWidth + doc->vertlines[k].vpos * transitionWidth * transitionsPerGridStep,
@@ -1174,12 +1132,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         dc.DrawRectangle(offset.x-3, heightOffsets[editingPoint[1].y] - 3, 7, 7);
         dc.SetBrush(wxNullBrush);
     }
-    //dc.SetPen(*wxBLACK_PEN);
-
 
     /// drawing the horizontal arrows
-    if ( !exporting && (WindowState == SelectingText ||
-                        WindowState == TextFieldSelected ))
+    if ( !exporting && ( WindowState == SelectingText ||
+                         WindowState == TextFieldSelected ) )
     {
         dc.SetBackgroundMode(wxSOLID);
         dc.SetTextBackground(col);
@@ -1245,73 +1201,21 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         HArrowOffsets.push_back(offset);
         HArrowToOffset.push_back(tooffset.x);
 
-        /// the text:
-        wxPoint textoff(0,0);
-        wxString text = ha.text;
-
-        texts.push_back(text);
-        if (WindowState == TextFieldSelected &&
-            editingNumber == textNumber )
-            text = editingText;
-        else if ( text.IsEmpty() )
-        {
-            text = _T(" ");
-            wxCoord w, h;
-            dc.GetTextExtent(text, &w, &h);
-            textoff.x -= w/2;
-        }
-        wxCoord h = dc.GetCharHeight();
+        ///the text:
+        wxPoint textoff;
         if ( editingNumber == n && WindowState == HArrowMovingText )
         {
-            textoff.x  += (offset.x + tooffset.x)/2 + editingValA;
-            textoff.y  += offset.y + editingValB - h;
+            textoff.x  = (offset.x + tooffset.x)/2 + editingValA;
+            textoff.y  = offset.y + editingValB - dc.GetCharHeight();
         }
         else
         {
-            textoff.x  += (offset.x + tooffset.x)/2 + ha.textoffset.x;
-            textoff.y  += offset.y + ha.textoffset.y - h;
+            textoff.x  = (offset.x + tooffset.x)/2 + ha.textoffset.x;
+            textoff.y  = offset.y + ha.textoffset.y - dc.GetCharHeight();
         }
+        DrawEditableText( dc, ha.text, textoff );
 
-        dc.DrawText(text, textoff.x, textoff.y );
-        textOffsets.push_back(textoff);
-        wxCoord wid, hei;
-        dc.GetTextExtent(text, &wid, &hei);
-        textSizes.push_back( wxPoint(wid,hei) );
-
-        /// change position of caret
-        if ( WindowState == TextFieldSelected && editingNumber == textNumber )
-        {
-            wxCoord w, h;
-            if ( editingValA > text.Length() )
-                 editingValA = text.Length();
-            dc.GetTextExtent(text.Mid(0, editingValA), &w, &h);
-            //caret->Move(textoff.x+w, textoff.y);
-            wxCoord xx, yy;
-            CalcScrolledPosition( textoff.x+w, textoff.y, &xx, &yy);
-            caret->Move(xx, yy);
-            /// highlight selected text
-            if ( editingValB != -1 && editingValC != -1 )
-            {
-                wxCoord dx, dy, lx;
-                if ( editingValB < editingValC )
-                {
-                    dc.GetTextExtent(text.Mid(0, editingValB), &dx, &dy);
-                    dc.GetTextExtent(text.Mid(editingValB, editingValC-editingValB), &lx, &dy);
-                }
-                else
-                {
-                    dc.GetTextExtent(text.Mid(0, editingValC), &dx, &dy);
-                    dc.GetTextExtent(text.Mid(editingValC, editingValB-editingValC), &lx, &dy);
-                }
-                dx += textoff.x;
-                dy = dc.GetCharHeight();
-                dc.Blit(dx, textoff.y, lx, dy, &dc, 0, 0, wxINVERT);
-            }
-        }
-        //
-        ++textNumber;
-        //textStringPtrs.push_back( &(doc->harrows[n].text) );
-
+        /// blue boxes to manipulate positions
         if ( editingNumber == n && ( WindowState == HArrowIsMarked ||
                WindowState == ChangingHArrowLengthLeft ||
                WindowState == ChangingHArrowLengthRight ))
@@ -1328,7 +1232,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
             dc.SetBrush(*wxBLUE_BRUSH);
             dc.DrawRectangle(
                 textoff.x - 3,
-                textoff.y + h - 3,
+                textoff.y + dc.GetCharHeight() - 3,
                 7, 7);
             dc.SetBrush(wxNullBrush);
         }
@@ -1341,13 +1245,9 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         {
             wxPen pen(*wxBLACK, 1, wxSHORT_DASH );
             dc.SetPen(pen);
-            dc.DrawLine(  (offset.x + tooffset.x)/2,   offset.y, textoff.x,   textoff.y+h);
-            //dc.SetPen(wxNullPen);
+            dc.DrawLine(  (offset.x + tooffset.x)/2,   offset.y, textoff.x,   textoff.y+dc.GetCharHeight());
             dc.SetPen(*wxBLACK_PEN);
         }
-
-        //wxString text;
-        //wxPoint textoffset;
     }
     if ( WindowState == InsertingHArrowWaitingSecondPoint )
     {
@@ -1395,6 +1295,89 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     }
 
     //dropcaret->Draw(dc);
+}
+void TimingWindow::DrawSignalPoints(wxDC &dc, TimingDocument *doc)
+{
+    dc.SetBrush(*wxBLACK_BRUSH);
+    for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
+    {
+        if ( WindowState == SignalIsSelected && editingNumber == n )
+        {
+            dc.SetBrush(*wxBLUE_BRUSH);
+            dc.SetPen(*wxLIGHT_GREY_PEN);
+        }
+        dc.DrawCircle(manipXoffset,
+            heightOffsets[n] + doc->SignalHeight/2+doc->MinimumSignalDistance/2+ doc->signals[n].prespace,
+            manipRadius
+        );
+        if ( WindowState == SignalIsSelected && editingNumber == n )
+        {
+            dc.SetBrush(*wxBLACK_BRUSH);
+            //dc.SetPen(wxNullPen);
+            dc.SetPen(*wxBLACK_PEN);
+        }
+    }
+    dc.SetBrush(wxNullBrush);
+}
+void TimingWindow::DrawTimeLine(wxDC &dc, TimingDocument *doc, wxCoord &width)
+{
+    wxInt32 gridWidth = transitionsPerGridStep * transitionWidth;
+    wxInt32 gridSteps = doc->length;
+    axisStart = signalNamesWidth;
+    //if ( !changingLength )
+    if ( WindowState != EditAxisLeft && WindowState != EditAxisRight )
+    {
+
+            axisStop  = signalNamesWidth + gridWidth*gridSteps + 3;
+            dc.DrawLine(axisStart -3 , DistanceToTimeline,
+                    axisStop , DistanceToTimeline);
+            for (wxInt32 n = 0; n <= gridSteps; ++n )
+            {
+                dc.DrawLine(signalNamesWidth + n*gridWidth, DistanceToTimeline-2,
+                    signalNamesWidth + n*gridWidth, DistanceToTimeline+3);
+            }
+            //if ( axismarked )
+            if ( WindowState == AxisIsMarked )
+            {
+                dc.SetBrush(*wxBLUE_BRUSH);
+                dc.DrawRectangle(axisStop-3, DistanceToTimeline-3, 7, 7);
+                dc.DrawRectangle(axisStart-3, DistanceToTimeline-3, 7, 7);
+            }
+    }
+    else
+    {
+        wxInt32 newLength = editingValB;
+        if ( WindowState == EditAxisRight )
+        {
+            axisStop  = signalNamesWidth + gridWidth*newLength + 3;
+            dc.DrawLine(axisStart - 3, DistanceToTimeline,
+                    axisStop, DistanceToTimeline);
+            for (wxInt32 n = 0; n <= newLength; ++n )
+                dc.DrawLine(signalNamesWidth + n*gridWidth, DistanceToTimeline-2,
+                    signalNamesWidth + n*gridWidth, DistanceToTimeline+3);
+            dc.SetBrush(*wxBLUE_BRUSH);
+            dc.DrawRectangle(axisStop-3, DistanceToTimeline-3, 7, 7);
+            dc.DrawRectangle(axisStart-3, DistanceToTimeline-3, 7, 7);
+        }
+        else
+        {
+            axisStop  = signalNamesWidth + gridWidth*gridSteps + 3;
+            dc.DrawLine(signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength -3 ,
+                DistanceToTimeline,
+                axisStop , DistanceToTimeline
+            );
+            for (wxInt32 n = 0; n <= newLength; ++n )
+                dc.DrawLine(signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength + n*gridWidth,
+                    DistanceToTimeline-2,
+                    signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength + n*gridWidth,
+                    DistanceToTimeline+3
+                );
+            dc.SetBrush(*wxBLUE_BRUSH);
+            dc.DrawRectangle(axisStop-3, DistanceToTimeline-3, 7, 7);
+            dc.DrawRectangle(signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength -3, DistanceToTimeline-3, 7, 7);
+        }
+    }
+    width += 20 + gridWidth * gridSteps;
 }
 
 /// //////////////don't use this event methdos///////////////////////////////////
@@ -3619,38 +3602,4 @@ wxInt32 TimingWindow::GetSelectedSignalNr()
         return editingNumber;
     return -1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -98,6 +98,12 @@ private: /// event methods
 
     void PaintBackground(wxDC &dc);
 
+    void DrawTimeLine(wxDC &dc, TimingDocument *doc, wxCoord &width);
+    void DrawSignalPoints(wxDC &dc, TimingDocument *doc);
+    void InitTextDrawing();
+    wxInt32 textNumber;
+    wxPoint DrawEditableText(wxDC &dc, wxString str, wxPoint &offset);
+
 private:
     wxCaret *caret;
     // remember text areas

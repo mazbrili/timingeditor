@@ -1221,7 +1221,7 @@ bool ChangeTextCommand::Do(void)
     wxString str;
     wxInt32 n = 0;
     bool found = false;
-    for ( ; n < m_doc->signals.size() && !found ; ++n )
+    /*for ( ; n < m_doc->signals.size() && !found ; ++n )
     {
         if ( n == m_nmbr )
         {
@@ -1229,6 +1229,29 @@ bool ChangeTextCommand::Do(void)
             m_doc->signals[n].name = m_newText;
             m_newText = tmp;
             found = true;
+        }
+    }*/
+    for ( wxUint32 k = 0 ; k < m_doc->signals.size() && !found ; ++k)
+    {
+        if ( n == m_nmbr )
+        {
+            tmp = m_doc->signals[k].name;
+            m_doc->signals[k].name = m_newText;
+            m_newText = tmp;
+            found = true;
+        }
+        ++n;
+
+        if ( m_doc->signals[k].IsBus )
+        {
+            if ( n == m_nmbr )
+            {
+                tmp = m_doc->signals[k].buswidth;
+                m_doc->signals[k].buswidth = m_newText;
+                m_newText = tmp;
+                found = true;
+            }
+            ++n;
         }
     }
     for ( wxUint32 k = 0 ; k < m_doc->signals.size() && !found ; ++k)

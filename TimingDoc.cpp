@@ -39,8 +39,6 @@
 //#include <wx/txtstrm.h>
 #include <wx/datstrm.h>
 
-
-
 #include "TimingDoc.h"
 //#include "TimingApp.h" /// wxGetApp()
 #include "enumers.h"
@@ -325,7 +323,7 @@ bool Signal::serialize(wxDataOutputStream &store)
     wxInt32 i;
 
     /// version
-    i = 1;
+    i = 2;
     store << i;
     store << name;
     store << prespace;
@@ -390,16 +388,19 @@ bool Signal::serialize(wxDataOutputStream &store)
                         store << TextValues[n];
                     }
             }
+            store << buswidth;
         }
     }
+
+
     return true;
 }
 bool Signal::deserialize(wxDataInputStream &load)
 {
-    wxInt32 i;
+    wxInt32 i, ver;
 
-    load >> i;
-    if ( i == 1 )
+    load >> ver;
+    if ( ver <= 2 )
     {
         values.clear();
         TextValues.clear();
@@ -453,6 +454,10 @@ bool Signal::deserialize(wxDataInputStream &load)
                     load >> str;
                     TextValues[t] = str;
                 }
+                if (ver >= 2 )
+                {
+                    load >> buswidth;
+                }
             }
         }
         return true;
@@ -475,10 +480,10 @@ bool VLine::serialize(wxDataOutputStream &store)
 }
 bool VLine::deserialize(wxDataInputStream &load)
 {
-    wxInt32 i;
+    wxInt32 ver;
 
-    load >> i;
-    if ( i == 1 )
+    load >> ver;
+    if ( ver == 1 )
     {
         load >> EndPos;
         load >> StartPos;
@@ -512,10 +517,10 @@ bool HArrow::serialize(wxDataOutputStream &store)
 }
 bool HArrow::deserialize(wxDataInputStream &load)
 {
-    wxInt32 i;
+    wxInt32 ver;
 
-    load >> i;
-    if ( i == 1 || i == 2 )
+    load >> ver;
+    if ( ver == 1 || ver == 2 )
     {
         wxInt32 k;
         load >> fromVLine;
@@ -528,12 +533,12 @@ bool HArrow::deserialize(wxDataInputStream &load)
             textoffset.y = k;
         signalnmbr = 0;
     }
-    if ( i == 2 )
+    if ( ver == 2 )
     {
         load >> signalnmbr;
     }
 
-    if ( i > 2 ) return false; // wrong format version
+    if ( ver > 2 ) return false; // wrong format version
 
     return true;
 }
