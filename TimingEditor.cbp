@@ -23,10 +23,25 @@
 				<Linker>
 					<Add library="libwxmsw28ud_svg" />
 					<Add library="libwxmsw28ud.a" />
+					<Add library="libwxmsw28ud_richtext.a" />
+					<Add library="libwxmsw28ud_xrc.a" />
+					<Add library="libwxmsw28ud_aui.a" />
+					<Add library="libwxmsw28ud_dbgrid.a" />
+					<Add library="libwxbase28ud_odbc.a" />
+					<Add library="libwxmsw28ud_media.a" />
+					<Add library="libwxbase28ud_net.a" />
+					<Add library="libwxmsw28ud_gl.a" />
+					<Add library="libwxbase28ud_xml.a" />
+					<Add library="libwxmsw28ud_adv.a" />
+					<Add library="libwxmsw28ud_html.a" />
+					<Add library="libwxmsw28ud_core.a" />
+					<Add library="libwxbase28ud.a" />
 					<Add library="libwxpngd.a" />
 					<Add library="libwxjpegd.a" />
-					<Add library="libwxtiffd.a" />
+					<Add library="libwxtifff.a" />
 					<Add library="libwxzlibd.a" />
+					<Add library="libwxregexud.a" />
+					<Add library="libwxexpatd.a" />
 					<Add directory="$(#wx)\lib\gcc_lib" />
 				</Linker>
 			</Target>
@@ -51,11 +66,25 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="libwxmsw28u_svg" />
-					<Add library="libwxmsw28u.a" />
+					<Add library="libwxmsw28u_richtext.a" />
+					<Add library="libwxmsw28u_xrc.a" />
+					<Add library="libwxmsw28u_aui.a" />
+					<Add library="libwxmsw28u_dbgrid.a" />
+					<Add library="libwxbase28u_odbc.a" />
+					<Add library="libwxmsw28u_media.a" />
+					<Add library="libwxbase28u_net.a" />
+					<Add library="libwxmsw28u_gl.a" />
+					<Add library="libwxbase28u_xml.a" />
+					<Add library="libwxmsw28u_adv.a" />
+					<Add library="libwxmsw28u_html.a" />
+					<Add library="libwxmsw28u_core.a" />
+					<Add library="libwxbase28u.a" />
 					<Add library="libwxpng.a" />
 					<Add library="libwxjpeg.a" />
 					<Add library="libwxtiff.a" />
 					<Add library="libwxzlib.a" />
+					<Add library="libwxregexu.a" />
+					<Add library="libwxexpat.a" />
 					<Add directory="$(#wx)\lib\gcc_lib" />
 				</Linker>
 			</Target>

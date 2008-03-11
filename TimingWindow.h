@@ -97,9 +97,6 @@ private: /// event methods
     void OnTimer(wxTimerEvent& event);
 
     void PaintBackground(wxDC &dc);
-
-    void DrawTimeLine(wxDC &dc, TimingDocument *doc, wxCoord &width);
-    void DrawSignalPoints(wxDC &dc, TimingDocument *doc);
     void InitTextDrawing();
     wxInt32 textNumber;
     wxPoint DrawEditableText(wxDC &dc, wxString str, wxPoint &offset);
@@ -142,8 +139,9 @@ private:
     bool scrollingright;
     wxTimer scrolltimer;
 
-    wxInt32 transitionWidth;
-    wxInt32 transitionsPerGridStep;
+    //wxInt32 transitionWidth;
+    //wxInt32 transitionsPerGridStep;
+    wxInt32 GridStepWidth;
 
 
     std::vector<wxCoord> heightOffsets;

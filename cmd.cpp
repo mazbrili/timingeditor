@@ -943,11 +943,12 @@ bool AddVLineCommand::Undo(void)
     return true;
 }
 
-ChangeVLineCommand::ChangeVLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower)
+ChangeVLineCommand::ChangeVLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower, wxInt32 newVposoffset)
     : wxCommand(true, _T("change a vertical line")),
     m_doc(doc),
     m_nmbr(nmbr),
-    m_newVpos(newVpos)
+    m_newVpos(newVpos),
+    m_newVposoff(newVposoffset)
 {
     if ( newUpper <= newLower )
     {
@@ -985,6 +986,12 @@ bool ChangeVLineCommand::Do(void)
     tmp = m_doc->vertlines[m_nmbr].vpos;
     m_doc->vertlines[m_nmbr].vpos = m_newVpos;
     m_newVpos = tmp;
+
+
+
+    tmp = m_doc->vertlines[m_nmbr].vposoffset;
+    m_doc->vertlines[m_nmbr].vposoffset = m_newVposoff;
+    m_newVposoff = tmp;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();

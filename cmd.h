@@ -214,7 +214,7 @@ protected:
 class ChangeVLineCommand : public wxCommand
 {
 public:
-    ChangeVLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower);
+    ChangeVLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower, wxInt32 newVposoffset);
     ~ChangeVLineCommand();
     bool Do(void);
     bool Undo(void);
@@ -224,6 +224,7 @@ protected:
     wxInt32 m_newVpos;
     wxInt32 m_newUpper;
     wxInt32 m_newLower;
+    wxInt32 m_newVposoff;
 };
 class ChangeHArrowCommand : public wxCommand
 {

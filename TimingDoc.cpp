@@ -50,6 +50,7 @@ TimingDocument::TimingDocument(void)
 {
     length = 24;
     SignalHeight = 20;
+    TransitWidth = 30; // %
     MinimumSignalDistance = 10;
 
     VLine line;
@@ -182,7 +183,7 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     wxUint32 ui;
 
     /// store file format version first
-    i = 2;
+    i = 3;
     store << i;
 
     ///
@@ -225,6 +226,9 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     store << SignalHeight;
     store << MinimumSignalDistance;
 
+    // new with version 3:
+    store << TransitWidth;
+
 
     return outp.Close();
 }
@@ -239,7 +243,7 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
 
     /// get file format version first
     load >> i;
-    if ( i == 1 || i == 2 )
+    if ( i >= 1 )
     {
         load >> length;
 
@@ -282,11 +286,9 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
             load >> dis;
             discontinuities.insert(dis);
         }
-        SignalHeight = 20;
-        MinimumSignalDistance = 10;
     }
 
-    if ( i == 2)
+    if ( i >= 2)
     {
         wxInt32 height;
         load >> height;
@@ -296,8 +298,23 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         load >> dist;
         MinimumSignalDistance = dist;
     }
+    else
+    {
+        SignalHeight = 20;
+        MinimumSignalDistance = 10;
+    }
 
-    if ( i > 2)
+    if ( i >= 3)
+    {
+        load >> TransitWidth;
+    }
+    else
+    {
+        TransitWidth = 20;
+    }
+
+
+    if ( i > 3)
     {
         // unknown format version
         return false;
@@ -470,12 +487,13 @@ bool VLine::serialize(wxDataOutputStream &store)
     wxInt32 i;
 
     /// version
-    i = 1;
+    i = 2;
     store << i;
 
     store << EndPos;
     store << StartPos;
     store << vpos;
+    store << vposoffset;
     return true;
 }
 bool VLine::deserialize(wxDataInputStream &load)
@@ -483,15 +501,25 @@ bool VLine::deserialize(wxDataInputStream &load)
     wxInt32 ver;
 
     load >> ver;
-    if ( ver == 1 )
+    if ( ver >= 1 )
     {
         load >> EndPos;
         load >> StartPos;
         load >> vpos;
-        return true;
     }
     else
-        return false; // wrong format version
+    {
+        vposoffset = 0;
+    }
+    if ( ver >= 2 )
+    {
+        load >> vposoffset;
+    }
+
+
+    if ( ver > 2 ) return false; // wrong format version
+
+    return true;
 }
 bool HArrow::serialize(wxDataOutputStream &store)
 {

@@ -86,6 +86,7 @@ public:
     wxInt32 StartPos; // above signal number
     wxInt32 EndPos; // below signal number
     wxInt32 vpos;
+    wxUint8 vposoffset;
     //std::vector<HArrow *> referencedByHArrows;
     bool serialize(wxDataOutputStream &store);
     bool deserialize(wxDataInputStream &load);
@@ -130,6 +131,8 @@ class TimingDocument: public wxDocument
 
         wxInt32 SignalHeight;
         wxInt32 MinimumSignalDistance;
+
+        wxUint8 TransitWidth; // width in percent of the width of a tick
 
     protected:
         bool DoSaveDocument(const wxString& file);
