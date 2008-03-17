@@ -79,6 +79,8 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
         void ShowTip(bool force = false);
         void SaveFramePositions(wxConfig *config);
         void LoadFramePositions(wxConfig *config);
+        void SaveAuiPerspective(wxConfig *config);
+        void LoadAuiPerspective(wxConfig *config);
 
     private:
         wxAuiManager *m_manager;

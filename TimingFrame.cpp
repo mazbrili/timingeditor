@@ -98,7 +98,6 @@ TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wx
 
     SetDropTarget(new DnDFile(manager));
 
-
     /// wxAui
     /// notify wxAUI which frame to use
     m_manager = new wxAuiManager(this);
@@ -107,8 +106,8 @@ TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wx
     trnssetpanel = new TransitionSettingsPanel(this, -1);
 
 
-    m_manager->AddPane(clksetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Caption(wxT("Clock-type signal Settings")).CloseButton(false));
-    m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Caption(wxT("Transition Settings")).CloseButton(false));
+    m_manager->AddPane(clksetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("ClockPanel")).Caption(wxT("Clock-type signal Settings")).CloseButton(false));
+    m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TransitionPanel")).Caption(wxT("Transition Settings")).CloseButton(false));
 
     // tell the manager to "commit" all the changes just made
     m_manager->Update();
@@ -133,7 +132,17 @@ void TimingFrame::SaveFramePositions(wxConfig *config)
     }
     config->Write(_T("/MainFrame/s"), (long) s);
 }
-
+void TimingFrame::SaveAuiPerspective(wxConfig *config)
+{
+    wxString str = m_manager->SavePerspective();
+    config->Write( _T( "/MainFrame/AuiPerspective" ), str );
+}
+void TimingFrame::LoadAuiPerspective(wxConfig *config)
+{
+    wxString str;
+    config->Read(_T( "/MainFrame/AuiPerspective" ), &str);
+    m_manager->LoadPerspective(str);
+}
 void TimingFrame::LoadFramePositions(wxConfig *config)
 {
     /// restore frame position and size
@@ -155,8 +164,8 @@ TimingFrame::~TimingFrame()
 {
     wxConfig *cfg = wxGetApp().GetConfig();
     SaveFramePositions(cfg);
+    SaveAuiPerspective(cfg);
 
-    /// aui // deinitialize the frame manager
     m_manager->UnInit();
     delete m_manager;
     delete clksetpanel;

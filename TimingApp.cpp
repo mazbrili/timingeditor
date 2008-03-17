@@ -132,6 +132,7 @@ bool TimingApp::OnInit()
 
 
     mainframe->LoadFramePositions(m_config);
+    mainframe->LoadAuiPerspective(m_config);
 
     SetTopWindow(mainframe);
 
