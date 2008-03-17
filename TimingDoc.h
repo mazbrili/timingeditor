@@ -50,8 +50,8 @@ public:
     bool IsClock;
     bool IsBus;
     // infos about the clock (if it is a clock)
-    int ticks; // of a half clock period
-    int delay; // of the clock in ticks
+    wxInt32 ticks; // of a half clock period
+    wxInt32 delay; // of the clock in ticks
 
 
     // graphical information
@@ -133,6 +133,7 @@ class TimingDocument: public wxDocument
         wxInt32 MinimumSignalDistance;
 
         wxUint8 TransitWidth; // width in percent of the width of a tick
+        bool    en5090;
 
     protected:
         bool DoSaveDocument(const wxString& file);

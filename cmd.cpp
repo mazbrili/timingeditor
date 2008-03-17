@@ -1311,3 +1311,28 @@ bool ChangeTextCommand::Undo(void)
 {
     return Do();
 }
+ChangeTransitionWidth::ChangeTransitionWidth(TimingDocument *doc, wxInt8 width, bool en5090)
+    :wxCommand(true, _("change transition width") ),
+    m_doc(doc),
+    m_width(width),
+    m_en5090(en5090)
+{}
+ChangeTransitionWidth::~ChangeTransitionWidth(){}
+bool ChangeTransitionWidth::Do(void)
+{
+    wxInt8 tmp = m_doc->TransitWidth;
+    m_doc->TransitWidth = m_width;
+    m_width = tmp;
+
+    bool t =  m_doc->en5090;
+    m_doc->en5090 = m_en5090;
+    m_en5090 = t;
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+bool ChangeTransitionWidth::Undo(void)
+{
+    return Do();
+}

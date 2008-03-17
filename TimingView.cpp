@@ -43,7 +43,6 @@
 #include "TimingWindow.h"
 #include "TimingFrame.h"
 #include "TimingApp.h"
-//#include "doc.h"
 #include "ClockEditDlg.h"
 #include "cmd.h"
 #include "enumers.h"
@@ -51,14 +50,14 @@
 
 IMPLEMENT_DYNAMIC_CLASS(TimingView, wxView)
 BEGIN_EVENT_TABLE(TimingView, wxView)
-    EVT_MENU(wxID_DELETE,               TimingView::OnDelete)
+    EVT_ACTIVATE(                       TimingView::OnActivate)
+    EVT_MENU(TIMING_ID_DELETE,          TimingView::OnDelete)
     EVT_MENU(wxID_SELECTALL,            TimingView::OnSelectAll)
     EVT_MENU(wxID_COPY,                 TimingView::OnCopy)
     EVT_MENU(wxID_CUT,                  TimingView::OnCut)
     EVT_MENU(wxID_PASTE,                TimingView::OnPaste)
     EVT_MENU(TIMING_ID_GLASS_N,         TimingView::OnZoomTicksOut)
     EVT_MENU(TIMING_ID_GLASS_P,         TimingView::OnZoomTicksIn)
-    //EVT_MENU(TIMING_ID_DELETE_SIGNAL,   TimingView::OnDeleteSignal)
     EVT_MENU(TIMING_ID_CHANGECLOCK,     TimingView::OnEditClock)
     EVT_MENU(TIMING_ID_ADD_CLOCK,       TimingView::OnAddClock)
     EVT_MENU(TIMING_ID_ADD_SIGNAL,      TimingView::OnAddSignal)
@@ -99,12 +98,24 @@ void TimingView::OnEditClock(wxCommandEvent& event)
         );
     }
 }
-bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
+void TimingView::OnActivate(wxActivateEvent &event)
+{
+    if ( event.GetActive() )
+        window->AttachPanels();
+    event.Skip();
+}
+
+TimingView::TimingView()
+{
+    window = (TimingWindow *)NULL;
+    frame = (wxMDIChildFrame *)NULL;
+}
+bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 {
     frame = wxGetApp().CreateChildFrame(doc, this);
     frame->SetTitle(_T("MyView"));
 
-     window = wxGetApp().GetMainFrame()->CreateWindow(this, frame);
+    window = wxGetApp().GetMainFrame()->CreateWindow(this, frame);
 #ifdef __X__
     // X seems to require a forced resize
     int x, y;
@@ -124,12 +135,6 @@ void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
     window->Refresh();
 }
 
-//void TimingView::OnDeleteSignal(wxCommandEvent& event)
-//{
-//    window->DeleteSignal();
-//}
-
-
 void TimingView::OnDelete(wxCommandEvent& WXUNUSED(event) )
 {
     window->DeleteSelection();
@@ -140,6 +145,8 @@ void TimingView::OnDelete(wxCommandEvent& WXUNUSED(event) )
 bool TimingView::OnClose(bool deleteWindow)
 {
     if (!GetDocument()->Close()) return false;
+
+    window->DetachPanels();
 
     // Clear the canvas in  case we're in single-window mode,
     // and the canvas stays.
@@ -236,6 +243,9 @@ void TimingView::OnAddClock(wxCommandEvent& event)
 
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
 
+    window->SetNeutralState();
+    window->SetCursor(*wxCROSS_CURSOR);
+
     cmdproc->Submit( new AddSignalCommand(doc, n, sig) );
 
 }
@@ -254,6 +264,9 @@ void TimingView::OnAddSignal(wxCommandEvent& event)
     sig.prespace = 0;
     for (wxInt32 n = 0 ; n < doc->length; ++n)
         sig.values.push_back(zero);
+
+    window->SetNeutralState();
+    window->SetCursor(*wxCROSS_CURSOR);
 
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
 
@@ -276,6 +289,9 @@ void TimingView::OnAddBus(wxCommandEvent& event)
     for (wxInt32 n = 0 ; n < doc->length; ++n)
         sig.values.push_back(zero);
     //sig.TextValues[0] = _("Data");
+
+    window->SetNeutralState();
+    window->SetCursor(*wxCROSS_CURSOR);
 
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
 
@@ -305,7 +321,53 @@ void TimingView::OnSelectNeutral(wxCommandEvent& event)
 {
     window->OnSelectNeutralTool();
 }
-
+bool TimingView::CanZoomIn(void)
+{
+    if ( window && window->CanZoomTicksIn() )
+        return true;
+    return false;
+}
+bool TimingView::CanZoomOut(void)
+{
+    if ( window && window->CanZoomTicksOut() )
+        return true;
+    return false;
+}
+bool TimingView::CanPaste(void)
+{
+    if ( window && window->CanPaste() )
+        return true;
+    return false;
+}
+bool TimingView::IsSomethingSelected(void)
+{
+    if ( window && (
+        window->IsTextSelected() ||
+        window->IsSignalSelected() ||
+        window->VLineIsSelected() ||
+        window->HArrowIsSelected() )
+    )
+        return true;
+    return false;
+}
+bool TimingView::IsTextSelected(void)
+{
+    if ( window && window->IsTextSelected() )
+        return true;
+    return false;
+}
+bool TimingView::CanDelete(void)
+{
+    if ( window && (
+        window->IsTextSelected() ||
+        window->IsSignalSelected() ||
+        window->VLineIsSelected() ||
+        window->HArrowIsSelected() ||
+        window->CanDeleteText() )
+    )
+        return true;
+    return false;
+}
 void TimingView::OnExportBitmap(wxCommandEvent& event)
 {
     wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"),_T(""),_T(""),_T("PNG files (*.png)|*.png"),wxSAVE | wxOVERWRITE_PROMPT );

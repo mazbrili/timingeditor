@@ -38,9 +38,10 @@
 #include "enumers.h"
 
 #include "TimingWindow.h"
+#include "ClockSettingsPanel.h"
+#include "TransitionSettingsPanel.h"
 #include "TimingView.h"
 #include "dndfile.h"
-
 
 #include "art/new.xpm"
 #include "art/open.xpm"
@@ -70,7 +71,7 @@ BEGIN_EVENT_TABLE(TimingFrame, wxDocMDIParentFrame )
     EVT_UPDATE_UI(wxID_COPY,                 TimingFrame::OnUpdateCopy)
     EVT_UPDATE_UI(wxID_CUT,                  TimingFrame::OnUpdateCut)
     EVT_UPDATE_UI(wxID_PASTE,                TimingFrame::OnUpdatePaste)
-    EVT_UPDATE_UI(wxID_DELETE,               TimingFrame::OnUpdateDelete)
+    EVT_UPDATE_UI(TIMING_ID_DELETE,               TimingFrame::OnUpdateDelete)
     EVT_UPDATE_UI(TIMING_ID_GLASS_N,         TimingFrame::OnUpdateGlassN)
     EVT_UPDATE_UI(TIMING_ID_GLASS_P,         TimingFrame::OnUpdateGlassP)
     EVT_UPDATE_UI(TIMING_ID_DISCONTINUATION, TimingFrame::OnUpdateDiscont)
@@ -82,10 +83,7 @@ END_EVENT_TABLE()
 
 
 TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wxString& title, wxPoint pos, wxSize size, int style )
-  //: wxFrame( parent, id, title, pos, size, style )
   : wxDocMDIParentFrame(manager, frame, id, title, pos, size, style)
-
-
 {
     editMenu = (wxMenu *) NULL;
 
@@ -99,14 +97,24 @@ TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wx
     SetAcceleratorTable(accel);
 
     SetDropTarget(new DnDFile(manager));
+
+
+    /// wxAui
+    /// notify wxAUI which frame to use
+    m_manager = new wxAuiManager(this);
+
+    clksetpanel = new ClockSettingsPanel(this, -1);
+    trnssetpanel = new TransitionSettingsPanel(this, -1);
+
+
+    m_manager->AddPane(clksetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Caption(wxT("Clock-type signal Settings")).CloseButton(false));
+    m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Caption(wxT("Transition Settings")).CloseButton(false));
+
+    // tell the manager to "commit" all the changes just made
+    m_manager->Update();
 }
-
-TimingFrame::~TimingFrame()
+void TimingFrame::SaveFramePositions(wxConfig *config)
 {
-    wxConfig *pConfig = wxGetApp().GetConfig();
-    if ( pConfig == NULL )
-        return;
-
     // save the frame position
     wxInt32 x, y, w, h, s;
     GetClientSize(&w, &h);
@@ -118,18 +126,45 @@ TimingFrame::~TimingFrame()
         s= -1;
     if ( s == 0 )
     {
-        pConfig->Write(_T("/MainFrame/x"), (long) x);
-        pConfig->Write(_T("/MainFrame/y"), (long) y);
-        pConfig->Write(_T("/MainFrame/w"), (long) w);
-        pConfig->Write(_T("/MainFrame/h"), (long) h);
+        config->Write(_T("/MainFrame/x"), (long) x);
+        config->Write(_T("/MainFrame/y"), (long) y);
+        config->Write(_T("/MainFrame/w"), (long) w);
+        config->Write(_T("/MainFrame/h"), (long) h);
     }
-    pConfig->Write(_T("/MainFrame/s"), (long) s);
+    config->Write(_T("/MainFrame/s"), (long) s);
+}
+
+void TimingFrame::LoadFramePositions(wxConfig *config)
+{
+    /// restore frame position and size
+        wxInt32 x, y, w, h, s;
+        x = config->Read(_T("/MainFrame/x"), 50);
+        y = config->Read(_T("/MainFrame/y"), 50);
+        w = config->Read(_T("/MainFrame/w"), 600);
+        h = config->Read(_T("/MainFrame/h"), 500);
+        s = config->Read(_T("/MainFrame/s"), (long)0);
+        Move(x, y);
+        SetClientSize(w, h);
+        if ( s > 0 )
+            Maximize(true);
+        if ( s < 0)
+            Iconize(true);
+}
+
+TimingFrame::~TimingFrame()
+{
+    wxConfig *cfg = wxGetApp().GetConfig();
+    SaveFramePositions(cfg);
+
+    /// aui // deinitialize the frame manager
+    m_manager->UnInit();
+    delete m_manager;
+    delete clksetpanel;
+    delete trnssetpanel;
 }
 
 void TimingFrame::OnAbout(wxCommandEvent &event)
 {
-    /*wxString msg = wxbuildinfo(long_f);
-    wxMessageBox(msg, _("Welcome to..."));*/
     wxMessageBox(_T("TimingEditor..."), _T("About TimingEditor"));
 }
 
@@ -148,58 +183,32 @@ void TimingFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 bool TimingFrame::CanDelete(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view )
-        if ( view->window )
-            if
-            ( /*view->window->selpos[0] != -1 &&
-                 view->window->selpos[1] != -1 &&
-                 view->window->selpos[0] != view->window->selpos[1] */
-                view->window->IsTextSelected() ||
-                view->window->IsSignalSelected() ||
-                view->window->VLineIsSelected() ||
-                view->window->HArrowIsSelected() ||
-                view->window->CanDeleteText()
-            )
-                return true;
+    if ( view && view->CanDelete() )
+        return true;
     return false;
 }
 bool TimingFrame::IsSomethingSelected(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view )
-        if ( view->window )
-            if
-            ( /*view->window->selpos[0] != -1 &&
-                 view->window->selpos[1] != -1 &&
-                 view->window->selpos[0] != view->window->selpos[1] */
-                view->window->IsTextSelected() ||
-                view->window->IsSignalSelected() ||
-                view->window->VLineIsSelected() ||
-                view->window->HArrowIsSelected()
-            )
-                return true;
+    if ( view && view->IsSomethingSelected() )
+        return true;
     return false;
 }
 bool TimingFrame::IsTextSelected(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view )
-        if ( view->window )
-            if ( view->window->IsTextSelected() )
-                return true;
+    if ( view && view->IsTextSelected() )
+        return true;
     return false;
 }
 void TimingFrame::OnUpdatePaste(wxUpdateUIEvent& event)
 {
-    //event.Enable(true);
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view )
-        if ( view->window )
-            if ( view->window->CanPaste() )
-            {
-                event.Enable(true);
-                return;
-            }
+    if ( view  && view->CanPaste() )
+    {
+        event.Enable(true);
+        return;
+    }
     event.Enable(false);
 }
 void TimingFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
@@ -214,12 +223,7 @@ void TimingFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
 }
 TimingWindow *TimingFrame::CreateWindow(wxView *view, wxMDIChildFrame *parent)
 {
-    //TimingWindow *canvas = new TimingWindow(view, parent);
-    //canvas->SetCursor(wxCursor(wxCURSOR_ARROW));
-    //canvas->SetScrollRate(5, 5);
-    //return canvas;
-
-    return new TimingWindow(view, parent);
+    return new TimingWindow(view, parent, clksetpanel, trnssetpanel);
 }
 
 void TimingFrame::InitToolBar(wxToolBar* toolBar)
@@ -254,6 +258,10 @@ void TimingFrame::InitToolBar(wxToolBar* toolBar)
 
 void TimingFrame::OnTip(wxCommandEvent &event)
 {
+    ShowTip(true);
+}
+void TimingFrame::ShowTip(bool force)
+{
     wxConfig *config = wxGetApp().GetConfig();
 
     bool ShowTipsAtStartup = true;
@@ -261,7 +269,7 @@ void TimingFrame::OnTip(wxCommandEvent &event)
     config->Read(_T("/StartupTips/ShowTipsAtStarup"), &ShowTipsAtStartup);
     config->Read(_T("/StartupTips/TipNumber"), &TipNumber);
 
-    //if ( ShowTipsAtStartup )
+    if ( ShowTipsAtStartup || force )
     {
         wxTipProvider *tipProvider = wxCreateFileTipProvider(_T("tips"), TipNumber);
         ShowTipsAtStartup = wxShowTip(this, tipProvider, ShowTipsAtStartup);
@@ -271,31 +279,25 @@ void TimingFrame::OnTip(wxCommandEvent &event)
         config->Write(_T("/StartupTips/ShowTipsAtStarup"), ShowTipsAtStartup);
         config->Write(_T("/StartupTips/TipNumber"), TipNumber);
     }
-
 }
 
 void TimingFrame::OnUpdateGlassN(wxUpdateUIEvent &event)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view )
-        if ( view->window )
-            if
-            ( view->window->CanZoomTicksOut() )
-            {
-                event.Enable(true);
-                return;
-            }
+    if ( view && view->CanZoomOut() )
+    {
+        event.Enable(true);
+        return;
+    }
     event.Enable(false);
 }
 void TimingFrame::OnUpdateGlassP(wxUpdateUIEvent &event)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view )
-        if ( view->window )
-            if ( view->window->CanZoomTicksIn() )
-            {
-                event.Enable(true);
-                return;
-            }
+    if ( view && view->CanZoomIn() )
+    {
+        event.Enable(true);
+        return;
+    }
     event.Enable(false);
 }

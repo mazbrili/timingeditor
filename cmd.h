@@ -279,6 +279,17 @@ protected:
     wxInt32 m_nmbr;
     wxString m_newText;
 };
-
+class ChangeTransitionWidth : public wxCommand
+{
+public:
+    ChangeTransitionWidth(TimingDocument *doc, wxInt8 width, bool en5090);
+    ~ChangeTransitionWidth();
+    bool Do(void);
+    bool Undo(void);
+protected:
+    TimingDocument *m_doc;
+    wxInt8 m_width;
+    bool m_en5090;
+};
 
 #endif //__CMD__

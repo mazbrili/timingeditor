@@ -130,28 +130,15 @@ bool TimingApp::OnInit()
     m_docManager->FileHistoryLoad(*m_config);
     m_config->SetPath(_T("/"));
 
-    {/// restore frame position and size
-        wxInt32 x, y, w, h, s;
-        x = m_config->Read(_T("/MainFrame/x"), 50);
-        y = m_config->Read(_T("/MainFrame/y"), 50);
-        w = m_config->Read(_T("/MainFrame/w"), 600);
-        h = m_config->Read(_T("/MainFrame/h"), 500);
-        s = m_config->Read(_T("/MainFrame/s"), (long)0);
-        mainframe->Move(x, y);
-        mainframe->SetClientSize(w, h);
-        if ( s > 0 )
-            mainframe->Maximize(true);
-        if ( s < 0)
-            mainframe->Iconize(true);
-    }
 
-#ifndef __WXMAC__
-    mainframe->Show(true);
-#endif //ndef __WXMAC__
+    mainframe->LoadFramePositions(m_config);
 
     SetTopWindow(mainframe);
 
 
+#ifndef __WXMAC__
+    mainframe->Show(true);
+#endif //ndef __WXMAC__
 
     //wxInitAllImageHandlers();
     wxImage::AddHandler( new wxPNGHandler );
@@ -162,23 +149,7 @@ bool TimingApp::OnInit()
         m_docManager->CreateDocument(parser.GetParam(n), wxDOC_SILENT );
 
 
-    {//// Tip of the day
-        bool ShowTipsAtStartup = true;
-        wxInt32 TipNumber = 0;
-        m_config->Read(_T("/StartupTips/ShowTipsAtStarup"), &ShowTipsAtStartup);
-        m_config->Read(_T("/StartupTips/TipNumber"), &TipNumber);
-
-        if ( ShowTipsAtStartup )
-        {
-            wxTipProvider *tipProvider = wxCreateFileTipProvider(_T("tips"), TipNumber);
-            ShowTipsAtStartup = wxShowTip(mainframe, tipProvider);
-            TipNumber = tipProvider->GetCurrentTip();
-            delete tipProvider;
-
-            m_config->Write(_T("/StartupTips/ShowTipsAtStarup"), ShowTipsAtStartup);
-            m_config->Write(_T("/StartupTips/TipNumber"), TipNumber);
-        }
-    }
+    mainframe->ShowTip();
 
     return true;
 }
@@ -239,7 +210,7 @@ wxMDIChildFrame *TimingApp::CreateChildFrame(wxDocument *doc, wxView *view)
     edit_menu->Append(wxID_CUT, _T("Cu&t\tCtrl-X"), _T("Cut"));
     edit_menu->Append(wxID_COPY, _T("&Copy\tCtrl-C"), _T("Copy"));
     edit_menu->Append(wxID_PASTE, _T("&Paste\tCtrl-V"), _T("Paste"));
-    edit_menu->Append(wxID_DELETE, _T("&Delete\tDel"), _T("Delete"));
+    edit_menu->Append(TIMING_ID_DELETE, _T("&Delete"), _T("Delete"));
     edit_menu->AppendSeparator();
     edit_menu->Append(TIMING_ID_ADD_CLOCK, _T("&Add Clock"), _T("&Add Clock") );
     edit_menu->Append(TIMING_ID_ADD_SIGNAL, _T("Add &Signal"), _T("Add &Signal"));

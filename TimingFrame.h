@@ -25,13 +25,14 @@
 #define TIMINGFRAME_H
 
 #include <wx/docmdi.h>
+#include <wx/aui/aui.h>
 #include "TimingApp.h"
 
 class TimingWindow;
+class ClockSettingsPanel;
+class TransitionSettingsPanel;
 class TimingFrame: public wxDocMDIParentFrame//wxFrame
 {
-
-    public:
     public:
         //TimingFrame( wxWindow* parent, wxString title = wxT("Timing"), wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 481,466 ), int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
         TimingFrame(wxDocManager *manager , wxFrame *frame, int id = wxID_ANY, const wxString& title = _T("TimingEditor"), wxPoint pos = wxDefaultPosition, wxSize size = wxDefaultSize, int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
@@ -39,9 +40,17 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
     ///member vars
     private:
         wxMenu *editMenu;
-
+        ClockSettingsPanel *clksetpanel;
+        TransitionSettingsPanel *trnssetpanel;
+    public:
+//        wxString GetClockSettingsPanelDelay() { return clksetpanel->GetDelayText(); }
+//        wxString GetClockSettingsPanelTicks() { return clksetpanel->GetTicksText(); }
+//        void     SetClockSettingsPanelUnmodified(){clksetpanel->SetUnmodified();}
+//        wxInt8   GetTransitionWidth(){return trnssetpanel->GetTransitionWidth();}
+//        bool     GetTransition5090(){return trnssetpanel->Get5090();}
 
     private:
+        ///void OnTimingEvent(wxCommandEvent &event);
         /*void OnClose(wxCloseEvent& event);
         void OnQuit(wxCommandEvent& event);*/
         void OnAbout(wxCommandEvent& event);
@@ -56,19 +65,23 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
         void OnUpdateGlassP(wxUpdateUIEvent &event);
         void OnUpdateDiscont(wxUpdateUIEvent& event);
 
-    /*protected:
-        wxMenuBar* mbar;
-        wxStatusBar* statusBar;*/
+
 
         bool IsSomethingSelected();
         bool IsTextSelected(void);
         bool CanDelete(void);
 
-    ///public methods
     public:
         //TimingWindow *CreateCanvas(wxView *view, wxMDIChildFrame *parent);
         TimingWindow *CreateWindow(wxView *view, wxMDIChildFrame *parent);
         void InitToolBar(wxToolBar* toolBar);
+
+        void ShowTip(bool force = false);
+        void SaveFramePositions(wxConfig *config);
+        void LoadFramePositions(wxConfig *config);
+
+    private:
+        wxAuiManager *m_manager;
 
     DECLARE_CLASS(TimingFrame)
     DECLARE_EVENT_TABLE()

@@ -26,21 +26,35 @@
 #include <wx/docview.h>
 
 class TimingWindow;
+class ClockSettingsPanel;
+class TransitionSettingsPanel;
+
 class TimingView: public wxView
 {
     public:
         wxMDIChildFrame *frame;
         TimingWindow *window;
+        ClockSettingsPanel *ClkSetPanel;
+        TransitionSettingsPanel *TranSetPanel;
 
-        TimingView() { window = (TimingWindow *) NULL; frame = (wxMDIChildFrame *) NULL; }
+        TimingView();
         ~TimingView() {}
 
-        bool OnCreate(wxDocument *doc, long flags);
+        bool OnCreate(wxDocument *doc, long WXUNUSED(flags));
         void OnDraw(wxDC *dc);
         void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
         bool OnClose(bool deleteWindow = true);
 
+    public:
+        bool CanZoomIn(void);
+        bool CanZoomOut(void);
+        bool CanPaste(void);
+        bool IsSomethingSelected(void);
+        bool IsTextSelected(void);
+        bool CanDelete(void);
+
     private:
+        void OnActivate(wxActivateEvent &event);
         void OnDelete(wxCommandEvent& event);
         //void OnDeleteSignal(wxCommandEvent& event);
         void OnSelectAll(wxCommandEvent& event);
@@ -65,6 +79,8 @@ class TimingView: public wxView
         void OnExportSVG(wxCommandEvent& event);
         void OnExportPS(wxCommandEvent& event);
 
+        void OnClockApply(wxCommandEvent& event);
+        void OnTrnansitionPanelApply(wxCommandEvent& event);
     private:
         DECLARE_DYNAMIC_CLASS(TimingView)
         DECLARE_EVENT_TABLE()

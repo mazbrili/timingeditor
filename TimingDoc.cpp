@@ -52,6 +52,7 @@ TimingDocument::TimingDocument(void)
     SignalHeight = 20;
     TransitWidth = 30; // %
     MinimumSignalDistance = 10;
+    en5090 = true;
 
     VLine line;
 

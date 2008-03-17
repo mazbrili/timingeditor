@@ -54,6 +54,9 @@
 
 #include "dndtarget.h"
 
+#include "ClockSettingsPanel.h"
+#include "TransitionSettingsPanel.h"
+
 //#include "view.h"
 
 BEGIN_EVENT_TABLE(TimingWindow, wxScrolledWindow)
@@ -75,12 +78,10 @@ BEGIN_EVENT_TABLE(TimingWindow, wxScrolledWindow)
     EVT_TIMER           (-1, TimingWindow::OnTimer)
 END_EVENT_TABLE()
 
-
-
-
 // Define a constructor for my canvas
-TimingWindow::TimingWindow(wxView *v, wxWindow *parent)://wxMDIChildFrame *frame):
-    wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER | wxWANTS_CHARS),
+//TimingWindow::TimingWindow(wxView *v, wxWindow *parent)
+TimingWindow::TimingWindow(wxView *v, wxWindow *parent, ClockSettingsPanel *clkpanel, TransitionSettingsPanel *trnpanel)
+:wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER | wxWANTS_CHARS),
     //currentlyEditedTextPtr(NULL),
     mouseoverwindow(true),
     //overText(false),
@@ -100,6 +101,9 @@ TimingWindow::TimingWindow(wxView *v, wxWindow *parent)://wxMDIChildFrame *frame
 
 
     WindowState(Neutral),
+
+    ClkSetPanel(clkpanel),
+    TranSetPanel(trnpanel),
 
     view(v)
 {
@@ -167,6 +171,7 @@ void TimingWindow::InitTextDrawing()
 
 wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
 {
+    bool empty = false;
     texts.push_back(str);
     wxCoord w, h;//, desc;
     if ( WindowState == TextFieldSelected  &&  editingNumber == textNumber )
@@ -175,8 +180,9 @@ wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
     }
     else
     {
-        if ( str.IsEmpty() )
+        if ( str.length() == 0 )
         {
+            empty = true;
             str = _T(" ");
             dc.GetTextExtent(str, &w, &h);
             offset.x -= w/2;
@@ -222,6 +228,8 @@ wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
     }
     ++textNumber;
 
+    if ( empty )
+        return wxPoint(0, h);
     return wxPoint(w, h);
 }
 
@@ -287,6 +295,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
             str = doc->signals[k].buswidth;
             wxPoint bwoff(textoff.x + siz.x+w+2, textoff.y);
             wxPoint s = DrawEditableText(dc, str, bwoff);
+
 
             dc.SetTextBackground(bgcol);
             dc.SetBackgroundMode(wxTRANSPARENT);
@@ -583,7 +592,41 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
         else if ( !sig.IsBus )
         {
-            offset.x = signalNamesWidth + GridStepWidth/(100.0/doc->TransitWidth);//1*transitionWidth;
+            offset.x = signalNamesWidth;
+            wxCoord transwidth = GridStepWidth/(100.0/doc->TransitWidth);
+            if ( doc->length > 0 ) switch(sig.values[0])
+            {
+                case zero:
+                    dc.DrawLine(
+                        offset.x,              offset.y+doc->SignalHeight,
+                        offset.x + transwidth, offset.y+doc->SignalHeight
+                    );
+                    break;
+                case one:
+                    dc.DrawLine(
+                        offset.x,            offset.y,
+                        offset.x+transwidth, offset.y
+                    );
+                    break;
+                case hz :
+                    dc.DrawLine(
+                        offset.x,            offset.y + doc->SignalHeight/2,
+                        offset.x+transwidth, offset.y + doc->SignalHeight/2
+                    );
+                    break;
+                case u:
+                default:
+                    dc.DrawLine(
+                        offset.x,            offset.y+doc->SignalHeight,
+                        offset.x+transwidth, offset.y+doc->SignalHeight
+                    );
+                    dc.DrawLine(
+                        offset.x,            offset.y,
+                        offset.x+transwidth, offset.y
+                    );
+                    break;
+            }
+            offset.x += transwidth;//1*transitionWidth;
             for ( wxInt32 k = 0 ; k < doc->length ; ++k )
             {
                 switch ( sig.values[k])
@@ -743,7 +786,53 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
         else // is bus
         {
-            offset.x = signalNamesWidth + GridStepWidth/(100.0/(doc->TransitWidth));//1*transitionWidth;
+            offset.x = signalNamesWidth;
+            wxCoord transwidth = GridStepWidth/(100.0/doc->TransitWidth);
+            if ( doc->length > 0 ) switch(sig.values[0])
+            {
+                case zero:
+                case one:
+                    dc.DrawLine(
+                        offset.x,            offset.y + doc->SignalHeight,
+                        offset.x+transwidth, offset.y + doc->SignalHeight
+                    );
+                    dc.DrawLine(
+                        offset.x,            offset.y,
+                        offset.x+transwidth, offset.y
+                    );
+                break;
+                case hz :
+                    dc.DrawLine(
+                        offset.x,            offset.y+doc->SignalHeight/2,
+                        offset.x+transwidth, offset.y+doc->SignalHeight/2
+                    );
+                    break;
+                case u:
+                default:
+                    {
+                        dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                        dc.SetPen(*wxLIGHT_GREY_PEN);
+                        wxPoint rec[4];
+                        rec[0] = wxPoint(offset.x+1, offset.y+doc->SignalHeight);
+                        rec[1] = wxPoint(offset.x+transwidth, offset.y+doc->SignalHeight);
+                        rec[2] = wxPoint(offset.x+transwidth, offset.y);
+                        rec[3] = wxPoint(offset.x+1, offset.y);
+                        dc.DrawPolygon(4, rec);
+                        //dc.SetPen(wxNullPen);
+                        //dc.SetPen(*wxBLACK_PEN);
+                        dc.SetPen(boldPen);
+                    }
+                    dc.DrawLine(
+                        offset.x,            offset.y+doc->SignalHeight,
+                        offset.x+transwidth, offset.y+doc->SignalHeight
+                    );
+                    dc.DrawLine(
+                        offset.x,            offset.y,
+                        offset.x+transwidth, offset.y
+                    );
+                break;
+            }
+            offset.x += transwidth;
             //wxInt32 i = 0;
             for ( wxInt32 k = 0 ; k < doc->length ; ++k )
             {
@@ -1056,10 +1145,13 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         wxPoint offset(signalNamesWidth + doc->vertlines[k].vpos * GridStepWidth,
         /*offset.y =*/ heightOffsets[doc->vertlines[k].StartPos]);
 
-        if ( doc->vertlines[k].vposoffset == 1 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-        else if ( doc->vertlines[k].vposoffset == 2 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+        if ( doc->en5090 )
+        {
+            if ( doc->vertlines[k].vposoffset == 1 )
+                offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+            else if ( doc->vertlines[k].vposoffset == 2 )
+                offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+        }
 
         wxInt32 tolen = heightOffsets[doc->vertlines[k].EndPos + 1];
         if ( editingNumber == k )
@@ -1100,10 +1192,15 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
             else if ( WindowState == MovingVLine )
             {
                 offset.x = signalNamesWidth + editingValA * GridStepWidth;
-                if ( editingValB == 1 )
-                    offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-                else if ( editingValB == 2 )
-                    offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                if ( doc->en5090 )
+                {
+                    if ( editingValB == 1 )
+                        offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                    else if ( editingValB == 2 )
+                        offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                }
+                else
+                    editingValB = 0;
 
                 dc.DrawLine(
                     offset.x, offset.y,
@@ -1137,10 +1234,15 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         wxPoint offset(signalNamesWidth + editingPoint[0].x * GridStepWidth,
         offset.y = heightOffsets[editingPoint[0].y]);
 
-        if ( editingValB == 1 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-        else if ( editingValB == 2 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+        if ( doc->en5090 )
+        {
+            if ( editingValB == 1 )
+                offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+            else if ( editingValB == 2 )
+                offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+        }
+        else
+            editingValB = 0;
 
         dc.DrawLine(
             offset.x, offset.y,
@@ -1442,6 +1544,7 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
     if ( !doc ) return;
 
+    SetFocus();
 
     wxClientDC dc(this);
     PrepareDC(dc);
@@ -1653,6 +1756,10 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             {
                 newstate = MovingVLine;
                 editingValA = doc->vertlines[editingNumber].vpos;
+                if ( doc->en5090 )
+                    editingValB = doc->vertlines[editingNumber].vposoffset;
+                else
+                    editingValB = 0;
                 dorefresh = true;
                 break;
             }
@@ -1702,25 +1809,31 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 wxInt32 n = doc->signals.size();
                 if ( n && // some signals in the document
                     pt.x > axisStart &&
-                    pt.x < axisStop /*&&
-                    pt.y > heightOffsets[0] &&
-                    pt.y < heightOffsets[n]*/ )
+                    pt.x < axisStop )
                 {
-//                    wxCoord p = pt.x - axisStart + GridStepWidth/2;
-//                    editingPoint[0].x = p / GridStepWidth;
-//                    editingValB = 0;
 
-                    editingPoint[0].x = (pt.x - axisStart)/GridStepWidth;
-                    wxCoord p = pt.x - axisStart - editingPoint[0].x*GridStepWidth;
-                    if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
-                        editingValB = 0;
-                    else if ( p < GridStepWidth *((3.0*doc->TransitWidth/4.0)/100.0) )
-                        editingValB = 1;
-                    else if ( p < GridStepWidth * (50.0+doc->TransitWidth/2.0) / 100.0 )
-                        editingValB = 2;
+                    if ( doc->en5090 )
+                    {
+                        editingPoint[0].x = (pt.x - axisStart)/GridStepWidth;
+                        wxCoord p = pt.x - axisStart - editingPoint[0].x*GridStepWidth;
+                        if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
+                            editingValB = 0;
+                        else if ( p < GridStepWidth *((3.0*doc->TransitWidth/4.0)/100.0) )
+                            editingValB = 1;
+                        else if ( p < GridStepWidth * (50.0+doc->TransitWidth/2.0) / 100.0 )
+                            editingValB = 2;
+                        else
+                        {
+                            editingPoint[0].x++;
+                            editingValB = 0;
+                        }
+                    }
                     else
                     {
-                        editingPoint[0].x++;
+                        editingPoint[0].x = (pt.x - axisStart)/GridStepWidth;
+                        wxCoord p = pt.x - axisStart - editingPoint[0].x*GridStepWidth;
+                        if ( p > GridStepWidth/2 )
+                            editingPoint[0].x++;
                         editingValB = 0;
                     }
 
@@ -1953,6 +2066,8 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             break;
     }
     WindowState = newstate;
+    if ( newstate == SignalIsSelected && doc->signals[editingNumber].IsClock )
+        UpdateClockPanel();
 
     if ( dorefresh ) this->Refresh();
     return;
@@ -1960,6 +2075,7 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
 void TimingWindow::SetNeutralState(void)
 {
     WindowState = Neutral;
+    if ( caret->IsVisible() ) caret->Show(false);
     scrollingleft = false;
     scrollingright = false;
     scrolltimer.Stop();
@@ -1976,6 +2092,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
     if ( !doc ) return;
 
+    SetFocus();
 
     states newstate = WindowState;
     switch ( WindowState )
@@ -2036,6 +2153,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                 editingNumber = editingValA;
             else if ( editingValA > editingNumber + 1)
                 editingNumber = editingValA - 1;
+            //SendEvent(_T("SignalSelected"));
             break;
         case ChangingUpperSpace:
             if ( doc->signals[editingNumber].prespace != editingValA )
@@ -2063,6 +2181,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                 VLine newline;
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 newline.vpos = editingPoint[0].x;
+                if ( !doc->en5090 ) editingValB = 0;
                 newline.vposoffset = editingValB;
                 if ( editingPoint[0].y > editingPoint[1].y )
                 {
@@ -2111,6 +2230,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                  editingValB != doc->vertlines[editingNumber].vposoffset )
             {
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+                if ( !doc->en5090 ) editingValB = 0;
                 cmdproc->Submit(new ChangeVLineCommand(doc, editingNumber,
                     editingValA,
                     doc->vertlines[editingNumber].StartPos,
@@ -2186,6 +2306,8 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
     if ( !doc ) return;
 
+    SetFocus();
+
     wxClientDC dc(this);
     PrepareDC(dc);
     dc.SetFont(font);
@@ -2226,14 +2348,12 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
         {
             editingNumber = n;
             WindowState = SignalIsSelected;
+            if ( doc->signals[n].IsClock ) UpdateClockPanel();
 
-            wxMenu menu;//(_T("Add/Remove function Menue"));
+            wxMenu menu;
             if ( doc->signals[n].IsClock )
                 menu.Append(TIMING_ID_CHANGECLOCK, _T("Change clock settings"));
-            //menu.Append(TIMING_ID_DELETE_SIGNAL, _T("Delet signal"));
-            menu.Append(wxID_DELETE, _T("Delet signal"));
-
-
+            menu.Append(TIMING_ID_DELETE, _T("Delet signal"));
             PopupMenu(&menu);
         }
 
@@ -2438,26 +2558,18 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
         case ChangingVLineLengthLower:
             {
                 wxInt32 n = doc->signals.size();
-                if ( n && // some signals in the document
-                    pt.x > axisStart &&
-                    pt.x < axisStop )
+                if ( n && pt.x > axisStart && pt.x < axisStop )
                 {
                     wxCoord p = pt.x-axisStart + (GridStepWidth)/2;
                     editingPoint[1].x = p / (GridStepWidth);
 
                     wxInt32 kmax = n, kmin = 0;
-                    // for every harrow in the doc check
                     for ( wxInt32 j = 0 ; j < doc->harrows.size() ; ++j )
                     {
-                        // if it is connected to the changing vline
                         if ( editingNumber == doc->harrows[j].fromVLine ||
                              editingNumber == doc->harrows[j].toVLine )
                         {
                             wxInt32 off =
-                            //heightOffsets[
-                            //    doc->vertlines[doc->harrows[j].fromVLine].StartPos
-                            //] +
-                            //DistanceToTimeline + DistanceFromTimeline +
                             doc->harrows[j].pos + heightOffsets[doc->harrows[j].signalnmbr];
 
                             wxInt32 k;
@@ -2517,17 +2629,28 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
 //                    editingPoint[0].x = p / GridStepWidth;
 //                    editingValB = 0;
 
-                    editingValA = (pt.x - axisStart)/GridStepWidth;
-                    wxCoord p = pt.x - axisStart - editingValA*GridStepWidth;
-                    if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
-                        editingValB = 0;
-                    else if ( p < GridStepWidth *((3.0*doc->TransitWidth/4.0)/100.0) )
-                        editingValB = 1;
-                    else if ( p < GridStepWidth * (50.0+doc->TransitWidth/2.0) / 100.0 )
-                        editingValB = 2;
+                    if ( doc->en5090 )
+                    {
+                        editingValA = (pt.x - axisStart)/GridStepWidth;
+                        wxCoord p = pt.x - axisStart - editingValA*GridStepWidth;
+                        if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
+                            editingValB = 0;
+                        else if ( p < GridStepWidth *((3.0*doc->TransitWidth/4.0)/100.0) )
+                            editingValB = 1;
+                        else if ( p < GridStepWidth * (50.0+doc->TransitWidth/2.0) / 100.0 )
+                            editingValB = 2;
+                        else
+                        {
+                            editingValA++;
+                            editingValB = 0;
+                        }
+                    }
                     else
                     {
-                        editingValA++;
+                        editingValA = (pt.x - axisStart)/GridStepWidth;
+                        wxCoord p = pt.x - axisStart - editingValA*GridStepWidth;
+                        if ( p > GridStepWidth/2 )
+                            editingValA++;
                         editingValB = 0;
                     }
                 }
@@ -2733,17 +2856,14 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                 SetCursor(*wxCROSS_CURSOR);
         default:
         case Neutral:
-        case VLineIsMarked:
         case ChangingVLineLengthLower:
         case ChangingVLineLengthUpper:
-        case AxisIsMarked:
         case EditAxisLeft:
         case EditAxisRight:
         case EditSignal:
         case MovingSignal:
         case ChangingUpperSpace:
         case ChangingLowerSpace:
-        case HArrowIsMarked:
         case ChangingHArrowLengthLeft:
         case ChangingHArrowLengthRight:
         case HArrowMovingText:
@@ -2752,6 +2872,20 @@ void TimingWindow::OnChar(wxKeyEvent &event)
             if ( event.GetKeyCode() == WXK_ESCAPE )
             {
                 SetNeutralState();
+                Refresh();
+            }
+            break;
+        case VLineIsMarked:
+        case AxisIsMarked:
+        case HArrowIsMarked:
+            if ( event.GetKeyCode() == WXK_ESCAPE )
+            {
+                SetNeutralState();
+                Refresh();
+            }
+            else if ( event.GetKeyCode() == WXK_DELETE )
+            {
+                DeleteSelection();
                 Refresh();
             }
             break;
@@ -2764,6 +2898,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if (editingNumber != 0 )
                         {
                             editingNumber = 0;
+                            UpdateClockPanel();
                             this->Refresh();
                         }
                         break;
@@ -2771,6 +2906,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if ( editingNumber != n-1 )
                         {
                             editingNumber = n-1;
+                            UpdateClockPanel();
                             this->Refresh();
                         }
                         break;
@@ -2778,6 +2914,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if ( editingNumber != 0)
                         {
                             --editingNumber;
+                            UpdateClockPanel();
                             this->Refresh();
                         }
                         break;
@@ -2785,9 +2922,12 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if ( editingNumber < n-1 )
                         {
                             ++editingNumber;
+                            UpdateClockPanel();
                             this->Refresh();
                         }
                         break;
+                    case WXK_DELETE:
+                        DeleteSelection();
                     case WXK_ESCAPE:
                         WindowState = Neutral;
                         scrollingleft = false;
@@ -2848,6 +2988,11 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                             editingValC = -1;
                         }
                         Refresh();
+                        return;
+                    }
+                    case WXK_DELETE:
+                    {
+                        DeleteSelection();
                         return;
                     }
                     case WXK_HOME:
@@ -2954,7 +3099,6 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                     case WXK_NUMPAD_ENTER:
                     {
                         /// generate the command to change the text
-                        // TODO (daniel#1#): command to change text
                         wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                         cmdproc->Submit(
                             new ChangeTextCommand(doc, editingNumber, editingText)
@@ -2973,7 +3117,6 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         editingValB = -1;
                         editingValC = -1;
                         if ( caret->IsVisible() ) caret->Hide();
-                        //EditMode = false;
                         editingNumber = -1;
                         /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         WindowState = SelectingText;
@@ -3211,23 +3354,6 @@ void TimingWindow::OnSelectNeutralTool(void)
 
 }
 
-/*void TimingWindow::InsertDroppedText(wxString str)
-{
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    wxString text = *droppedStringPtr;
-    doc->GetCommandProcessor()->Submit(
-        new ChangeText(doc, droppedStringPtr, text.Mid(0, droppos) + str + text.Mid(droppos) )
-    );
-    strpos = droppos + str.Length();
-    selpos[0] = droppos;
-    selpos[1] = strpos;
-    //selnmbr = dropnmbr;
-    currentlyEditedTextPtr = droppedStringPtr;
-    droppedStringPtr = NULL;
-    droppos = -1;
-    this->Refresh();
-}*/
-
 void TimingWindow::InsertText(wxString str)
 {
     if ( WindowState == TextFieldSelected && editingValA != -1 )
@@ -3256,6 +3382,7 @@ void TimingWindow::InsertText(wxString str)
         Refresh();
     }
 }
+
 wxString TimingWindow::GetText(void)
 {
     if ( !view )
@@ -3389,12 +3516,15 @@ void TimingWindow::DeleteSelection(void)
     {
         case SignalIsSelected:
             DeleteSignal();
+            SetNeutralState();
             break;
         case VLineIsMarked:
             DeleteVLine();
+            SetNeutralState();
             break;
         case HArrowIsMarked:
             DeleteHArrow();
+            SetNeutralState();
             break;
         case TextFieldSelected:
             DeleteText();
@@ -3598,4 +3728,99 @@ wxInt32 TimingWindow::GetSelectedSignalNr()
         return editingNumber;
     return -1;
 }
+bool TimingWindow::IsSelectedSignalClock(void)
+{
+    if ( !IsSignalSelected() ) return false;
 
+    if (!view) return false;
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return false;
+
+    return doc->signals[editingNumber].IsClock;
+}
+
+void TimingWindow::DetachPanels()
+{
+    ClkSetPanel->wnd = (TimingWindow *)NULL;
+    TranSetPanel->wnd = (TimingWindow *)NULL;
+}
+void TimingWindow::AttachPanels()
+{
+    ClkSetPanel->wnd = this;
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
+
+    if ( IsSelectedSignalClock() )
+        UpdateClockPanel();
+
+    TranSetPanel->wnd = this;
+    UpdateTransitionPanel();
+}
+void TimingWindow::UpdateClockPanel()
+{
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
+
+    if ( IsSelectedSignalClock() )
+    {
+        wxInt32 n;
+        wxString str;
+
+        n = doc->signals[editingNumber].delay;
+        str = wxString::Format ( _( "%d" ) , n);
+        ClkSetPanel->SetDelayText(str);
+
+        n = doc->signals[editingNumber].ticks;
+        str = wxString::Format ( _( "%d" ) , n);
+        ClkSetPanel->SetTicksText(str);
+    }
+}
+void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks)
+{
+    SetFocus();
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
+    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+
+    if ( IsSelectedSignalClock() )
+    {
+        cmdproc->Submit(
+            new ChangeClockParamCommand(doc, editingNumber , ticks, delay)
+        );
+    }
+}
+
+void TimingWindow::UpdateTransitionPanel()
+{
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
+
+    TranSetPanel->SetTransitionWidth(doc->TransitWidth);
+    TranSetPanel->Set5090(doc->en5090);
+}
+wxInt8 TimingWindow::GetTransitionWidth()
+{
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return 25;
+
+    return doc->TransitWidth;
+}
+bool TimingWindow::GetEn5090()
+{
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return false;
+
+    return doc->en5090;
+}
+void TimingWindow::SetTransition(wxInt8 width, bool en5090)
+{
+    SetFocus();
+
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
+    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+    cmdproc->Submit(
+        new ChangeTransitionWidth(doc, width, en5090)
+    );
+    UpdateTransitionPanel();
+}

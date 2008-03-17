@@ -122,6 +122,8 @@
 		</Linker>
 		<Unit filename="ClockEditDlg.cpp" />
 		<Unit filename="ClockEditDlg.h" />
+		<Unit filename="ClockSettingsPanel.cpp" />
+		<Unit filename="ClockSettingsPanel.h" />
 		<Unit filename="TimingApp.cpp" />
 		<Unit filename="TimingApp.h" />
 		<Unit filename="TimingDoc.cpp" />
@@ -132,6 +134,8 @@
 		<Unit filename="TimingView.h" />
 		<Unit filename="TimingWindow.cpp" />
 		<Unit filename="TimingWindow.h" />
+		<Unit filename="TransitionSettingsPanel.cpp" />
+		<Unit filename="TransitionSettingsPanel.h" />
 		<Unit filename="WxWizFrame.fbp" />
 		<Unit filename="cmd.cpp" />
 		<Unit filename="cmd.h" />

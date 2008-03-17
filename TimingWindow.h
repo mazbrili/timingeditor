@@ -31,6 +31,9 @@
 
 #include "TimingDoc.h"
 
+class ClockSettingsPanel;
+class TransitionSettingsPanel;
+
 class DropCaret
 {
 public:
@@ -54,30 +57,45 @@ private:
     wxSize m_size;
     bool m_show;
 };
+
+//BEGIN_DECLARE_EVENT_TYPES()
+//    DECLARE_EVENT_TYPE(TimingDiagramEvent, -1)
+//END_DECLARE_EVENT_TYPES()
+
+
+
 class TimingWindow: public wxScrolledWindow
 {
 public:
     //TimingWindow(wxView *v, wxMDIChildFrame *frame, const wxPoint& pos, const wxSize& size, long style);
-    TimingWindow(wxView *v, wxWindow *parent);
+    TimingWindow(wxView *v, wxWindow *parent, ClockSettingsPanel *clkpanel, TransitionSettingsPanel *trnpanel );
     ~TimingWindow();
-    virtual void OnDraw(wxDC& dc);
-
 
     bool IsTextSelected(void);
     bool IsSignalSelected(void);
+    bool IsSelectedSignalClock(void);
     bool VLineIsSelected(void);
     bool HArrowIsSelected(void);
     bool CanPaste(void);
     bool CanDeleteText(void);
     void InsertText(wxString str);
+    bool IsSomethingSelected(void);
 
     void DeleteText(void);
     wxString GetText(void);
     void SelectAll(void);
 
+    void AttachPanels();
+    void DetachPanels();
+
+
 
     void Draw(wxDC& dc, bool exporting = false);
     wxPoint GetBitmapSize();
+    //void SendEvent(const wxString& str);
+private:
+    void UpdateClockPanel();
+    void UpdateTransitionPanel();
 private: /// event methods
     void OnPaint(wxPaintEvent &event);
     void OnEraseBackground(wxEraseEvent &event);
@@ -93,6 +111,7 @@ private: /// event methods
     //void OnKillFocus(wxFocusEvent &event);
     void OnLeaveWindow(wxMouseEvent &event);
     void OnEnterWindow(wxMouseEvent &event);
+    void OnDraw(wxDC& dc);
 
     void OnTimer(wxTimerEvent& event);
 
@@ -103,32 +122,16 @@ private: /// event methods
 
 private:
     wxCaret *caret;
-    // remember text areas
+
     std::vector<wxPoint> textOffsets;
     std::vector<wxPoint> textSizes;
     std::vector<wxString> texts;
-    //std::vector<wxString *> textStringPtrs;
-    //wxString *currentlyEditedTextPtr;
-    //wxString *droppedStringPtr;
     bool mouseoverwindow;
-    /*bool overText;
-    wxInt32 selpos[2];
-    wxInt32 strpos;
-    wxInt32 droppos;
-    wxPoint dndpt;
-    bool dndsource;
-    bool drop;
-    bool dropcopy;
-    wxString DroppedText;
-    DropCaret *dropcaret;
-    void InsertDroppedText(wxString str);*/
-
-    //bool EditMode(void) const;
 
     wxCoord signalNamesWidth;
     wxPoint cursorpos;
 
-    bool IsSomethingSelected(void);
+
 
     wxInt32 fontsize;
     wxFont font;
@@ -139,10 +142,7 @@ private:
     bool scrollingright;
     wxTimer scrolltimer;
 
-    //wxInt32 transitionWidth;
-    //wxInt32 transitionsPerGridStep;
     wxInt32 GridStepWidth;
-
 
     std::vector<wxCoord> heightOffsets;
     wxInt32 editingNumber;
@@ -202,13 +202,18 @@ private:
         //TextSelected,
     };
     states WindowState;
-    void SetNeutralState(void);
 
-
-
+    ClockSettingsPanel *ClkSetPanel;
+    TransitionSettingsPanel *TranSetPanel;
 
 public:
+    wxInt8 GetTransitionWidth();
+    bool GetEn5090();
+    void SetClock(wxInt32 delay, wxInt32 ticks);
+    void SetNeutralState(void);
     wxInt32 GetSelectedSignalNr();
+    void SetTransition(wxInt8 width, bool en5090);
+
     void OnDragEnter(void);
     void OnDragLeave(void);
     wxDragResult OnDragOver(wxPoint pt, wxDragResult def);
