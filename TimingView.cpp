@@ -43,7 +43,6 @@
 #include "TimingWindow.h"
 #include "TimingFrame.h"
 #include "TimingApp.h"
-#include "ClockEditDlg.h"
 #include "cmd.h"
 #include "enumers.h"
 
@@ -58,7 +57,7 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
     EVT_MENU(wxID_PASTE,                TimingView::OnPaste)
     EVT_MENU(TIMING_ID_GLASS_N,         TimingView::OnZoomTicksOut)
     EVT_MENU(TIMING_ID_GLASS_P,         TimingView::OnZoomTicksIn)
-    EVT_MENU(TIMING_ID_CHANGECLOCK,     TimingView::OnEditClock)
+    //EVT_MENU(TIMING_ID_CHANGECLOCK,     TimingView::OnEditClock)
     EVT_MENU(TIMING_ID_ADD_CLOCK,       TimingView::OnAddClock)
     EVT_MENU(TIMING_ID_ADD_SIGNAL,      TimingView::OnAddSignal)
     EVT_MENU(TIMING_ID_ADD_BUS,         TimingView::OnAddBus)
@@ -72,32 +71,6 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
     EVT_MENU(TIMING_ID_EXPORT_PS,       TimingView::OnExportPS)
 END_EVENT_TABLE()
 
-void TimingView::OnEditClock(wxCommandEvent& event)
-{
-    ClockEditDlg dlg(window, wxID_ANY, _T("Change clock parameters") );
-    TimingDocument *doc = (TimingDocument *)GetDocument();
-    if ( !doc ) return;
-    wxInt32 signr = window->GetSelectedSignalNr();
-    if ( signr == -1) return;
-    wxInt32 period = doc->signals[signr].ticks;
-    wxInt32 delay = doc->signals[signr].delay;
-
-    dlg.SetTextPeriod(wxString::Format(_T("%d"), period));
-    dlg.SetTextDelay(wxString::Format(_T("%d"), delay));
-
-    if ( dlg.ShowModal() == wxID_OK )
-    {
-        long val;
-        dlg.GetTextPeriod().ToLong(&val);
-        period = val;
-        dlg.GetTextDelay().ToLong(&val);
-        delay = val;
-        wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-        cmdproc->Submit(
-            new ChangeClockParamCommand(doc, signr, period, delay)
-        );
-    }
-}
 void TimingView::OnActivate(wxActivateEvent &event)
 {
     if ( event.GetActive() )

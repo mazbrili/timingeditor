@@ -232,7 +232,49 @@ wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
         return wxPoint(0, h);
     return wxPoint(w, h);
 }
-
+//void TimingWindow::DrawState(wxDC& dc)
+//{
+//    switch( WindowState )
+//    {
+//        default:
+//        case Neutral: dc.DrawText(_T("Neutral"),0,0); break;
+//
+//        /// selecting and changing the axis
+//        case AxisIsMarked: dc.DrawText(_T("AxisIsMarked"),0,0); break;
+//        case EditAxisLeft: dc.DrawText(_T("EditAxisLeft"),0,0); break;
+//        case EditAxisRight: dc.DrawText(_T("EditAxisRight"),0,0); break;
+//
+//        /// editing, selecting and moving signals (3), change space (2)
+//        case EditSignal: dc.DrawText(_T("EditSignal"),0,0); break;
+//        case SignalIsSelected: dc.DrawText(_T("SignalIsSelected"),0,0); break;
+//        case MovingSignal: dc.DrawText(_T("MovingSignal"),0,0); break;
+//        case ChangingUpperSpace: dc.DrawText(_T("ChangingUpperSpace"),0,0); break;
+//        case ChangingLowerSpace: dc.DrawText(_T("ChangingLowerSpace"),0,0); break;
+//
+//        /// one state to edit discontinuities
+//        case EditingDiscontinuity: dc.DrawText(_T("EditingDiscontinuity"),0,0); break;
+//
+//        /// vertical lines: create new (2), selected (1), change length (2), moving around (1)
+//        case InsertingVLineWaitingFirstPoint: dc.DrawText(_T("InsertingVLineWaitingFirstPoint"),0,0); break;
+//        case InsertingVLineWaitingSecondPoint: dc.DrawText(_T("InsertingVLineWaitingSecondPoint"),0,0); break;
+//        case VLineIsMarked: dc.DrawText(_T("VLineIsMarked"),0,0); break;
+//        case ChangingVLineLengthUpper: dc.DrawText(_T("ChangingVLineLengthUpper"),0,0); break;
+//        case ChangingVLineLengthLower: dc.DrawText(_T("ChangingVLineLengthLower"),0,0); break;
+//        case MovingVLine: dc.DrawText(_T("MovingVLine"),0,0); break;
+//
+//        ///
+//        case InsertingHArrowWaitingFirstPoint: dc.DrawText(_T("InsertingHArrowWaitingFirstPoint"),0,0); break;
+//        case InsertingHArrowWaitingSecondPoint: dc.DrawText(_T("InsertingHArrowWaitingSecondPoint"),0,0); break;
+//        case HArrowIsMarked: dc.DrawText(_T("HArrowIsMarked"),0,0); break;
+//        case ChangingHArrowLengthLeft: dc.DrawText(_T("ChangingHArrowLengthLeft"),0,0); break;
+//        case ChangingHArrowLengthRight: dc.DrawText(_T("ChangingHArrowLengthRight"),0,0); break;
+//        case MovingHArrow: dc.DrawText(_T("MovingHArrow"),0,0); break;
+//        case HArrowMovingText: dc.DrawText(_T("HArrowMovingText"),0,0); break;
+//        case SelectingText: dc.DrawText(_T("SelectingText"),0,0); break;
+//        case TextFieldSelected: dc.DrawText(_T("TextFieldSelected"),0,0); break;
+//        //TextSelected,
+//    };
+//}
 void TimingWindow::Draw(wxDC& dc, bool exporting)
 {
     if (!view) return;
@@ -261,6 +303,8 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         offset = wxPoint(40, DistanceToTimeline + DistanceFromTimeline );
     else
         offset = wxPoint( 0, 0);
+
+    ///DrawState(dc);
 
     /// drawing signal names:
     for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
@@ -2148,7 +2192,8 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                     doc, editingNumber, editingValA)
                 );
             }
-            newstate = SignalIsSelected;
+            ///newstate = SignalIsSelected;
+            newstate = Neutral;
             if (editingValA <=  editingNumber )
                 editingNumber = editingValA;
             else if ( editingValA > editingNumber + 1)
@@ -2351,8 +2396,8 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
             if ( doc->signals[n].IsClock ) UpdateClockPanel();
 
             wxMenu menu;
-            if ( doc->signals[n].IsClock )
-                menu.Append(TIMING_ID_CHANGECLOCK, _T("Change clock settings"));
+//            if ( doc->signals[n].IsClock )
+//                menu.Append(TIMING_ID_CHANGECLOCK, _T("Change clock settings"));
             menu.Append(TIMING_ID_DELETE, _T("Delet signal"));
             PopupMenu(&menu);
         }

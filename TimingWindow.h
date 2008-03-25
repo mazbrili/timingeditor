@@ -205,7 +205,7 @@ private:
 
     ClockSettingsPanel *ClkSetPanel;
     TransitionSettingsPanel *TranSetPanel;
-
+    ///void DrawState(wxDC& dc);
 public:
     wxInt8 GetTransitionWidth();
     bool GetEn5090();

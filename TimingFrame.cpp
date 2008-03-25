@@ -112,53 +112,6 @@ TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wx
     // tell the manager to "commit" all the changes just made
     m_manager->Update();
 }
-void TimingFrame::SaveFramePositions(wxConfig *config)
-{
-    // save the frame position
-    wxInt32 x, y, w, h, s;
-    GetClientSize(&w, &h);
-    GetPosition(&x, &y);
-    s = 0;
-    if ( IsMaximized() )
-        s = 1;
-    if ( IsIconized() )
-        s= -1;
-    if ( s == 0 )
-    {
-        config->Write(_T("/MainFrame/x"), (long) x);
-        config->Write(_T("/MainFrame/y"), (long) y);
-        config->Write(_T("/MainFrame/w"), (long) w);
-        config->Write(_T("/MainFrame/h"), (long) h);
-    }
-    config->Write(_T("/MainFrame/s"), (long) s);
-}
-void TimingFrame::SaveAuiPerspective(wxConfig *config)
-{
-    wxString str = m_manager->SavePerspective();
-    config->Write( _T( "/MainFrame/AuiPerspective" ), str );
-}
-void TimingFrame::LoadAuiPerspective(wxConfig *config)
-{
-    wxString str;
-    config->Read(_T( "/MainFrame/AuiPerspective" ), &str);
-    m_manager->LoadPerspective(str);
-}
-void TimingFrame::LoadFramePositions(wxConfig *config)
-{
-    /// restore frame position and size
-        wxInt32 x, y, w, h, s;
-        x = config->Read(_T("/MainFrame/x"), 50);
-        y = config->Read(_T("/MainFrame/y"), 50);
-        w = config->Read(_T("/MainFrame/w"), 600);
-        h = config->Read(_T("/MainFrame/h"), 500);
-        s = config->Read(_T("/MainFrame/s"), (long)0);
-        Move(x, y);
-        SetClientSize(w, h);
-        if ( s > 0 )
-            Maximize(true);
-        if ( s < 0)
-            Iconize(true);
-}
 
 TimingFrame::~TimingFrame()
 {
@@ -309,4 +262,51 @@ void TimingFrame::OnUpdateGlassP(wxUpdateUIEvent &event)
         return;
     }
     event.Enable(false);
+}
+void TimingFrame::SaveFramePositions(wxConfig *config)
+{
+    // save the frame position
+    wxInt32 x, y, w, h, s;
+    GetClientSize(&w, &h);
+    GetPosition(&x, &y);
+    s = 0;
+    if ( IsMaximized() )
+        s = 1;
+    if ( IsIconized() )
+        s= -1;
+    if ( s == 0 )
+    {
+        config->Write(_T("/MainFrame/x"), (long) x);
+        config->Write(_T("/MainFrame/y"), (long) y);
+        config->Write(_T("/MainFrame/w"), (long) w);
+        config->Write(_T("/MainFrame/h"), (long) h);
+    }
+    config->Write(_T("/MainFrame/s"), (long) s);
+}
+void TimingFrame::SaveAuiPerspective(wxConfig *config)
+{
+    wxString str = m_manager->SavePerspective();
+    config->Write( _T( "/MainFrame/AuiPerspective" ), str );
+}
+void TimingFrame::LoadAuiPerspective(wxConfig *config)
+{
+    wxString str;
+    config->Read(_T( "/MainFrame/AuiPerspective" ), &str);
+    m_manager->LoadPerspective(str);
+}
+void TimingFrame::LoadFramePositions(wxConfig *config)
+{
+    /// restore frame position and size
+        wxInt32 x, y, w, h, s;
+        x = config->Read(_T("/MainFrame/x"), 50);
+        y = config->Read(_T("/MainFrame/y"), 50);
+        w = config->Read(_T("/MainFrame/w"), 600);
+        h = config->Read(_T("/MainFrame/h"), 500);
+        s = config->Read(_T("/MainFrame/s"), (long)0);
+        Move(x, y);
+        SetClientSize(w, h);
+        if ( s > 0 )
+            Maximize(true);
+        if ( s < 0)
+            Iconize(true);
 }

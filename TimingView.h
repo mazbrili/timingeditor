@@ -64,7 +64,7 @@ class TimingView: public wxView
 
         void OnZoomTicksOut(wxCommandEvent& WXUNUSED(event) );
         void OnZoomTicksIn(wxCommandEvent& WXUNUSED(event) );
-        void OnEditClock(wxCommandEvent& event);
+        //void OnEditClock(wxCommandEvent& event);
         void OnInsertDiscontTool(wxCommandEvent& event);
         void OnSelectRuler(wxCommandEvent& event);
         void OnSelectHArrow(wxCommandEvent& event);
