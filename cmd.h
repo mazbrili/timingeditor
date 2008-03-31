@@ -66,6 +66,7 @@ protected:
     wxInt32 m_newLength;
     std::vector< Signal > signals;
     std::set<wxInt32> discont;
+    std::map<wxInt32, wxInt32> disclen;
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
 class ChangeLengthLeft : public wxCommand
@@ -81,6 +82,8 @@ protected:
     wxInt32 m_newLength;
     std::vector< Signal > signals;
     std::set<wxInt32> discont;
+    std::map<wxInt32, wxInt32> disclen;
+
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
 class ChangeSignal : public wxCommand
@@ -173,6 +176,7 @@ public:
 protected:
     TimingDocument *m_doc;
     wxInt32 m_discont;
+    wxInt32 m_len;
 };
 class ChangeSpaceCommand : public wxCommand
 {
@@ -290,6 +294,33 @@ protected:
     TimingDocument *m_doc;
     wxInt8 m_width;
     bool m_en5090;
+};
+
+class ChangeAxisSettings : public wxCommand
+{
+public:
+    ChangeAxisSettings(TimingDocument *doc, wxInt8 unit, wxInt32 ticklenth, wxInt32 tacklength, wxInt32 offset);
+    ~ChangeAxisSettings();
+    bool Do(void);
+    bool Undo(void);
+protected:
+    TimingDocument *m_doc;
+    wxInt8 m_unit;
+    wxInt32 m_ticklength;
+    wxInt32 m_tacklength;
+    wxInt32 m_offset;
+};
+class ChangeTimeCompressor : public wxCommand
+{
+public:
+    ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time);
+    ~ChangeTimeCompressor();
+    bool Do(void);
+    bool Undo(void);
+protected:
+    TimingDocument *m_doc;
+    wxInt32 m_time;
+    wxInt32 m_index;
 };
 
 #endif //__CMD__

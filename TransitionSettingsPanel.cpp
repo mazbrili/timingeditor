@@ -84,7 +84,9 @@ void TransitionSettingsPanel::OnUpdateControls(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxSize size, int style ) : wxPanel( parent, id, pos, size, style )
+TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxSize size, int style ) :
+    wxPanel( parent, id, pos, size, style ),
+    wnd(NULL)
 {
 	wxBoxSizer* bSizer1;
 	bSizer1 = new wxBoxSizer( wxVERTICAL );

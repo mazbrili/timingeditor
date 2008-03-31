@@ -20,11 +20,7 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Sep 14 2006)
-// http://www.wxformbuilder.org/
-//
-// PLEASE DO "NOT" EDIT THIS FILE!
-///////////////////////////////////////////////////////////////////////////
+
 
 #include "wx/wxprec.h"
 
@@ -39,7 +35,6 @@
 #include "TimingApp.h"//GetApp
 #include "ClockSettingsPanel.h"
 #include "enumers.h"
-#include "TimingView.h"
 #include "TimingWindow.h"
 
 ///////////////////////////////////////////////////////////////////////////
@@ -103,7 +98,9 @@ void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxSize size, int style ) : wxPanel( parent, id, pos, size, style )
+ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxSize size, int style ) :
+    wxPanel( parent, id, pos, size, style ),
+    wnd(NULL)
 {
 	wxBoxSizer* bSizer1;
 	bSizer1 = new wxBoxSizer( wxVERTICAL );

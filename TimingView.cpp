@@ -318,7 +318,8 @@ bool TimingView::IsSomethingSelected(void)
         window->IsTextSelected() ||
         window->IsSignalSelected() ||
         window->VLineIsSelected() ||
-        window->HArrowIsSelected() )
+        window->HArrowIsSelected() ||
+        window->DiscontSelected() )
     )
         return true;
     return false;
@@ -336,7 +337,8 @@ bool TimingView::CanDelete(void)
         window->IsSignalSelected() ||
         window->VLineIsSelected() ||
         window->HArrowIsSelected() ||
-        window->CanDeleteText() )
+        window->CanDeleteText() ||
+        window->DiscontSelected() )
     )
         return true;
     return false;

@@ -54,6 +54,11 @@ TimingDocument::TimingDocument(void)
     MinimumSignalDistance = 10;
     en5090 = true;
 
+    TickLengthUnit = -3;
+    TickLength = 10; // in TickLengthUnit
+    TackLength = 10; // in ticks
+    timeOffset = 5; // in ticks
+
     VLine line;
 
     line.StartPos = 0;
@@ -99,6 +104,7 @@ TimingDocument::TimingDocument(void)
     }
 
     discontinuities.insert(3);
+    discontlength[3] = 7;
 
     Signal sig2;
     {
@@ -184,7 +190,7 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     wxUint32 ui;
 
     /// store file format version first
-    i = 3;
+    i = 4;
     store << i;
 
     ///
@@ -221,6 +227,7 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     {
         i = *it;
         store << i;
+        store << discontlength[i];
     }
 
     // new with version 2:
@@ -230,6 +237,11 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     // new with version 3:
     store << TransitWidth;
 
+    // new with version 4:
+    store << TickLengthUnit;
+    store << TickLength; // in TickLengthUnit
+    store << TackLength; // in ticks
+    store << timeOffset; // in ticks
 
     return outp.Close();
 }
@@ -239,12 +251,13 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
     wxFileInputStream inp( file );
     wxDataInputStream load( inp );
 
-    wxInt32 i;
+    //wxInt32 i;
+    wxInt32  version;
     wxUint32 ui;
 
     /// get file format version first
-    load >> i;
-    if ( i >= 1 )
+    load >> version;
+    if ( version >= 1 )
     {
         load >> length;
 
@@ -280,16 +293,25 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         }
 
         discontinuities.clear();
+        discontlength.clear();
         load >> ui;
         for ( wxUint32 n = 0 ; n < ui ; ++n )
         {
             wxInt32 dis;
             load >> dis;
             discontinuities.insert(dis);
+            if ( version >= 4 )
+            {
+                wxInt32 l;
+                load >> l;
+                discontlength[dis] = l;
+            }
+            else
+                discontlength[dis] = 2;
         }
     }
 
-    if ( i >= 2)
+    if ( version >= 2)
     {
         wxInt32 height;
         load >> height;
@@ -305,7 +327,7 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         MinimumSignalDistance = 10;
     }
 
-    if ( i >= 3)
+    if ( version >= 3)
     {
         load >> TransitWidth;
     }
@@ -314,8 +336,24 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         TransitWidth = 20;
     }
 
+    if ( version >= 4 )
+    {
+        load >> TickLengthUnit;
+        load >> TickLength;
+        load >> TackLength;
+        load >> timeOffset;
+    }
+    else
+    {
+        TickLengthUnit = -3;
+        TickLength = 10; // in TickLengthUnit
+        TackLength = 10; // in ticks
+        timeOffset = 5; // in ticks
+    }
 
-    if ( i > 3)
+
+
+    if ( version > 4)
     {
         // unknown format version
         return false;

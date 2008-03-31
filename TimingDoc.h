@@ -124,16 +124,30 @@ class TimingDocument: public wxDocument
         //wxArrayString SignalNames;
         wxInt32 length;
         std::vector<Signal> signals;
-        std::set<wxInt32> discontinuities;
         std::vector<VLine> vertlines;
         std::vector<HArrow> harrows;
         //std::vector<SplArrow> splarrows;
-
+        std::set<wxInt32> discontinuities;
+        std::map<wxInt32, wxInt32> discontlength;
         wxInt32 SignalHeight;
         wxInt32 MinimumSignalDistance;
 
         wxUint8 TransitWidth; // width in percent of the width of a tick
         bool    en5090;
+
+
+        // 1: ks
+        // 0: s
+        // -1: ms
+        // -2: us
+        // -3: ns
+        // -4: ps
+        // -5: fs
+        wxInt8  TickLengthUnit;
+        wxInt32 TickLength; // in TickLengthUnit
+        wxInt32 TackLength; // in ticks
+        wxInt32 timeOffset; // in ticks
+
 
     protected:
         bool DoSaveDocument(const wxString& file);

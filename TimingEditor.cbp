@@ -22,7 +22,6 @@
 				</ResourceCompiler>
 				<Linker>
 					<Add library="libwxmsw28ud_svg" />
-					<Add library="libwxmsw28ud.a" />
 					<Add library="libwxmsw28ud_richtext.a" />
 					<Add library="libwxmsw28ud_xrc.a" />
 					<Add library="libwxmsw28ud_aui.a" />
@@ -38,7 +37,7 @@
 					<Add library="libwxbase28ud.a" />
 					<Add library="libwxpngd.a" />
 					<Add library="libwxjpegd.a" />
-					<Add library="libwxtifff.a" />
+					<Add library="libwxtiffd.a" />
 					<Add library="libwxzlibd.a" />
 					<Add library="libwxregexud.a" />
 					<Add library="libwxexpatd.a" />
@@ -90,15 +89,15 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wall" />
 			<Add option="-pipe" />
 			<Add option="-mthreads" />
+			<Add option="-Winvalid-pch" />
+			<Add option="-include wx_pch.h" />
 			<Add option="-D__GNUWIN32__" />
 			<Add option="-D__WXMSW__" />
 			<Add option="-DwxUSE_UNICODE" />
-			<Add option="-Winvalid-pch" />
-			<Add option="-include wx_pch.h" />
 			<Add option="-DWX_PRECOMP" />
-			<Add option="-Wall" />
 			<Add directory="$(#wx)\include" />
 			<Add directory="$(#wx)\contrib\include" />
 		</Compiler>
@@ -120,8 +119,8 @@
 			<Add library="libwsock32.a" />
 			<Add library="libodbc32.a" />
 		</Linker>
-		<Unit filename="ClockEditDlg.cpp" />
-		<Unit filename="ClockEditDlg.h" />
+		<Unit filename="AxisSettingsPanel.cpp" />
+		<Unit filename="AxisSettingsPanel.h" />
 		<Unit filename="ClockSettingsPanel.cpp" />
 		<Unit filename="ClockSettingsPanel.h" />
 		<Unit filename="TimingApp.cpp" />

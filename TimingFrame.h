@@ -31,6 +31,8 @@
 class TimingWindow;
 class ClockSettingsPanel;
 class TransitionSettingsPanel;
+class AxisSettingsPanel;
+class TimeCompressorSettingsPanel;
 class TimingFrame: public wxDocMDIParentFrame//wxFrame
 {
     public:
@@ -42,6 +44,8 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
         wxMenu *editMenu;
         ClockSettingsPanel *clksetpanel;
         TransitionSettingsPanel *trnssetpanel;
+        AxisSettingsPanel *axissetpanel;
+        TimeCompressorSettingsPanel *tcsetpanel;
     public:
 //        wxString GetClockSettingsPanelDelay() { return clksetpanel->GetDelayText(); }
 //        wxString GetClockSettingsPanelTicks() { return clksetpanel->GetTicksText(); }

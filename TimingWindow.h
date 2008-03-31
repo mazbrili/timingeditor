@@ -33,6 +33,8 @@
 
 class ClockSettingsPanel;
 class TransitionSettingsPanel;
+class AxisSettingsPanel;
+class TimeCompressorSettingsPanel;
 
 class DropCaret
 {
@@ -68,7 +70,11 @@ class TimingWindow: public wxScrolledWindow
 {
 public:
     //TimingWindow(wxView *v, wxMDIChildFrame *frame, const wxPoint& pos, const wxSize& size, long style);
-    TimingWindow(wxView *v, wxWindow *parent, ClockSettingsPanel *clkpanel, TransitionSettingsPanel *trnpanel );
+    TimingWindow(wxView *v, wxWindow *parent,
+        ClockSettingsPanel *clkpanel,
+        TransitionSettingsPanel *trnpanel,
+        AxisSettingsPanel *axspanel,
+        TimeCompressorSettingsPanel * tcpanel);
     ~TimingWindow();
 
     bool IsTextSelected(void);
@@ -76,6 +82,7 @@ public:
     bool IsSelectedSignalClock(void);
     bool VLineIsSelected(void);
     bool HArrowIsSelected(void);
+    bool DiscontSelected(void);
     bool CanPaste(void);
     bool CanDeleteText(void);
     void InsertText(wxString str);
@@ -96,6 +103,7 @@ public:
 private:
     void UpdateClockPanel();
     void UpdateTransitionPanel();
+    void UpdateAxisPanel();
 private: /// event methods
     void OnPaint(wxPaintEvent &event);
     void OnEraseBackground(wxEraseEvent &event);
@@ -200,11 +208,15 @@ private:
         SelectingText,
         TextFieldSelected,
         //TextSelected,
+
+        DisconSelected,
     };
     states WindowState;
 
     ClockSettingsPanel *ClkSetPanel;
     TransitionSettingsPanel *TranSetPanel;
+    AxisSettingsPanel *AxisSetPanel;
+    TimeCompressorSettingsPanel *TmeCmprssrPanel;
     ///void DrawState(wxDC& dc);
 public:
     wxInt8 GetTransitionWidth();
@@ -213,6 +225,9 @@ public:
     void SetNeutralState(void);
     wxInt32 GetSelectedSignalNr();
     void SetTransition(wxInt8 width, bool en5090);
+    void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset);
+    void SetTimeCompressor(wxInt32 time);
+    void UpdateTimeCompressorPanel(void);
 
     void OnDragEnter(void);
     void OnDragLeave(void);
@@ -226,6 +241,7 @@ public:
     void DeleteSignal(void);
     void DeleteVLine(void);
     void DeleteHArrow(void);
+    void DeleteDiscont(void);
     void DeleteSelection(void);
     void OnSelectInsertDiscontTool(void);
     void OnSelectRulerTool(void);

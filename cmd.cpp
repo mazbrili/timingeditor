@@ -77,7 +77,6 @@ ChangeLength::~ChangeLength()
         if ( dvlc ) delete dvlc;
     }
 }
-// TODO (daniel#1#): remember to handle vertical lines and arrow while shortening the axis
 bool ChangeLength::Do(void)
 {
 
@@ -85,15 +84,18 @@ bool ChangeLength::Do(void)
     signals = m_doc->signals;
 
     discont.clear();
+    disclen.clear();
     std::set<wxInt32>::iterator it;
     std::set<wxInt32>::iterator itlow;
     itlow = m_doc->discontinuities.lower_bound(m_newLength) ;
-    for (
-        it = itlow;
+    for(it = itlow;
         it != m_doc->discontinuities.end() ;
-        it++
-    )
+        it++)
+    {
         discont.insert(*it);
+        disclen[*it] = m_doc->discontlength[*it];
+        m_doc->discontlength.erase(*it);
+    }
     m_doc->discontinuities.erase(itlow, m_doc->discontinuities.end() );
 
     for ( wxInt32 n = 0 ; n < signals.size() ; ++n )
@@ -157,7 +159,10 @@ bool ChangeLength::Undo(void)
         it != discont.end() ;
         it++
     )
+    {
         m_doc->discontinuities.insert(*it);
+        m_doc->discontlength[*it] = disclen[*it];
+    }
 
 
     m_doc->signals.clear();
@@ -430,6 +435,8 @@ bool AddDiscontCommand::Do(void)
     if ( m_doc->discontinuities.find(m_discont) == m_doc->discontinuities.end() )
     {
         m_doc->discontinuities.insert(m_discont);
+        m_doc->discontlength[m_discont] = 2;
+
         m_doc->Modify(true);
         m_doc->UpdateAllViews();
         return true;
@@ -440,6 +447,7 @@ bool AddDiscontCommand::Do(void)
 bool AddDiscontCommand::Undo(void)
 {
     m_doc->discontinuities.erase(m_discont);
+    m_doc->discontlength.erase(m_discont);
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -457,7 +465,10 @@ bool RemoveDiscontCommand::Do(void)
 {
     if ( m_doc->discontinuities.find(m_discont) != m_doc->discontinuities.end() )
     {
+        m_len = m_doc->discontlength[m_discont];
         m_doc->discontinuities.erase(m_discont);
+        m_doc->discontlength.erase(m_discont);
+
         m_doc->Modify(true);
         m_doc->UpdateAllViews();
         return true;
@@ -468,6 +479,7 @@ bool RemoveDiscontCommand::Do(void)
 bool RemoveDiscontCommand::Undo(void)
 {
     m_doc->discontinuities.insert(m_discont);
+    m_doc->discontlength[m_discont] = m_len;
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
@@ -779,7 +791,9 @@ bool ChangeLengthLeft::Do(void)
 
     discont.clear();
     discont = m_doc->discontinuities;
+    disclen = m_doc->discontlength;
     m_doc->discontinuities.clear(); /// add the corrected values later
+    m_doc->discontlength.clear();
 
     /// change the values of the signal
     for ( wxInt32 n = 0 ; n < signals.size() ; ++n )
@@ -853,7 +867,7 @@ bool ChangeLengthLeft::Do(void)
         }
     }
 
-    /// change position of dicontinuities or remove them
+    /// calc new position of dicontinuities (do not add them if outside the graph)
     for (
         std::set<wxInt32>::iterator it = discont.begin();
         it != discont.end();
@@ -862,7 +876,10 @@ bool ChangeLengthLeft::Do(void)
     {
         wxInt32 n = *it - (m_doc->length - m_newLength);
         if ( n >= 0 )
+        {
             m_doc->discontinuities.insert( n );
+            m_doc->discontlength[n] = disclen[*it];
+        }
     }
 
     /// change positoin of vertical lines or remove them
@@ -894,6 +911,8 @@ bool ChangeLengthLeft::Undo(void)
 {
     m_doc->discontinuities.clear();
     m_doc->discontinuities = discont;
+    m_doc->discontlength.clear();
+    m_doc->discontlength = disclen;
 
     m_doc->signals.clear();
     m_doc->signals = signals;
@@ -1336,3 +1355,61 @@ bool ChangeTransitionWidth::Undo(void)
 {
     return Do();
 }
+
+ChangeAxisSettings::ChangeAxisSettings(TimingDocument *doc, wxInt8 unit, wxInt32 ticklenth, wxInt32 tacklength, wxInt32 offset):
+    wxCommand(true, _("Change time-axis settings") ),
+    m_doc(doc),
+    m_unit(unit),
+    m_ticklength(ticklenth),
+    m_tacklength(tacklength),
+    m_offset(offset)
+{}
+ChangeAxisSettings::~ChangeAxisSettings(){}
+bool ChangeAxisSettings::Do(void)
+{
+    wxInt8 tmp8 = m_doc->TickLengthUnit;
+    m_doc->TickLengthUnit = m_unit;
+    m_unit = tmp8;
+
+    wxInt32 tmp = m_doc->TickLength;
+    m_doc->TickLength = m_ticklength;
+    m_ticklength = tmp;
+
+    tmp = m_doc->TackLength;
+    m_doc->TackLength = m_tacklength;
+    m_tacklength = tmp;
+
+    tmp = m_doc->timeOffset;
+    m_doc->timeOffset = m_offset;
+    m_offset = tmp;
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+bool ChangeAxisSettings::Undo(void)
+{
+    return Do();
+}
+
+ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time)
+    :wxCommand(true, _("Change time compressor length") ),
+    m_doc(doc),
+    m_time(time),
+    m_index(index)
+{}
+bool ChangeTimeCompressor::Do(void)
+{
+    wxInt32 tmp = m_doc->discontlength[m_index];
+    m_doc->discontlength[m_index] = m_time;
+    m_time = tmp;
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+bool ChangeTimeCompressor::Undo(void)
+{
+    return Do();
+}
+ChangeTimeCompressor::~ChangeTimeCompressor(){}

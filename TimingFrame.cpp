@@ -37,11 +37,13 @@
 #include "TimingApp.h"//GetApp
 #include "enumers.h"
 
+#include "TimingView.h"
+#include "dndfile.h"
 #include "TimingWindow.h"
 #include "ClockSettingsPanel.h"
 #include "TransitionSettingsPanel.h"
-#include "TimingView.h"
-#include "dndfile.h"
+#include "AxisSettingsPanel.h"
+#include "TimeCompressorSettingsPanel.h"
 
 #include "art/new.xpm"
 #include "art/open.xpm"
@@ -102,12 +104,16 @@ TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wx
     /// notify wxAUI which frame to use
     m_manager = new wxAuiManager(this);
 
-    clksetpanel = new ClockSettingsPanel(this, -1);
-    trnssetpanel = new TransitionSettingsPanel(this, -1);
+    clksetpanel = new ClockSettingsPanel(this);
+    trnssetpanel = new TransitionSettingsPanel(this);
+    axissetpanel = new AxisSettingsPanel(this);
+    tcsetpanel = new TimeCompressorSettingsPanel(this);
 
 
-    m_manager->AddPane(clksetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("ClockPanel")).Caption(wxT("Clock-type signal Settings")).CloseButton(false));
+    m_manager->AddPane(clksetpanel , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("ClockPanel")).Caption(wxT("Clock-type signal Settings")).CloseButton(false));
     m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TransitionPanel")).Caption(wxT("Transition Settings")).CloseButton(false));
+    m_manager->AddPane(axissetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("AxisPanel")).Caption(wxT("Axis/Time Settings")).CloseButton(false));
+    m_manager->AddPane(tcsetpanel  , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TimeCompressorPanel")).Caption(wxT("Time compressor Settings")).CloseButton(false));
 
     // tell the manager to "commit" all the changes just made
     m_manager->Update();
@@ -123,6 +129,8 @@ TimingFrame::~TimingFrame()
     delete m_manager;
     delete clksetpanel;
     delete trnssetpanel;
+    delete axissetpanel;
+    delete tcsetpanel;
 }
 
 void TimingFrame::OnAbout(wxCommandEvent &event)
@@ -185,7 +193,7 @@ void TimingFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
 }
 TimingWindow *TimingFrame::CreateWindow(wxView *view, wxMDIChildFrame *parent)
 {
-    return new TimingWindow(view, parent, clksetpanel, trnssetpanel);
+    return new TimingWindow(view, parent, clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
 }
 
 void TimingFrame::InitToolBar(wxToolBar* toolBar)
@@ -287,12 +295,21 @@ void TimingFrame::SaveAuiPerspective(wxConfig *config)
 {
     wxString str = m_manager->SavePerspective();
     config->Write( _T( "/MainFrame/AuiPerspective" ), str );
+    /// store version to let newer versions of gui a cahnce to build a new valid perspective
+    config->Write( _T( "/MainFrame/AuiPerspectiveVersion" ), 2);
 }
 void TimingFrame::LoadAuiPerspective(wxConfig *config)
 {
     wxString str;
-    config->Read(_T( "/MainFrame/AuiPerspective" ), &str);
-    m_manager->LoadPerspective(str);
+    long v;
+
+    /// if version stored is older than current do not load old perspective
+    config->Read(_T( "/MainFrame/AuiPerspectiveVersion" ), &v, 0);
+    if ( v == 2 )
+    {
+        config->Read(_T( "/MainFrame/AuiPerspective" ), &str);
+        m_manager->LoadPerspective(str);
+    }
 }
 void TimingFrame::LoadFramePositions(wxConfig *config)
 {

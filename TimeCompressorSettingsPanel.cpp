@@ -1,0 +1,117 @@
+//    Copyright 2008 Daniel Anselmi
+//
+//    This file is part of TimingEditor.
+//
+//    TimingEditor is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    TimingEditor is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with TimingEditor.  If not, see <http://www.gnu.org/licenses/>.
+//
+//    Contact e-mail: daniel anselmi <danselmi@gmx.ch>
+//    Program URL   : http://sourceforge.net/projects/timingeditor/
+//
+//
+///////////////////////////////////////////////////////////////////////////
+
+
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif //__BORLANDC__
+
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif //WX_PRECOMP
+
+#include "TimingApp.h"//GetApp
+#include "TimeCompressorSettingsPanel.h"
+#include "enumers.h"
+#include "TimingWindow.h"
+
+///////////////////////////////////////////////////////////////////////////
+
+BEGIN_EVENT_TABLE(TimeCompressorSettingsPanel, wxPanel)
+    EVT_UPDATE_UI(TIMING_ID_PANEL_TC_APPLY,    TimeCompressorSettingsPanel::OnUpdatePanelApply)
+    EVT_UPDATE_UI(TIMING_ID_PANEL_TC_TXTFIELD, TimeCompressorSettingsPanel::OnUpdateTextField)
+    EVT_BUTTON(TIMING_ID_PANEL_TC_APPLY,       TimeCompressorSettingsPanel::OnApply)
+END_EVENT_TABLE()
+
+TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
+    ( wxWindow* parent, int id, wxPoint pos, wxSize size, int style )
+    : wxPanel( parent, id, pos, size, style ),
+    wnd(NULL)
+{
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxVERTICAL );
+
+	wxFlexGridSizer* fgSizer1;
+	fgSizer1 = new wxFlexGridSizer( 2, 2, 0, 0 );
+
+	m_staticText3 = new wxStaticText( this, ID_DEFAULT, wxT("Length of gap [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer1->Add( m_staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	m_textTime = new wxTextCtrl( this, TIMING_ID_PANEL_TC_TXTFIELD, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
+	fgSizer1->Add( m_textTime, 0, wxALL, 5 );
+
+	bSizer3->Add( fgSizer1, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxVERTICAL );
+
+	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_TC_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_buttonApply, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+	bSizer3->Add( bSizer4, 1, wxEXPAND, 5 );
+
+	this->SetSizer( bSizer3 );
+	this->Layout();
+	bSizer3->Fit( this );
+}
+void TimeCompressorSettingsPanel::OnUpdateTextField(wxUpdateUIEvent& event)
+{
+    if ( wnd && wnd->DiscontSelected() )
+    {
+        event.Enable(true);
+        return;
+    }
+    event.Enable(false);
+}
+void TimeCompressorSettingsPanel::OnApply(wxCommandEvent &event)
+{
+    SetUnmodified();
+
+    long val;
+    m_textTime->GetValue().ToLong(&val);
+
+    if ( wnd ) wnd->SetTimeCompressor(val);
+}
+void TimeCompressorSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
+{
+    if ( wnd && wnd->DiscontSelected() )
+    {
+        long val;
+        m_textTime->GetValue().ToLong(&val);
+        if ( val <= 0 )
+        {
+            event.Enable(false);
+            return;
+        }
+        if ( ! ( m_textTime->IsModified() ) )
+        {
+            event.Enable(false);
+            return;
+        }
+        event.Enable(true);
+        return;
+    }
+    event.Enable(false);
+}
