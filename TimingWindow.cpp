@@ -1174,9 +1174,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         {
             if ( WindowState == DisconSelected && *it == editingValA )
             {
+                wxPen pen(*wxBLUE);
                 dc.SetBrush(*wxBLUE_BRUSH);
+                dc.SetPen(pen);
                 dc.DrawPolygon(3, points);
                 dc.SetBrush(*wxBLACK_BRUSH);
+                dc.SetPen(*wxBLACK_PEN);
             }
             else
                 dc.DrawPolygon(3, points);
