@@ -267,6 +267,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         dc.SetBackgroundMode(wxSOLID);
         dc.SetTextBackground(col);
     }
+    dc.SetPen(*wxBLACK_PEN);
 
     wxCoord width = 0;
     wxPoint offset(0, 0);

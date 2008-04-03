@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="TimingEditor" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/TimingEditor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/TimingEditor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="`wx-config --cflags`" />
+			<Add option="-Winvalid-pch" />
+			<Add option="-include wx_pch.h" />
+			<Add option="-DWX_PRECOMP" />
+		</Compiler>
+		<Linker>
+			<Add option="`wx-config --libs`" />
+			<Add library="wx_gtk2u_svg-2.8" />
+		</Linker>
+		<Unit filename="AxisSettingsPanel.cpp" />
+		<Unit filename="AxisSettingsPanel.h" />
+		<Unit filename="ClockSettingsPanel.cpp" />
+		<Unit filename="ClockSettingsPanel.h" />
+		<Unit filename="TimeCompressorSettingsPanel.cpp" />
+		<Unit filename="TimeCompressorSettingsPanel.h" />
+		<Unit filename="TimingApp.cpp" />
+		<Unit filename="TimingApp.h" />
+		<Unit filename="TimingDoc.cpp" />
+		<Unit filename="TimingDoc.h" />
+		<Unit filename="TimingFrame.cpp" />
+		<Unit filename="TimingFrame.h" />
+		<Unit filename="TimingView.cpp" />
+		<Unit filename="TimingView.h" />
+		<Unit filename="TimingWindow.cpp" />
+		<Unit filename="TimingWindow.h" />
+		<Unit filename="TransitionSettingsPanel.cpp" />
+		<Unit filename="TransitionSettingsPanel.h" />
+		<Unit filename="cmd.cpp" />
+		<Unit filename="cmd.h" />
+		<Unit filename="dndfile.cpp" />
+		<Unit filename="dndfile.h" />
+		<Unit filename="dndtarget.cpp" />
+		<Unit filename="dndtarget.h" />
+		<Unit filename="enumers.h" />
+		<Unit filename="wx_pch.h">
+			<Option compile="1" />
+			<Option weight="0" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

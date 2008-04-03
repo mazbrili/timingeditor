@@ -156,6 +156,7 @@
 			<code_completion />
 			<envvars />
 			<debugger />
+			<SVNInside Login="d_anselmi" ConnectStatus="1" NeedsPassword="1" />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
