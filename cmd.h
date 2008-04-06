@@ -286,14 +286,15 @@ protected:
 class ChangeTransitionWidth : public wxCommand
 {
 public:
-    ChangeTransitionWidth(TimingDocument *doc, wxInt8 width, bool en5090);
+    ChangeTransitionWidth(TimingDocument *doc, wxInt8 width, bool en50, bool en90);
     ~ChangeTransitionWidth();
     bool Do(void);
     bool Undo(void);
 protected:
     TimingDocument *m_doc;
     wxInt8 m_width;
-    bool m_en5090;
+    bool m_en50;
+    bool m_en90;
 };
 
 class ChangeAxisSettings : public wxCommand

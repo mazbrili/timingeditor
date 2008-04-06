@@ -220,11 +220,11 @@ private:
     ///void DrawState(wxDC& dc);
 public:
     wxInt8 GetTransitionWidth();
-    bool GetEn5090();
+    //bool GetEn5090();
     void SetClock(wxInt32 delay, wxInt32 ticks);
     void SetNeutralState(void);
     wxInt32 GetSelectedSignalNr();
-    void SetTransition(wxInt8 width, bool en5090);
+    void SetTransition(wxInt8 width, bool en50, bool en90);
     void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset);
     void SetTimeCompressor(wxInt32 time);
     void UpdateTimeCompressorPanel(void);

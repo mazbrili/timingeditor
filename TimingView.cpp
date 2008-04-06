@@ -87,14 +87,19 @@ TimingView::TimingView()
 bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 {
     frame = wxGetApp().CreateChildFrame(doc, this);
-
     window = wxGetApp().GetMainFrame()->CreateWindow(this, frame);
+
 #ifdef __X__
     // X seems to require a forced resize
     int x, y;
     frame->GetSize(&x, &y);
     frame->SetSize(wxDefaultCoord, wxDefaultCoord, x, y);
 #endif
+
+    //frame->SetTitle( doc->GetTitle() );
+    wxFileName fname( doc->GetFilename() );
+    frame->SetTitle( fname.GetName() );
+
     frame->Show(true);
     Activate(true);
 
@@ -110,7 +115,7 @@ void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
     if (frame)
     {
         if ( doc->IsModified() )
-            frame->SetTitle( fname.GetName() + _("*") );
+            frame->SetTitle( fname.GetName() + _(" *") );
         else
             frame->SetTitle( fname.GetName() );
     }

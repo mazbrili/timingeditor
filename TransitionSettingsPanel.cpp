@@ -47,33 +47,65 @@
 ///////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(TransitionSettingsPanel, wxPanel)
     EVT_UPDATE_UI(TIMING_ID_PANEL_TRANS_APPLY,  TransitionSettingsPanel::OnUpdatePanelApply)
-    EVT_UPDATE_UI_RANGE(TIMING_ID_PANEL_TRANS_CHECK, TIMING_ID_PANEL_TRANS_WIDTH,
+   EVT_UPDATE_UI_RANGE(TIMING_ID_PANEL_TRANS_CHECK50, TIMING_ID_PANEL_TRANS_WIDTH,
         TransitionSettingsPanel::OnUpdateControls)
     EVT_BUTTON(TIMING_ID_PANEL_TRANS_APPLY , TransitionSettingsPanel::OnApply )
 END_EVENT_TABLE()
 
 void TransitionSettingsPanel::OnApply(wxCommandEvent &event)
 {
-    if ( wnd ) wnd->SetTransition((wxInt8)m_spinCtrl1->GetValue(), m_checkBox1->GetValue());
+    SetUnmodified();
+
+    if ( wnd ) wnd->SetTransition(
+        (wxInt8)m_spinCtrl1->GetValue(),
+        m_check50->GetValue(),
+        m_check90->GetValue()
+    );
 }
 
+void TransitionSettingsPanel::Set50(bool val)
+{
+    m_check50->SetValue(val);
+    en50 = val;
+}
+void TransitionSettingsPanel::Set90(bool val)
+{
+    m_check90->SetValue(val);
+    en90 = val;
+}
+void TransitionSettingsPanel::SetTransitionWidth(wxInt8 tw)
+{
+    m_spinCtrl1->SetValue(tw);
+    transwidth = tw;
+}
 
 void TransitionSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 {
     if ( wnd )
     {
-        if ( wnd->GetTransitionWidth() != m_spinCtrl1->GetValue() )
+        if ( transwidth != m_spinCtrl1->GetValue() )
         {
             event.Enable(true);
             return;
         }
-        if ( wnd->GetEn5090() != m_checkBox1->GetValue() )
+        if ( en50 != m_check50->GetValue() )
+        {
+            event.Enable(true);
+            return;
+        }
+        if ( en90 != m_check90->GetValue() )
         {
             event.Enable(true);
             return;
         }
     }
     event.Enable(false);
+}
+void TransitionSettingsPanel::SetUnmodified()
+{
+    transwidth = m_spinCtrl1->GetValue();
+    en50 = m_check50->GetValue();
+    en90 = m_check90->GetValue();
 }
 void TransitionSettingsPanel::OnUpdateControls(wxUpdateUIEvent& event)
 {
@@ -110,9 +142,17 @@ TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPo
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 
-	m_checkBox1 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK, wxT("Allow vertical lines after 50% and 90% of a transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	//m_checkBox1 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK, wxT("Allow vertical lines after 50% and 90% of a transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_check10 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK10, wxT("Snap vertical lines at 10% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_check10->SetValue(true);
+	m_check10->Enable(false);
+	m_check50 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK50, wxT("Snap vertical lines at 50% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_check90 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK90, wxT("Snap vertical lines at 90% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
 
-	bSizer2->Add( m_checkBox1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	//bSizer2->Add( m_checkBox1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer2->Add(m_check10,  0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer2->Add(m_check50,  0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer2->Add(m_check90,  0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 	bSizer1->Add( bSizer2, 0, wxEXPAND, 5 );
 

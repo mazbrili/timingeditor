@@ -54,8 +54,9 @@ class TimingWindow;
 class TransitionSettingsPanel : public wxPanel
 {
     public:
-        void SetTransitionWidth(wxInt8 tw){m_spinCtrl1->SetValue(tw);}
-        void Set5090(bool val){m_checkBox1->SetValue(val);}
+        void SetTransitionWidth(wxInt8 tw);
+        void Set50(bool val);
+        void Set90(bool val);
         //wxInt8 GetTransitionWidth(){return m_spinCtrl1->GetValue();}
         //bool Get5090(){return m_checkBox1->GetValue();}
 
@@ -67,11 +68,19 @@ class TransitionSettingsPanel : public wxPanel
         void OnUpdateControls(wxUpdateUIEvent &event);
         void OnApply(wxCommandEvent &event);
 
+        void SetUnmodified();
+
 	protected:
 		wxStaticText* m_staticText1;
 		wxSpinCtrl* m_spinCtrl1;
-		wxCheckBox* m_checkBox1;
+		//wxCheckBox* m_checkBox1;
+		wxCheckBox *m_check10;
+		wxCheckBox *m_check50;
+		wxCheckBox *m_check90;
 		wxButton* m_button4;
+
+		bool en50,en90;
+		wxInt8 transwidth;
 
 	public:
 		TransitionSettingsPanel( wxWindow* parent, int id = -1, wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 500,132 ), int style = wxTAB_TRAVERSAL );

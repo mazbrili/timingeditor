@@ -52,7 +52,8 @@ TimingDocument::TimingDocument(void)
     SignalHeight = 20;
     TransitWidth = 30; // %
     MinimumSignalDistance = 10;
-    en5090 = true;
+    en50 = true;
+    en90 = true;
 
     TickLengthUnit = -3;
     TickLength = 10; // in TickLengthUnit
@@ -121,49 +122,8 @@ TimingDocument::TimingDocument(void)
     signals.push_back(sig2);
     }
 
-    /*Signal sig3;
-    {
-    sig3.IsClock = false;
-    sig3.IsBus = true;
-    sig3.name = _T("TickCount_n");
-    sig3.values.push_back(zero);
-    sig3.values.push_back(zero);
-    sig3.values.push_back(zero);
-    sig3.values.push_back(zero);
-    sig3.values.push_back(hz);
-    sig3.values.push_back(hz);
-    sig3.values.push_back(hz);
-    sig3.values.push_back(hz);
-    sig3.values.push_back(one);
-    sig3.values.push_back(one);
-    sig3.values.push_back(one);
-    sig3.values.push_back(one);
-    sig3.values.push_back(zero);
-    sig3.values.push_back(zero);
-    sig3.values.push_back(zero);
-    sig3.values.push_back(zero);
-    sig3.values.push_back(u);
-    sig3.values.push_back(u);
-
-    sig3.values.push_back(u);
-    sig3.values.push_back(u);
-    sig3.values.push_back(u);
-    sig3.values.push_back(one);
-    sig3.values.push_back(one);
-    sig3.values.push_back(one);
-    sig3.TextValues[0]  = _("HH");
-    sig3.TextValues[8]  = _("HA");
-    sig3.TextValues[12] = _("HG");
-    sig3.TextValues[21] = _("HQ");
-//    sig3.TextValues.push_back(_("HH"));
-//    sig3.TextValues.push_back(_("HA"));
-//    sig3.TextValues.push_back(_("HG"));
-//    sig3.TextValues.push_back(_("HQ"));
-    sig3.space = 0;
-    sig3.prespace = 0;
-
-    signals.push_back(sig3);
-    }*/
+    //Modify(false);
+    //UpdateAllViews();
 }
 TimingDocument::~TimingDocument(void){}
 

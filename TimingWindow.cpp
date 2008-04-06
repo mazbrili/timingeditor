@@ -1248,13 +1248,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         wxPoint offset(signalNamesWidth + doc->vertlines[k].vpos * GridStepWidth,
         /*offset.y =*/ heightOffsets[doc->vertlines[k].StartPos]);
 
-        if ( doc->en5090 )
-        {
-            if ( doc->vertlines[k].vposoffset == 1 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-            else if ( doc->vertlines[k].vposoffset == 2 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
-        }
+        if ( doc->en50 && doc->vertlines[k].vposoffset == 1 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+        if ( doc->en90 && doc->vertlines[k].vposoffset == 2 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
         wxInt32 tolen = heightOffsets[doc->vertlines[k].EndPos + 1];
         if ( editingNumber == k )
@@ -1295,15 +1292,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
             else if ( WindowState == MovingVLine )
             {
                 offset.x = signalNamesWidth + editingValA * GridStepWidth;
-                if ( doc->en5090 )
-                {
-                    if ( editingValB == 1 )
-                        offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-                    else if ( editingValB == 2 )
-                        offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
-                }
-                else
-                    editingValB = 0;
+                if ( doc->en50 &&  editingValB == 1 )
+                    offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                if ( doc->en90 && editingValB == 2 )
+                    offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
                 dc.DrawLine(
                     offset.x, offset.y,
@@ -1337,15 +1329,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         wxPoint offset(signalNamesWidth + editingPoint[0].x * GridStepWidth,
         offset.y = heightOffsets[editingPoint[0].y]);
 
-        if ( doc->en5090 )
-        {
-            if ( editingValB == 1 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-            else if ( editingValB == 2 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
-        }
-        else
-            editingValB = 0;
+        if ( doc->en50 && editingValB == 1 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+        if ( doc->en90 && editingValB == 2 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
         dc.DrawLine(
             offset.x, offset.y,
@@ -1881,7 +1868,7 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             {
                 newstate = MovingVLine;
                 editingValA = doc->vertlines[editingNumber].vpos;
-                if ( doc->en5090 )
+                if ( doc->en50 || doc->en90 )
                     editingValB = doc->vertlines[editingNumber].vposoffset;
                 else
                     editingValB = 0;
@@ -1939,15 +1926,38 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                     pt.x > axisStart &&
                     pt.x < axisStop )
                 {
-
-                    if ( doc->en5090 )
+                    editingPoint[0].x = (pt.x - axisStart)/GridStepWidth;
+                    wxCoord p = pt.x - axisStart - editingPoint[0].x*GridStepWidth;
+                    if ( doc->en50 && doc->en90 )
                     {
-                        editingPoint[0].x = (pt.x - axisStart)/GridStepWidth;
-                        wxCoord p = pt.x - axisStart - editingPoint[0].x*GridStepWidth;
+                        if      ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
+                            editingValB = 0;
+                        else if ( p < GridStepWidth*((3.0*doc->TransitWidth/4.0)/100.0) )
+                            editingValB = 1;
+                        else if ( p < GridStepWidth*(50.0+doc->TransitWidth/2.0)/100.0 )
+                            editingValB = 2;
+                        else
+                        {
+                            editingPoint[0].x++;
+                            editingValB = 0;
+                        }
+                    }
+                    else if ( doc->en50 )
+                    {
                         if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
                             editingValB = 0;
-                        else if ( p < GridStepWidth *((3.0*doc->TransitWidth/4.0)/100.0) )
+                        else if ( p < GridStepWidth *((50.0+doc->TransitWidth/4.0)/100.0) )
                             editingValB = 1;
+                        else
+                        {
+                            editingPoint[0].x++;
+                            editingValB = 0;
+                        }
+                    }
+                    else if ( doc->en90 )
+                    {
+                        if ( p < GridStepWidth*(doc->TransitWidth/2.0)/100.0 )
+                            editingValB = 0;
                         else if ( p < GridStepWidth * (50.0+doc->TransitWidth/2.0) / 100.0 )
                             editingValB = 2;
                         else
@@ -1958,8 +1968,7 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                     }
                     else
                     {
-                        editingPoint[0].x = (pt.x - axisStart)/GridStepWidth;
-                        wxCoord p = pt.x - axisStart - editingPoint[0].x*GridStepWidth;
+
                         if ( p > GridStepWidth/2 )
                             editingPoint[0].x++;
                         editingValB = 0;
@@ -2311,7 +2320,8 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                 VLine newline;
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 newline.vpos = editingPoint[0].x;
-                if ( !doc->en5090 ) editingValB = 0;
+                if ( !doc->en50 && editingValB == 1 ) editingValB = 0;
+                if ( !doc->en90 && editingValB == 2 ) editingValB = 0;
                 newline.vposoffset = editingValB;
                 if ( editingPoint[0].y > editingPoint[1].y )
                 {
@@ -2360,7 +2370,8 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                  editingValB != doc->vertlines[editingNumber].vposoffset )
             {
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-                if ( !doc->en5090 ) editingValB = 0;
+                if ( !doc->en50 && editingValB == 1 ) editingValB = 0;
+                if ( !doc->en90 && editingValB == 2 ) editingValB = 0;
                 cmdproc->Submit(new ChangeVLineCommand(doc, editingNumber,
                     editingValA,
                     doc->vertlines[editingNumber].StartPos,
@@ -2753,21 +2764,38 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                 }
                 else
                 {
-                    //wxCoord p = pt.x-axisStart + GridStepWidth/2;
-                    //editingValA = p / GridStepWidth;
-                    //editingValB = 0;
-//                    wxCoord p = pt.x - axisStart + GridStepWidth/2;
-//                    editingPoint[0].x = p / GridStepWidth;
-//                    editingValB = 0;
-
-                    if ( doc->en5090 )
+                    editingValA = (pt.x - axisStart)/GridStepWidth;
+                    wxCoord p = pt.x - axisStart - editingValA*GridStepWidth;
+                    if ( doc->en50 && doc->en90 )
                     {
-                        editingValA = (pt.x - axisStart)/GridStepWidth;
-                        wxCoord p = pt.x - axisStart - editingValA*GridStepWidth;
                         if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
                             editingValB = 0;
-                        else if ( p < GridStepWidth *((3.0*doc->TransitWidth/4.0)/100.0) )
+                        else if ( p < GridStepWidth*((3.0*doc->TransitWidth/4.0)/100.0) )
                             editingValB = 1;
+                        else if ( p < GridStepWidth*(50.0+doc->TransitWidth/2.0)/100.0 )
+                            editingValB = 2;
+                        else
+                        {
+                            editingValA++;
+                            editingValB = 0;
+                        }
+                    }
+                    else if ( doc->en50 )
+                    {
+                        if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
+                            editingValB = 0;
+                        else if ( p < GridStepWidth *((50.0+doc->TransitWidth/4.0)/100.0) )
+                            editingValB = 1;
+                        else
+                        {
+                            editingValA++;
+                            editingValB = 0;
+                        }
+                    }
+                    else if ( doc->en90 )
+                    {
+                        if ( p < GridStepWidth*(doc->TransitWidth/2.0)/100.0 )
+                            editingValB = 0;
                         else if ( p < GridStepWidth * (50.0+doc->TransitWidth/2.0) / 100.0 )
                             editingValB = 2;
                         else
@@ -2778,8 +2806,6 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     }
                     else
                     {
-                        editingValA = (pt.x - axisStart)/GridStepWidth;
-                        wxCoord p = pt.x - axisStart - editingValA*GridStepWidth;
                         if ( p > GridStepWidth/2 )
                             editingValA++;
                         editingValB = 0;
@@ -3980,7 +4006,9 @@ void TimingWindow::UpdateTransitionPanel()
     if ( !doc ) return;
 
     TranSetPanel->SetTransitionWidth(doc->TransitWidth);
-    TranSetPanel->Set5090(doc->en5090);
+    TranSetPanel->Set50(doc->en50);
+    TranSetPanel->Set90(doc->en90);
+
 }
 wxInt8 TimingWindow::GetTransitionWidth()
 {
@@ -3989,14 +4017,7 @@ wxInt8 TimingWindow::GetTransitionWidth()
 
     return doc->TransitWidth;
 }
-bool TimingWindow::GetEn5090()
-{
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return false;
-
-    return doc->en5090;
-}
-void TimingWindow::SetTransition(wxInt8 width, bool en5090)
+void TimingWindow::SetTransition(wxInt8 width, bool en50, bool en90)
 {
     SetFocus();
 
@@ -4004,7 +4025,7 @@ void TimingWindow::SetTransition(wxInt8 width, bool en5090)
     if ( !doc ) return;
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
     cmdproc->Submit(
-        new ChangeTransitionWidth(doc, width, en5090)
+        new ChangeTransitionWidth(doc, width, en50, en90)
     );
     UpdateTransitionPanel();
 }

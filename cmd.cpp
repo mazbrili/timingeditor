@@ -1330,11 +1330,12 @@ bool ChangeTextCommand::Undo(void)
 {
     return Do();
 }
-ChangeTransitionWidth::ChangeTransitionWidth(TimingDocument *doc, wxInt8 width, bool en5090)
+ChangeTransitionWidth::ChangeTransitionWidth(TimingDocument *doc, wxInt8 width, bool en50, bool en90)
     :wxCommand(true, _("change transition width") ),
     m_doc(doc),
     m_width(width),
-    m_en5090(en5090)
+    m_en50(en50),
+    m_en90(en90)
 {}
 ChangeTransitionWidth::~ChangeTransitionWidth(){}
 bool ChangeTransitionWidth::Do(void)
@@ -1343,9 +1344,12 @@ bool ChangeTransitionWidth::Do(void)
     m_doc->TransitWidth = m_width;
     m_width = tmp;
 
-    bool t =  m_doc->en5090;
-    m_doc->en5090 = m_en5090;
-    m_en5090 = t;
+    bool t =  m_doc->en50;
+    m_doc->en50 = m_en50;
+    m_en50 = t;
+    t =  m_doc->en90;
+    m_doc->en90 = m_en90;
+    m_en90 = t;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();

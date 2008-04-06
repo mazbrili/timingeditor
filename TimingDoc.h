@@ -133,7 +133,8 @@ class TimingDocument: public wxDocument
         wxInt32 MinimumSignalDistance;
 
         wxUint8 TransitWidth; // width in percent of the width of a tick
-        bool    en5090;
+        bool    en50;
+        bool    en90;
 
 
         // 1: ks
