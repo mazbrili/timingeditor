@@ -38,6 +38,7 @@
 #include <wx/clipbrd.h>
 #include <wx/svg/dcsvg.h>
 #include <wx/dcps.h>
+#include <wx/filename.h>
 
 #include "TimingView.h"
 #include "TimingWindow.h"
@@ -86,7 +87,6 @@ TimingView::TimingView()
 bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 {
     frame = wxGetApp().CreateChildFrame(doc, this);
-    frame->SetTitle(_T("MyView"));
 
     window = wxGetApp().GetMainFrame()->CreateWindow(this, frame);
 #ifdef __X__
@@ -104,8 +104,19 @@ void TimingView::OnDraw(wxDC *dc){} // is virtual, has nothing to do (flicker fr
 
 void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 {
-  if (window)
-    window->Refresh();
+    TimingDocument *doc = (TimingDocument *)m_viewDocument;
+    wxFileName fname ( doc->GetFilename() );
+
+    if (frame)
+    {
+        if ( doc->IsModified() )
+            frame->SetTitle( fname.GetName() + _("*") );
+        else
+            frame->SetTitle( fname.GetName() );
+    }
+
+    if (window)
+        window->Refresh();
 }
 
 void TimingView::OnDelete(wxCommandEvent& WXUNUSED(event) )

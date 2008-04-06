@@ -243,6 +243,9 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     store << TackLength; // in ticks
     store << timeOffset; // in ticks
 
+    Modify(false);
+    UpdateAllViews();
+
     return outp.Close();
 }
 
@@ -350,8 +353,6 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         TackLength = 10; // in ticks
         timeOffset = 5; // in ticks
     }
-
-
 
     if ( version > 4)
     {
