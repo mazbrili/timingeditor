@@ -96,10 +96,7 @@ bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
     frame->SetSize(wxDefaultCoord, wxDefaultCoord, x, y);
 #endif
 
-    //frame->SetTitle( doc->GetTitle() );
-    wxFileName fname( doc->GetFilename() );
-    frame->SetTitle( fname.GetName() );
-
+    frame->SetTitle( doc->GetTitle() );
     frame->Show(true);
     Activate(true);
 
@@ -115,9 +112,9 @@ void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
     if (frame)
     {
         if ( doc->IsModified() )
-            frame->SetTitle( fname.GetName() + _(" *") );
+            frame->SetTitle( _("*") + doc->GetTitle() );
         else
-            frame->SetTitle( fname.GetName() );
+            frame->SetTitle( doc->GetTitle() );
     }
 
     if (window)
@@ -142,9 +139,6 @@ bool TimingView::OnClose(bool deleteWindow)
     window->ClearBackground();
     window->view = (wxView *) NULL;
     window = (TimingWindow *) NULL;
-
-    wxString s(wxTheApp->GetAppName());
-    if (frame) frame->SetTitle(s);
 
     SetFrame((wxFrame*)NULL);
     Activate(false);

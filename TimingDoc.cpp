@@ -570,3 +570,13 @@ bool HArrow::deserialize(wxDataInputStream &load)
 
     return true;
 }
+
+bool TimingDocument::OnNewDocument()
+{
+    bool res = wxDocument::OnNewDocument();
+    // hack to let the view update the title of the child frame
+    // filename and title of document are valid after OnNewDocument() has been called
+    // is only a problem on wxGTK not wxMSW don't hurt on wxMSW
+    UpdateAllViews();
+    return res;
+}

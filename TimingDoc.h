@@ -153,6 +153,7 @@ class TimingDocument: public wxDocument
     protected:
         bool DoSaveDocument(const wxString& file);
 	    bool DoOpenDocument(const wxString& file);
+        virtual bool OnNewDocument();
 
     //private:
     //virtual TimingCommandProcessor* OnCreateCommandProcessor();
