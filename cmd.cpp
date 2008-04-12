@@ -898,6 +898,8 @@ bool ChangeLengthLeft::Do(void)
     for ( wxInt32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
         m_doc->vertlines[k].vpos += diff;
 
+    m_doc->timeOffset -= diff;
+
     wxInt32 tmp = m_doc->length;
     m_doc->length = m_newLength;
     m_newLength = tmp;
@@ -928,7 +930,7 @@ bool ChangeLengthLeft::Undo(void)
         delVlineCom.pop_back();
     }
 
-
+    m_doc->timeOffset -= diff;
 
     wxInt32 tmp = m_doc->length;
     m_doc->length = m_newLength;
