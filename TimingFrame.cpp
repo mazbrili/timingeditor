@@ -31,7 +31,8 @@
 #endif //WX_PRECOMP
 
 #include <wx/config.h>
-#include <wx/tipdlg.h>
+//#include <wx/tipdlg.h>
+#include "myTipProvider.h"
 
 #include "TimingFrame.h"
 #include "TimingApp.h"//GetApp
@@ -241,7 +242,8 @@ void TimingFrame::ShowTip(bool force)
 
     if ( ShowTipsAtStartup || force )
     {
-        wxTipProvider *tipProvider = wxCreateFileTipProvider(_T("tips"), TipNumber);
+        //wxTipProvider *tipProvider = wxCreateFileTipProvider(_T("tips"), TipNumber);
+        wxTipProvider *tipProvider = new myTipProvider(TipNumber);;
         ShowTipsAtStartup = wxShowTip(this, tipProvider, ShowTipsAtStartup);
         TipNumber = tipProvider->GetCurrentTip();
         delete tipProvider;

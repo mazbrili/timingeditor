@@ -145,6 +145,8 @@
 		<Unit filename="dndtarget.cpp" />
 		<Unit filename="dndtarget.h" />
 		<Unit filename="enumers.h" />
+		<Unit filename="myTipProvider.cpp" />
+		<Unit filename="myTipProvider.h" />
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
