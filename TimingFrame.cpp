@@ -62,7 +62,9 @@
 #include "art/harrow_cur.xpm"
 #include "art/textedit_cur.xpm"
 #include "art/cross.xpm"
-
+#include "art/risingedge.xpm"
+#include "art/clockedge.xpm"
+#include "art/busedge.xpm"
 
 
 
@@ -82,6 +84,8 @@ BEGIN_EVENT_TABLE(TimingFrame, wxDocMDIParentFrame )
     EVT_UPDATE_UI(TIMING_ID_HARROW,          TimingFrame::OnUpdateDiscont)
     EVT_UPDATE_UI(TIMING_ID_EDITTEXT,        TimingFrame::OnUpdateDiscont)
     EVT_UPDATE_UI(TIMING_ID_NEUTRAL,         TimingFrame::OnUpdateDiscont)
+    EVT_UPDATE_UI_RANGE(TIMING_ID_ADD_CLOCK,
+                TIMING_ID_ADD_BUS,           TimingFrame::OnUpdateDiscont)
 END_EVENT_TABLE()
 
 
@@ -214,6 +218,10 @@ void TimingFrame::InitToolBar(wxToolBar* toolBar)
     toolBar->AddSeparator();
     toolBar->AddTool(TIMING_ID_GLASS_N, _T("Zoom out"), wxBitmap(glassntool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom out"), _T("Zoom out the Document"));
     toolBar->AddTool(TIMING_ID_GLASS_P, _T("Zoom in"), wxBitmap(glassptool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom in"), _T("Zoom in the Document"));
+    toolBar->AddSeparator();
+    toolBar->AddTool(TIMING_ID_ADD_CLOCK, _T("Add Clock"), wxBitmap(clockedge_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Add Clock"), _T("Add a clock to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_SIGNAL, _T("Add Signal"), wxBitmap(risingedge_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Add Signal"), _T("Add a signal to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_BUS, _T("Add Bus"), wxBitmap(busedge_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Add Bus"), _T("Add a bus to the Document"));
     toolBar->AddSeparator();
     toolBar->AddTool(TIMING_ID_NEUTRAL, _T("Select"), wxBitmap(cross_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Select"), _T(" Select something or change signal/bus"));
     toolBar->AddTool(TIMING_ID_DISCONTINUATION, _T("Edit time compressors"), wxBitmap(tri_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Edit time compressors"), _T("Edit time compressors by clicking on the bottom axis"));

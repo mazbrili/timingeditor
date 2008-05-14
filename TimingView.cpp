@@ -74,7 +74,7 @@ END_EVENT_TABLE()
 
 void TimingView::OnActivate(wxActivateEvent &event)
 {
-    if ( event.GetActive() )
+    if ( event.GetActive() && window )
         window->AttachPanels();
     event.Skip();
 }

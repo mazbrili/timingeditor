@@ -1,0 +1,21 @@
+/* XPM */
+static const char *risingedge_xpm[] = {
+"16 16 2 1",
+" 	c None",
+"x  c black",
+"                ",
+"          xxxxxx",
+"          x     ",
+"          x     ",
+"         x      ",
+"         x      ",
+"        x       ",
+"        x       ",
+"       x        ",
+"       x        ",
+"      x         ",
+"      x         ",
+"     x          ",
+"     x          ",
+"xxxxxx          ",
+"                "};
