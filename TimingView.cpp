@@ -96,7 +96,7 @@ bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
     frame->SetSize(wxDefaultCoord, wxDefaultCoord, x, y);
 #endif
 
-    frame->SetTitle( doc->GetTitle() );
+    //frame->SetTitle( doc->GetTitle() );
     frame->Show(true);
     Activate(true);
 
@@ -107,14 +107,18 @@ void TimingView::OnDraw(wxDC *dc){} // is virtual, has nothing to do (flicker fr
 void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 {
     TimingDocument *doc = (TimingDocument *)m_viewDocument;
-    wxFileName fname ( doc->GetFilename() );
+    wxFileName fn( doc->GetFilename() );
+    wxString fname = fn.GetName();
+
+    if ( fname.IsEmpty() )
+        fname = doc->GetTitle();
 
     if (frame)
     {
         if ( doc->IsModified() )
-            frame->SetTitle( _("*") + doc->GetTitle() );
+            frame->SetTitle( _("*") + fname );
         else
-            frame->SetTitle( doc->GetTitle() );
+            frame->SetTitle( fname );
     }
 
     if (window)

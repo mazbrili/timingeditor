@@ -218,6 +218,8 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
     wxInt32  version;
     wxUint32 ui;
 
+    SetFilename(file, true);
+
     /// get file format version first
     load >> version;
     if ( version >= 1 )
