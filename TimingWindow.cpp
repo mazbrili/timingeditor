@@ -1540,10 +1540,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     //dropcaret->Draw(dc);
 }
 
-/// //////////////don't use this event methdos///////////////////////////////////
+/////////////////don't use this event methods///////////////////////////////////
 void TimingWindow::OnEraseBackground(wxEraseEvent &event){/* must be empty */}
-void TimingWindow::OnDraw(wxDC& dc){/* must be empty */}
-/// ////////////////////////////////////////////////////////////////////////////
+//void TimingWindow::OnDraw(wxDC& dc){/* must be empty */}
+///////////////////////////////////////////////////////////////////////////////
 void TimingWindow::OnPaint(wxPaintEvent &event)
 {
     wxBufferedPaintDC dc(this);

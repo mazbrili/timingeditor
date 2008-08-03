@@ -54,7 +54,7 @@ class TimingView: public wxView
         bool CanDelete(void);
 
     private:
-        void OnActivate(wxActivateEvent &event);
+        virtual void OnActivateView(bool activate, wxView *activeView, wxView *deactiveView);
         void OnDelete(wxCommandEvent& event);
         //void OnDeleteSignal(wxCommandEvent& event);
         void OnSelectAll(wxCommandEvent& event);

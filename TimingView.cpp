@@ -50,7 +50,6 @@
 
 IMPLEMENT_DYNAMIC_CLASS(TimingView, wxView)
 BEGIN_EVENT_TABLE(TimingView, wxView)
-    EVT_ACTIVATE(                       TimingView::OnActivate)
     EVT_MENU(TIMING_ID_DELETE,          TimingView::OnDelete)
     EVT_MENU(wxID_SELECTALL,            TimingView::OnSelectAll)
     EVT_MENU(wxID_COPY,                 TimingView::OnCopy)
@@ -72,11 +71,10 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
     EVT_MENU(TIMING_ID_EXPORT_PS,       TimingView::OnExportPS)
 END_EVENT_TABLE()
 
-void TimingView::OnActivate(wxActivateEvent &event)
+void TimingView::OnActivateView(bool activate, wxView *activeView, wxView *deactiveView)
 {
-    if ( event.GetActive() && window )
+    if ( activate && this == activeView && window )
         window->AttachPanels();
-    event.Skip();
 }
 
 TimingView::TimingView()
@@ -99,10 +97,11 @@ bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
     //frame->SetTitle( doc->GetTitle() );
     frame->Show(true);
     Activate(true);
+    window->AttachPanels();
 
     return true;
 }
-void TimingView::OnDraw(wxDC *dc){} // is virtual, has nothing to do (flicker free machanism is walking on another way)
+void TimingView::OnDraw(wxDC *dc){} // is virtual and has nothing to do (flicker free machanism is walking on another way)
 
 void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 {
@@ -122,7 +121,10 @@ void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
     }
 
     if (window)
+    {
+        window->AttachPanels();
         window->Refresh();
+    }
 }
 
 void TimingView::OnDelete(wxCommandEvent& WXUNUSED(event) )

@@ -119,7 +119,6 @@ private: /// event methods
     //void OnKillFocus(wxFocusEvent &event);
     void OnLeaveWindow(wxMouseEvent &event);
     void OnEnterWindow(wxMouseEvent &event);
-    void OnDraw(wxDC& dc);
 
     void OnTimer(wxTimerEvent& event);
 

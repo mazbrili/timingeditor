@@ -150,7 +150,7 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     wxUint32 ui;
 
     /// store file format version first
-    i = 4;
+    i = 5;
     store << i;
 
     ///
@@ -202,6 +202,12 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     store << TickLength; // in TickLengthUnit
     store << TackLength; // in ticks
     store << timeOffset; // in ticks
+
+    // version 5
+    ui = 0;
+    if ( en50 ) ui |= 0x01;
+    if ( en90 ) ui |= 0x02;
+        store << ui;
 
     Modify(false);
     UpdateAllViews();
@@ -316,9 +322,32 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         timeOffset = 5; // in ticks
     }
 
-    if ( version > 4)
+    if ( version >= 5 )
+    {
+        wxUint32 ui;
+        load >> ui;
+        en50 = false;
+        en90 = false;
+        if ( ui & 0x01 ) en50 = true;
+        if ( ui & 0x02 ) en90 = true;
+    }
+    else
+    {
+        en50 = true;
+        en90 = true;
+    }
+
+    if ( version > 5)
     {
         // unknown format version
+        wxMessageDialog dlg(NULL,
+            _T("File format is unknown.\nUpdate to a newer version of TimingEditor please."),
+            _T("Format unknown"),
+            wxOK);
+
+            dlg.ShowModal();
+
+
         return false;
     }
 
