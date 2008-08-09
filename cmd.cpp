@@ -37,6 +37,7 @@
 
 #include "TimingDoc.h"
 #include "cmd.h"
+// TODO (daniel#5#): removed harrow by removed vline by removing signal dont gets  restored with undo
 
 //ChangeText(, wxInt32 n, wxString newText):
 ChangeText::ChangeText(TimingDocument *doc, wxString *target, wxString newText)
@@ -71,7 +72,7 @@ ChangeLength::ChangeLength(TimingDocument *doc, wxInt32 newLength)
 ChangeLength::~ChangeLength()
 {
     DeleteVLineCommand *dvlc;
-    for (wxInt32 k = 0 ; k < delVlineCom.size() ; ++k )
+    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
     {
         dvlc = delVlineCom[k];
         if ( dvlc ) delete dvlc;
@@ -98,7 +99,7 @@ bool ChangeLength::Do(void)
     }
     m_doc->discontinuities.erase(itlow, m_doc->discontinuities.end() );
 
-    for ( wxInt32 n = 0 ; n < signals.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < signals.size() ; ++n )
     {
         if ( !signals[n].IsClock )
         {
@@ -127,7 +128,7 @@ bool ChangeLength::Do(void)
     if ( m_newLength < m_doc->length)
     {
         //std::vector<VLine>::iterator it;
-        wxInt32 k;
+        wxUint32 k;
         //it = m_doc->vertlines.begin();
         for (  k = 0 ; k < m_doc->vertlines.size(); ++k )
         {
@@ -232,7 +233,7 @@ DeleteSignalCommand::DeleteSignalCommand(TimingDocument *doc, wxInt32 deletedSig
 DeleteSignalCommand::~DeleteSignalCommand()
 {
     DeleteVLineCommand *dvlc;
-    for (wxInt32 k = 0 ; k < delVlineCom.size() ; ++k )
+    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
     {
         dvlc = delVlineCom[k];
         if ( dvlc ) delete dvlc;
@@ -242,7 +243,7 @@ bool DeleteSignalCommand::Do(void)
 {
     // delete vertical lines which are only connected to the deleted signal
     delVlineCom.clear();
-    for (wxInt32  k = 0 ; k < m_doc->vertlines.size(); ++k )
+    for (wxUint32  k = 0 ; k < m_doc->vertlines.size(); ++k )
     {
         if ( m_doc->vertlines[k].EndPos == m_deletedSigNr &&
             m_doc->vertlines[k].StartPos == m_deletedSigNr )
@@ -265,7 +266,7 @@ bool DeleteSignalCommand::Do(void)
 
     // change the vertical lines connected to this signal
     vlines = m_doc->vertlines;
-    for ( wxInt32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
     {
         if ( m_doc->vertlines[n].StartPos > m_deletedSigNr)
             m_doc->vertlines[n].StartPos = m_doc->vertlines[n].StartPos-1;
@@ -383,7 +384,7 @@ bool AddSignalCommand::Do(void)
             it++;
         m_doc->signals.insert(it, 1, m_sig);
 
-        for ( wxInt32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+        for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
         {
             if ( m_doc->vertlines[n].StartPos >= m_selectedSigNr )
                  m_doc->vertlines[n].StartPos++;
@@ -391,7 +392,7 @@ bool AddSignalCommand::Do(void)
                 m_doc->vertlines[n].EndPos++;
         }
 
-        for ( wxInt32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+        for ( wxUint32 n = 0 ; n < m_doc->harrows.size() ; ++n )
         {
             if ( m_doc->harrows[n].signalnmbr >= m_selectedSigNr)
                 m_doc->harrows[n].signalnmbr++;
@@ -498,11 +499,11 @@ bool MoveSignalPosCommand::DoMove(void)
 {
     Signal sig = m_doc->signals[m_selectedSigNr];
 
-    if ( m_targetPos == m_doc->signals.size() ) // moved to end of vector
+    if ( m_targetPos == (wxInt32)m_doc->signals.size() ) // moved to end of vector
     {
         m_doc->signals.push_back(sig);
         std::vector<Signal>::iterator it = m_doc->signals.begin();
-        for ( wxInt32 n = 0 ; n < m_selectedSigNr ; ++n)
+        for ( wxUint32 n = 0 ; n < (wxUint32)m_selectedSigNr ; ++n)
             it++;
         m_doc->signals.erase(it);
 
@@ -513,13 +514,13 @@ bool MoveSignalPosCommand::DoMove(void)
     else
     {
         std::vector<Signal>::iterator it = m_doc->signals.begin();
-        for ( wxInt32 n = 0 ; n < m_targetPos ; ++n)
+        for ( wxUint32 n = 0 ; n < (wxUint32)m_targetPos ; ++n)
             it++;
         m_doc->signals.insert(it, sig);
 
 
         it = m_doc->signals.begin();
-        for ( wxInt32 n = 0 ; n < m_selectedSigNr ; ++n)
+        for ( wxUint32 n = 0 ; n < (wxUint32)m_selectedSigNr ; ++n)
             it++;
         if ( m_targetPos < m_selectedSigNr )
             it++;
@@ -549,8 +550,8 @@ bool MoveSignalPosCommand::Do(void)
     vlines = m_doc->vertlines;
     harrows = m_doc->harrows;
 
-    /// prepaire vertlines
-    for ( wxInt32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    /// prepare vertlines
+    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
     {
         if ( m_doc->vertlines[n].StartPos == m_selectedSigNr)
         {
@@ -611,8 +612,8 @@ bool MoveSignalPosCommand::Do(void)
         }
     }
 
-    /// prepaire harrows;
-    for ( wxInt32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+    /// prepare harrows;
+    for ( wxUint32 n = 0 ; n < m_doc->harrows.size() ; ++n )
     {
         if ( m_doc->harrows[n].signalnmbr == m_selectedSigNr )
         {
@@ -719,12 +720,11 @@ bool ChangeSpaceCommand::Do(void)
             {
                 //if ( m_doc->signals[m_selectedSignal].space > m_newLength )
                 //    m_doc->harrows[n].pos -= (m_doc->signals[m_selectedSignal].space - m_newLength);
-                wxUint32 p = m_doc->signals[m_selectedSignal].prespace +
+                wxInt32 p = m_doc->signals[m_selectedSignal].prespace +
                             m_doc->SignalHeight +
                             m_doc->MinimumSignalDistance +
                             m_newLength;
-                if ( //m_doc->signals[m_selectedSignal].space > m_newLength &&
-                    m_doc->harrows[n].pos > p )
+                if ( m_doc->harrows[n].pos > p )
                     m_doc->harrows[n].pos = p;
 
             }
@@ -775,7 +775,7 @@ ChangeLengthLeft::ChangeLengthLeft(TimingDocument *doc, wxInt32 newLength)
 ChangeLengthLeft::~ChangeLengthLeft()
 {
     DeleteVLineCommand *dvlc;
-    for (wxInt32 k = 0 ; k < delVlineCom.size() ; ++k )
+    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
     {
         dvlc = delVlineCom[k];
         if ( dvlc ) delete dvlc;
@@ -796,7 +796,7 @@ bool ChangeLengthLeft::Do(void)
     m_doc->discontlength.clear();
 
     /// change the values of the signal
-    for ( wxInt32 n = 0 ; n < signals.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < signals.size() ; ++n )
     {
         if ( !signals[n].IsClock )
         {
@@ -885,7 +885,7 @@ bool ChangeLengthLeft::Do(void)
     /// change positoin of vertical lines or remove them
     wxInt32 diff = m_newLength - m_doc->length;
     delVlineCom.clear();
-    for ( wxInt32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
+    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
     {
         if ( m_doc->vertlines[k].vpos + diff < 0 )
         {
@@ -895,7 +895,7 @@ bool ChangeLengthLeft::Do(void)
             k=-1;
         }
     }
-    for ( wxInt32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
+    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
         m_doc->vertlines[k].vpos += diff;
 
     m_doc->timeOffset -= diff;
@@ -920,7 +920,7 @@ bool ChangeLengthLeft::Undo(void)
     m_doc->signals = signals;
 
     wxInt32 diff = m_newLength - m_doc->length;
-    for ( wxInt32 k = 0 ; k < m_doc->vertlines.size(); ++k )
+    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size(); ++k )
         m_doc->vertlines[k].vpos += diff;
     while ( delVlineCom.size() )
     {
@@ -1091,7 +1091,7 @@ bool DeleteHArrowCommand::Undo(void)
     for ( wxInt32 k = 0 ; k < m_nmbr ; ++k )
         harrows.push_back(m_doc->harrows[k]);
     harrows.push_back(m_harrow);
-    for ( wxInt32 k = m_nmbr ; k < m_doc->harrows.size() ; ++k )
+    for ( wxUint32 k = m_nmbr ; k < m_doc->harrows.size() ; ++k )
         harrows.push_back(m_doc->harrows[k]);
     m_doc->harrows = harrows;
 
@@ -1162,7 +1162,7 @@ bool DeleteVLineCommand::Undo(void)
     for ( wxInt32 k = 0 ; k < m_nmbr ; ++k )
         vlines.push_back(m_doc->vertlines[k]);
     vlines.push_back(m_vline);
-    for ( wxInt32 k = m_nmbr ; k < m_doc->vertlines.size() ; ++k )
+    for ( wxUint32 k = m_nmbr ; k < m_doc->vertlines.size() ; ++k )
         vlines.push_back(m_doc->vertlines[k]);
     m_doc->vertlines = vlines;
 
@@ -1177,7 +1177,7 @@ bool DeleteVLineCommand::Undo(void)
     }
 
 
-    for ( wxInt32 k = 0 ; k < m_harrows.size() ; ++k)
+    for ( wxUint32 k = 0 ; k < m_harrows.size() ; ++k)
         m_doc->harrows.push_back(m_harrows[k]);
 
 
@@ -1291,7 +1291,7 @@ bool ChangeTextCommand::Do(void)
     {
         if ( !m_doc->signals[k].IsClock && m_doc->signals[k].IsBus )
         {
-            for ( wxUint32 i = 0 ; i < m_doc->length && !found ; ++i )
+            for ( wxUint32 i = 0 ; i < (wxUint32)m_doc->length && !found ; ++i )
             {
                 if ( m_doc->signals[k].values[i] == one ||
                      m_doc->signals[k].values[i] == zero )

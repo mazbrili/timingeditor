@@ -2822,7 +2822,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     editingPoint[1].x = p / (GridStepWidth);
 
                     wxInt32 kmax = n, kmin = 0;
-                    for ( wxInt32 j = 0 ; j < doc->harrows.size() ; ++j )
+                    for ( wxUint32 j = 0 ; j < doc->harrows.size() ; ++j )
                     {
                         if ( editingNumber == doc->harrows[j].fromVLine ||
                              editingNumber == doc->harrows[j].toVLine )
