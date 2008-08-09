@@ -60,12 +60,6 @@ private:
     bool m_show;
 };
 
-//BEGIN_DECLARE_EVENT_TYPES()
-//    DECLARE_EVENT_TYPE(TimingDiagramEvent, -1)
-//END_DECLARE_EVENT_TYPES()
-
-
-
 class TimingWindow: public wxScrolledWindow
 {
 public:
@@ -108,37 +102,42 @@ private: /// event methods
     void OnPaint(wxPaintEvent &event);
     void OnEraseBackground(wxEraseEvent &event);
     void OnMouseLeftDown(wxMouseEvent &event);
+    void OnMouseLeftDClick(wxMouseEvent &event);
     void OnMouseLeftUp(wxMouseEvent &event);
     void OnMouseRightDown(wxMouseEvent& event);
     void OnMouseRightUp(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent &event);
     void OnMouseWheel(wxMouseEvent& event);
-    void OnKeyDown(wxKeyEvent &event);
+    //void OnKeyDown(wxKeyEvent &event);
     void OnChar(wxKeyEvent &event);
     //void OnSetFocus(wxFocusEvent &event);
     //void OnKillFocus(wxFocusEvent &event);
     void OnLeaveWindow(wxMouseEvent &event);
     void OnEnterWindow(wxMouseEvent &event);
+    void OnScroll(wxScrollWinEvent &event);
+    void OnSize(wxSizeEvent &event);
 
     void OnTimer(wxTimerEvent& event);
 
     void PaintBackground(wxDC &dc);
     void InitTextDrawing();
     wxInt32 textNumber;
-    wxPoint DrawEditableText(wxDC &dc, wxString str, wxPoint &offset);
+    wxPoint DrawEditableText(wxDC &dc, wxString str, wxPoint &offset, bool visible);
+
+    void CheckVScroll(wxPoint pos);
+    void CheckHScroll(wxPoint pos);
 
 private:
     wxCaret *caret;
 
-    std::vector<wxPoint> textOffsets;
-    std::vector<wxPoint> textSizes;
+    std::vector<wxPoint>  textOffsets;
+    std::vector<wxPoint>  textSizes;
     std::vector<wxString> texts;
+    std::vector<bool>     textvisible;
     bool mouseoverwindow;
 
     wxCoord signalNamesWidth;
     wxPoint cursorpos;
-
-
 
     wxInt32 fontsize;
     wxFont font;
@@ -147,6 +146,8 @@ private:
     wxCoord axisStart, axisStop;
     bool scrollingleft;
     bool scrollingright;
+    bool scrollingup;
+    bool scrollingdown;
     wxTimer scrolltimer;
 
     wxInt32 GridStepWidth;
@@ -159,6 +160,7 @@ private:
     wxInt32 editingValB;
     wxInt32 editingValC;
     wxString editingText;
+    bool     editingTextIsVisible;
     /*wxInt32 selectedVLine;
     bool changingVLineLength;
     bool changingVLineUpperLength;

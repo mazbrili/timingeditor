@@ -80,6 +80,7 @@ TimingDocument::TimingDocument(void)
     ar.textoffset = wxPoint(0, -10);
     ar.signalnmbr = 0;
     ar.pos = 10;
+    ar.textgridoffset = 0;
     harrows.push_back(ar);
 
     /*std::vector<HArrow> horiarrows;*/
@@ -557,7 +558,7 @@ bool HArrow::serialize(wxDataOutputStream &store)
     wxInt32 i;
 
     /// version
-    i = 2;
+    i = 3;
     store << i;
 
     store << fromVLine;
@@ -572,6 +573,9 @@ bool HArrow::serialize(wxDataOutputStream &store)
 
     store << signalnmbr;
 
+    i = textgridoffset;
+    store << i;
+
     return true;
 }
 bool HArrow::deserialize(wxDataInputStream &load)
@@ -579,7 +583,7 @@ bool HArrow::deserialize(wxDataInputStream &load)
     wxInt32 ver;
 
     load >> ver;
-    if ( ver == 1 || ver == 2 )
+    if ( ver >= 1 )
     {
         wxInt32 k;
         load >> fromVLine;
@@ -590,14 +594,19 @@ bool HArrow::deserialize(wxDataInputStream &load)
             textoffset.x = k;
         load >> k;
             textoffset.y = k;
-        signalnmbr = 0;
-    }
-    if ( ver == 2 )
-    {
-        load >> signalnmbr;
     }
 
-    if ( ver > 2 ) return false; // wrong format version
+    if ( ver >= 2 )
+        load >> signalnmbr;
+    else
+        signalnmbr = 0;
+
+    if ( ver >= 3 )
+        load >> textgridoffset;
+    else
+        textgridoffset = 0;
+
+    if ( ver > 3 ) return false; // wrong format version
 
     return true;
 }

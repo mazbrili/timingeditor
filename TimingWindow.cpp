@@ -59,29 +59,26 @@
 #include "AxisSettingsPanel.h"
 #include "TimeCompressorSettingsPanel.h"
 
-//#include "view.h"
-
 BEGIN_EVENT_TABLE(TimingWindow, wxScrolledWindow)
     EVT_PAINT           (TimingWindow::OnPaint)
     EVT_ERASE_BACKGROUND(TimingWindow::OnEraseBackground)
     EVT_LEFT_DOWN       (TimingWindow::OnMouseLeftDown)
-    EVT_LEFT_DCLICK     (TimingWindow::OnMouseLeftDown)
+    EVT_LEFT_DCLICK     (TimingWindow::OnMouseLeftDClick)
     EVT_LEFT_UP         (TimingWindow::OnMouseLeftUp)
     EVT_RIGHT_DOWN      (TimingWindow::OnMouseRightDown)
     EVT_RIGHT_UP        (TimingWindow::OnMouseRightUp)
     EVT_MOTION          (TimingWindow::OnMouseMove)
     EVT_MOUSEWHEEL      (TimingWindow::OnMouseWheel)
     EVT_CHAR            (TimingWindow::OnChar)
-    EVT_KEY_DOWN        (TimingWindow::OnKeyDown)
+    //EVT_KEY_DOWN        (TimingWindow::OnKeyDown)
     EVT_LEAVE_WINDOW    (TimingWindow::OnLeaveWindow)
     EVT_ENTER_WINDOW    (TimingWindow::OnEnterWindow)
-    //EVT_SET_FOCUS       (TimingWindow::OnSetFocus)
-    //EVT_KILL_FOCUS      (TimingWindow::OnKillFocus)
     EVT_TIMER           (-1, TimingWindow::OnTimer)
+    EVT_SCROLLWIN       (TimingWindow::OnScroll)
+    EVT_SIZE            (TimingWindow::OnSize)
 END_EVENT_TABLE()
 
-// Define a constructor for my canvas
-//TimingWindow::TimingWindow(wxView *v, wxWindow *parent)
+
 TimingWindow::TimingWindow(wxView *v, wxWindow *parent,
     ClockSettingsPanel *clkpanel,
     TransitionSettingsPanel *trnpanel,
@@ -99,6 +96,8 @@ TimingWindow::TimingWindow(wxView *v, wxWindow *parent,
     axisStop(0),
     scrollingleft(false),
     scrollingright(false),
+    scrollingup(false),
+    scrollingdown(false),
     scrolltimer(this),
     //transitionWidth(3),
     //transitionsPerGridStep(5),
@@ -106,7 +105,7 @@ TimingWindow::TimingWindow(wxView *v, wxWindow *parent,
 
     editingNumber(-1),
 
-
+    editingTextIsVisible(false),
     WindowState(Neutral),
 
     ClkSetPanel(clkpanel),
@@ -127,7 +126,7 @@ TimingWindow::TimingWindow(wxView *v, wxWindow *parent,
     SetScrollRate(5, 5);
     SetCursor(*wxCROSS_CURSOR);
     SetNeutralState();
-    Refresh();
+    Refresh(true);
 }
 TimingWindow::~TimingWindow()
 {
@@ -181,12 +180,15 @@ void TimingWindow::InitTextDrawing()
     textSizes.clear();
     texts.clear();
     textNumber = 0;
+    editingTextIsVisible = false;
+    textvisible.clear();
 }
 
-wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
+wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset, bool visible = true)
 {
     bool empty = false;
     texts.push_back(str);
+    textvisible.push_back(visible);
     wxCoord w, h;//, desc;
     if ( WindowState == TextFieldSelected  &&  editingNumber == textNumber )
     {
@@ -202,7 +204,7 @@ wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
             offset.x -= w/2;
         }
     }
-    dc.DrawText(str, offset.x, offset.y);
+    if ( visible ) dc.DrawText(str, offset.x, offset.y);
     textOffsets.push_back( offset );
     dc.GetTextExtent(str, &w, &h);
     wxPoint size(w, h);
@@ -211,33 +213,43 @@ wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
     /// chang position of caret
     if ( WindowState == TextFieldSelected && editingNumber == textNumber )
     {
-        wxCoord w, h;//, desc;
-
-        if ( editingValA > str.Length() )
-             editingValA = str.Length();
-        dc.GetTextExtent(str.Mid(0, editingValA), &w, &h);
-        wxCoord xx, yy;
-        CalcScrolledPosition( offset.x+w, offset.y, &xx, &yy);
-        caret->Move(xx, yy);
-        //caret->Move(off.x+w, off.y);
-
-        /// highlight selected text
-        if ( editingValB != -1 && editingValC != -1 )
+        if ( visible )
         {
-            wxCoord dx, dy, lx;
-            if ( editingValB < editingValC )
+            editingTextIsVisible = true;
+            wxCoord w, h;//, desc;
+
+            if ( editingValA < 0 || (wxUint32)editingValA > str.Length() )
+                 editingValA = str.Length();
+            dc.GetTextExtent(str.Mid(0, editingValA), &w, &h);
+            wxCoord xx, yy;
+            CalcScrolledPosition( offset.x+w, offset.y, &xx, &yy);
+            caret->Move(xx, yy);
+            if ( !caret->IsVisible() ) caret->Show();
+            //caret->Move(off.x+w, off.y);
+
+            /// highlight selected text
+            if ( editingValB != -1 && editingValC != -1 )
             {
-                dc.GetTextExtent(str.Mid(0, editingValB), &dx, &dy);
-                dc.GetTextExtent(str.Mid(editingValB, editingValC-editingValB), &lx, &dy);
+                wxCoord dx, dy, lx;
+                if ( editingValB < editingValC )
+                {
+                    dc.GetTextExtent(str.Mid(0, editingValB), &dx, &dy);
+                    dc.GetTextExtent(str.Mid(editingValB, editingValC-editingValB), &lx, &dy);
+                }
+                else
+                {
+                    dc.GetTextExtent(str.Mid(0, editingValC), &dx, &dy);
+                    dc.GetTextExtent(str.Mid(editingValC, editingValB-editingValC), &lx, &dy);
+                }
+                dx += offset.x;
+                dy = dc.GetCharHeight();
+                dc.Blit(dx, offset.y, lx, dy, &dc, 0, 0, wxINVERT);
             }
-            else
-            {
-                dc.GetTextExtent(str.Mid(0, editingValC), &dx, &dy);
-                dc.GetTextExtent(str.Mid(editingValC, editingValB-editingValC), &lx, &dy);
-            }
-            dx += offset.x;
-            dy = dc.GetCharHeight();
-            dc.Blit(dx, offset.y, lx, dy, &dc, 0, 0, wxINVERT);
+        }
+        else
+        {
+            editingTextIsVisible = false;
+            if ( caret->IsVisible() ) caret->Hide();
         }
     }
     ++textNumber;
@@ -246,7 +258,8 @@ wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset)
         return wxPoint(0, h);
     return wxPoint(w, h);
 }
-void TimingWindow::Draw(wxDC& dc, bool exporting)
+
+void TimingWindow::Draw( wxDC& dc, bool exporting )
 {
     if (!view) return;
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
@@ -256,7 +269,6 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
 
     wxSize virtsize(0,0);
     //textStringPtrs.clear();
-    heightOffsets.clear();
     InitTextDrawing();
 
     wxColour bgcol = dc.GetTextBackground();
@@ -276,27 +288,47 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     else
         offset = wxPoint( 0, 0);
 
-
     offset.y += DistanceToAxis + DistanceFromAxis;
 
+    std::set<wxInt32>::iterator it;
+    wxPoint unscrolledPosition;
+    CalcUnscrolledPosition(0, 0, &unscrolledPosition.x, &unscrolledPosition.y);
+    if ( exporting ) unscrolledPosition = wxPoint(0,0);
+    wxPoint clientsize;
+    GetClientSize(&clientsize.x, &clientsize.y);
+    dc.DestroyClippingRegion();
 
-    ///DrawState(dc);
-
-    /// drawing signal names:
+    /// calc grid
+    heightOffsets.clear();
     for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
     {
         /// remember position
         heightOffsets.push_back(offset.y);
+        /// update position for next signal
+        offset.y += doc->SignalHeight;
+        offset.y += doc->MinimumSignalDistance;
+        offset.y += doc->signals[k].space;
+        offset.y += doc->signals[k].prespace;
 
+    }
+    heightOffsets.push_back(offset.y);// remember last offset
+
+    /// drawing signal names:
+    if ( !exporting )
+    dc.SetClippingRegion(0, heightOffsets[0]+unscrolledPosition.y,clientsize.x, clientsize.y);
+    for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
+    {
         wxString str = doc->signals[k].name;
-        wxPoint textoff(offset.x,
-            offset.y +
+        wxPoint textoff(offset.x + unscrolledPosition.x,
+            heightOffsets[k] +
             doc->SignalHeight/2 +
             doc->MinimumSignalDistance/2 +
             doc->signals[k].prespace -
             dc.GetCharHeight()/2
         );
-        wxPoint siz = DrawEditableText(dc, str, textoff);
+        bool viz = true;
+        if ( !exporting && textoff.y + dc.GetCharHeight()/2 < heightOffsets[0]+unscrolledPosition.y) viz = false;
+        wxPoint siz = DrawEditableText(dc, str, textoff, viz);
 
         if ( doc->signals[k].IsBus )
         {
@@ -314,8 +346,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
 
             str = doc->signals[k].buswidth;
             wxPoint bwoff(textoff.x + siz.x+w+2, textoff.y);
-            wxPoint s = DrawEditableText(dc, str, bwoff);
-
+            wxPoint s = DrawEditableText(dc, str, bwoff, viz);
 
             dc.SetTextBackground(bgcol);
             dc.SetBackgroundMode(wxTRANSPARENT);
@@ -331,92 +362,96 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
         /// remember maximum width
         if ( width < siz.x ) width = siz.x;
-
-
-        /// update position for next signal
-        offset.y += doc->SignalHeight;
-        offset.y += doc->MinimumSignalDistance;
-        offset.y += doc->signals[k].space;
-        offset.y += doc->signals[k].prespace;
     }
     dc.SetTextBackground(bgcol);
     dc.SetBackgroundMode(wxTRANSPARENT);
 
-    /// remember last offset
-    heightOffsets.push_back(offset.y);
+    /// points to manipulate the signal (through right click)
+    if ( !exporting )
+    {
+        dc.SetBrush(*wxBLACK_BRUSH);
+        for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n )
+        {
+            if ( WindowState == SignalIsSelected && editingNumber>=0 && ((wxUint32)editingNumber == n ) )
+            {
+                dc.SetBrush(*wxBLUE_BRUSH);
+                dc.SetPen(*wxLIGHT_GREY_PEN);
+            }
+            dc.DrawCircle(manipXoffset + unscrolledPosition.x,
+                heightOffsets[n] + doc->SignalHeight/2+doc->MinimumSignalDistance/2+ doc->signals[n].prespace,
+                manipRadius
+            );
+            if ( WindowState == SignalIsSelected  && editingNumber>=0 && (wxUint32)editingNumber == n )
+            {
+                dc.SetBrush(*wxBLACK_BRUSH);
+                //dc.SetPen(wxNullPen);
+                dc.SetPen(*wxBLACK_PEN);
+            }
+        }
+        dc.SetBrush(wxNullBrush);
+    }
+    dc.DestroyClippingRegion();
+
 
     /// where to start the waves and how big will the virtual window be
-    signalNamesWidth = offset.x + width + 20;
-    if ( virtsize.y < offset.y ) virtsize.y = offset.y;
+    signalNamesWidth = offset.x + width + 25;
+    if ( virtsize.y < offset.y ) virtsize.y = offset.y;// change the size of the scrollable window
+    width += 20 + GridStepWidth * doc->length;
+    if ( virtsize.x < (width + 500) ) virtsize.x = (width + 500);
+    SetVirtualSize(virtsize);
 
+
+
+    if ( WindowState != EditAxisLeft && !exporting  )
+        dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,unscrolledPosition.y, virtsize.x, virtsize.y+10);
     /// drawing the ticks
-    if ( !exporting ) //DrawTimeLine( dc, doc, width );
+    if ( !exporting )
     {
-        wxInt32 gridWidth = GridStepWidth;//transitionsPerGridStep * transitionWidth;
+        wxInt32 gridWidth = GridStepWidth;
         wxInt32 gridSteps = doc->length;
         axisStart = signalNamesWidth;
-        //if ( !changingLength )
-        if ( WindowState != EditAxisLeft && WindowState != EditAxisRight )
-        {
+        axisStop = signalNamesWidth + gridWidth*gridSteps;
+        wxCoord drawstartx, drawy, drawstopx;
+        wxInt32 drawsteps;
+        bool drawBoxes;
 
-                axisStop  = signalNamesWidth + gridWidth*gridSteps;
-                dc.DrawLine(axisStart -3 , DistanceToTimeline,
-                        axisStop + 3 , DistanceToTimeline);
-                for (wxInt32 n = 0; n <= gridSteps; ++n )
-                {
-                    dc.DrawLine(signalNamesWidth + n*gridWidth, DistanceToTimeline-2,
-                        signalNamesWidth + n*gridWidth, DistanceToTimeline+3);
-                }
-                //if ( axismarked )
-                if ( WindowState == AxisIsMarked )
-                {
-                    dc.SetBrush(*wxBLUE_BRUSH);
-                    dc.DrawRectangle(axisStop-3, DistanceToTimeline-3, 7, 7);
-                    dc.DrawRectangle(axisStart-3, DistanceToTimeline-3, 7, 7);
-                }
-        }
+        drawstartx = axisStart;
+        drawstopx = axisStop;
+        drawy = DistanceToTimeline;
+        drawsteps = gridSteps;
+
+        if ( WindowState != EditAxisLeft && WindowState != EditAxisRight )
+            drawBoxes = WindowState == AxisIsMarked;
         else
         {
-            wxInt32 newLength = editingValB;
+            drawBoxes = true;
+            drawsteps = editingValB;
             if ( WindowState == EditAxisRight )
-            {
-                axisStop  = signalNamesWidth + gridWidth*newLength;
-                dc.DrawLine(axisStart - 3, DistanceToTimeline,
-                        axisStop+3, DistanceToTimeline);
-                for (wxInt32 n = 0; n <= newLength; ++n )
-                    dc.DrawLine(signalNamesWidth + n*gridWidth, DistanceToTimeline-2,
-                        signalNamesWidth + n*gridWidth, DistanceToTimeline+3);
-                dc.SetBrush(*wxBLUE_BRUSH);
-                dc.DrawRectangle(axisStop-3, DistanceToTimeline-3, 7, 7);
-                dc.DrawRectangle(axisStart-3, DistanceToTimeline-3, 7, 7);
-            }
+                axisStop  = signalNamesWidth + gridWidth*editingValB;
             else
-            {
-                axisStop  = signalNamesWidth + gridWidth*gridSteps;
-                dc.DrawLine(signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength -3 ,
-                    DistanceToTimeline,
-                    axisStop + 3 , DistanceToTimeline
-                );
-                for (wxInt32 n = 0; n <= newLength; ++n )
-                    dc.DrawLine(signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength + n*gridWidth,
-                        DistanceToTimeline-2,
-                        signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength + n*gridWidth,
-                        DistanceToTimeline+3
-                    );
-                dc.SetBrush(*wxBLUE_BRUSH);
-                dc.DrawRectangle(axisStop-3, DistanceToTimeline-3, 7, 7);
-                dc.DrawRectangle(signalNamesWidth + gridWidth*gridSteps - gridWidth*newLength -3, DistanceToTimeline-3, 7, 7);
-            }
+                drawstartx = axisStop - gridWidth*editingValB;
+            drawstopx = axisStop;
         }
-        width += 20 + gridWidth * gridSteps;
+        drawy += unscrolledPosition.y;
+        dc.DrawLine(drawstartx - 3, drawy, drawstopx + 3, drawy);
+        for (wxInt32 n = 0 ; n <= drawsteps ; ++n)
+            dc.DrawLine(drawstartx + n*gridWidth, drawy - 2, drawstartx + n*gridWidth, drawy + 3);
+        if ( drawBoxes )
+        {
+            dc.SetBrush(*wxBLUE_BRUSH);
+            dc.DrawRectangle(drawstartx - 3, drawy - 3, 7, 7);
+            dc.DrawRectangle(drawstopx - 3, drawy - 3, 7, 7);
+        }
     }
 
     /// drawing the axis
+    if ( !exporting )
+        dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,unscrolledPosition.y, virtsize.x, virtsize.y+10);
     {
         wxInt32 gridWidth = GridStepWidth;
         wxInt32 gridSteps = doc->length;
 
-        wxCoord axispos =  DistanceToAxis;
+        wxCoord axispos =  DistanceToAxis + unscrolledPosition.y;
         wxCoord start = signalNamesWidth, stop = start + axisStop-axisStart;
         if ( ! exporting )
             axispos += DistanceToTimeline + DistanceFromTimeline;
@@ -465,117 +500,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
     }
 
-    /// points to manipulate the signal (through right click)
-    if ( !exporting ) //DrawSignalPoints(dc, doc);
-    {
-        dc.SetBrush(*wxBLACK_BRUSH);
-        for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
-        {
-            if ( WindowState == SignalIsSelected && editingNumber == n )
-            {
-                dc.SetBrush(*wxBLUE_BRUSH);
-                dc.SetPen(*wxLIGHT_GREY_PEN);
-            }
-            dc.DrawCircle(manipXoffset,
-                heightOffsets[n] + doc->SignalHeight/2+doc->MinimumSignalDistance/2+ doc->signals[n].prespace,
-                manipRadius
-            );
-            if ( WindowState == SignalIsSelected && editingNumber == n )
-            {
-                dc.SetBrush(*wxBLACK_BRUSH);
-                //dc.SetPen(wxNullPen);
-                dc.SetPen(*wxBLACK_PEN);
-            }
-        }
-        dc.SetBrush(wxNullBrush);
-    }
-
-    /// drawing around the selected signal
-    //if ( selectedSignal != -1 )
-    if ( !exporting && (WindowState == SignalIsSelected ||
-        WindowState == ChangingLowerSpace ||
-        WindowState == ChangingUpperSpace ||
-        WindowState == MovingSignal))
-    {
-        dc.SetPen(*wxBLACK_PEN);
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        wxInt32 newSpace = editingValA;
-        if ( WindowState != SignalIsSelected && WindowState != MovingSignal )
-        {
-            if ( WindowState == ChangingLowerSpace )
-            {
-                dc.DrawRoundedRectangle(manipXoffset - 2*manipRadius, heightOffsets[editingNumber],
-                axisStop-(manipXoffset - 2*manipRadius)+10,
-                doc->SignalHeight + doc->MinimumSignalDistance + newSpace + doc->signals[editingNumber].prespace,
-                10.0);
-                /// the end
-                editingPoint[0] = wxPoint(
-                    (manipXoffset - 2*manipRadius)+(axisStop-(manipXoffset - 2*manipRadius)+10)/2,
-                    heightOffsets[editingNumber] + doc->SignalHeight + doc->MinimumSignalDistance + newSpace + doc->signals[editingNumber].prespace
-                );
-                /// the start
-                editingPoint[1] = wxPoint(
-                    editingPoint[0].x,
-                    heightOffsets[editingNumber]
-                );
-            }
-            else
-            {
-                dc.DrawRoundedRectangle(manipXoffset - 2*manipRadius, heightOffsets[editingNumber] +
-                    doc->signals[editingNumber].prespace - newSpace,
-                axisStop-(manipXoffset - 2*manipRadius)+10,
-                    doc->SignalHeight + doc->MinimumSignalDistance + newSpace + doc->signals[editingNumber].space,
-                10.0);
-                /// the end
-                editingPoint[0] = wxPoint(
-                    (manipXoffset - 2*manipRadius)+(axisStop-(manipXoffset - 2*manipRadius)+10)/2,
-                    heightOffsets[editingNumber] + doc->SignalHeight + doc->MinimumSignalDistance + doc->signals[editingNumber].prespace + doc->signals[editingNumber].space
-                );
-                /// the start
-                editingPoint[1] = wxPoint(
-                    editingPoint[0].x,
-                    heightOffsets[editingNumber] + doc->signals[editingNumber].prespace - newSpace
-                );
-            }
-        }
-        else
-        {
-            dc.DrawRoundedRectangle(manipXoffset - 2*manipRadius, heightOffsets[editingNumber],
-                axisStop-(manipXoffset - 2*manipRadius)+10,
-                doc->SignalHeight + doc->MinimumSignalDistance + doc->signals[editingNumber].space + doc->signals[editingNumber].prespace,
-                10.0);
-            /// the end
-            editingPoint[0] = wxPoint(
-                (manipXoffset - 2*manipRadius)+(axisStop-(manipXoffset - 2*manipRadius)+10)/2,
-                    heightOffsets[editingNumber] + doc->SignalHeight + doc->MinimumSignalDistance +
-                    doc->signals[editingNumber].space+
-                    doc->signals[editingNumber].prespace
-            );
-            /// the start
-            editingPoint[1] = wxPoint(
-                editingPoint[0].x,
-                heightOffsets[editingNumber]
-            );
-        }
-        //dc.SetPen(wxNullPen);
-        dc.SetPen(*wxBLACK_PEN);
-        dc.SetBrush(wxNullBrush);
-
-        dc.SetBrush(*wxBLUE_BRUSH);
-        dc.DrawRectangle(
-            editingPoint[0].x - 3,
-            editingPoint[0].y -3,
-            7, 7
-        );
-        dc.DrawRectangle(
-            editingPoint[1].x - 3,
-            editingPoint[1].y -3,
-            7, 7
-        );
-    }
-
     /// indicate target position of moving signals
-    if ( WindowState == MovingSignal )
+    if ( !exporting )
+        dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,heightOffsets[0]-5+unscrolledPosition.y, virtsize.x, virtsize.y+10);
+    if ( !exporting && WindowState == MovingSignal )
     {
         wxPen pen(*wxBLACK, 2 );
         dc.SetPen(pen);
@@ -583,7 +511,6 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
             manipXoffset, heightOffsets[editingValA],
             axisStop,  heightOffsets[editingValA]
         );
-        //dc.SetPen(wxNullPen);
         dc.SetPen(*wxBLACK_PEN);
     }
 
@@ -597,12 +524,12 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         dc.SetBackgroundMode(wxSOLID);
         dc.SetTextBackground(col);
     }
-    for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n )
     {
         offset.x = signalNamesWidth;
         offset.y = heightOffsets[n]+doc->MinimumSignalDistance/2+ doc->signals[n].prespace;
         Signal sig;
-        if ( WindowState == EditSignal && editingNumber == n && editingValB != -1 ) sig = editingSignal;
+        if ( WindowState == EditSignal && editingNumber>=0 && (wxUint32)editingNumber == n && editingValB != -1 ) sig = editingSignal;
         else sig = doc->signals[n];
         if ( sig.IsClock )
         {
@@ -988,7 +915,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
                                 offset.y + doc->SignalHeight/2 -
                                 dc.GetCharHeight()/2
                             );
-                            DrawEditableText(dc, sig.TextValues[k], textoff);
+                            bool viz = true;
+                            if ( textoff.y + dc.GetCharHeight()/2 < heightOffsets[0]+unscrolledPosition.y) viz = false;
+                            if ( textoff.x                        < signalNamesWidth - 5 + unscrolledPosition.x) viz = false;
+                            DrawEditableText(dc, sig.TextValues[k], textoff, viz);
                         }
                         break;
                     case hz :
@@ -1155,56 +1085,10 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     dc.SetPen(defPen);
 
     /// drawing discontinuities
-    std::set<wxInt32>::iterator it;
     for ( it = doc->discontinuities.begin() ; it != doc->discontinuities.end() ; it++)
     {
-        /// triangle
-        offset.x = signalNamesWidth  +
-                    (0.5 + *it) * GridStepWidth
-                    - 3
-                    ;
-        offset.y = DistanceToTimeline-3;
-        wxPoint points[] =
-        {
-            offset + wxPoint(0,0),
-            offset + wxPoint(8,0),
-            offset + wxPoint(4, 6)
-        };
-        dc.SetBrush(*wxBLACK_BRUSH);
-        if (  !exporting )
-        {
-            if ( WindowState == DisconSelected && *it == editingValA )
-            {
-                wxPen pen(*wxBLUE);
-                dc.SetBrush(*wxBLUE_BRUSH);
-                dc.SetPen(pen);
-                dc.DrawPolygon(3, points);
-                dc.SetBrush(*wxBLACK_BRUSH);
-                dc.SetPen(*wxBLACK_PEN);
-            }
-            else
-                dc.DrawPolygon(3, points);
-        }
-
-        /// over the axis
-        offset.x = signalNamesWidth  +
-                    (0.5 + *it) * GridStepWidth - 1
-                    ;
-        offset.y = DistanceToAxis - 3;
-        if ( !exporting )
-            offset.y += DistanceToTimeline + DistanceFromTimeline;
-        for ( wxInt32 n = 0 ; n < 4 ; ++n )
-        {
-            if ( n == 0 || n == 3 )
-                dc.SetPen(*wxBLACK_PEN);
-            else
-                dc.SetPen( *wxWHITE_PEN );
-            dc.DrawLine(offset.x + n-1 , offset.y,
-                        offset.x + n-1 , offset.y + 6);
-        }
-
         /// splines over signal
-        for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n)
+        for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n)
         {
             //wxPoint sploff(15, 10);
             offset.x = signalNamesWidth  +
@@ -1235,15 +1119,199 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         }
     }
 
-    /// change the size of the scrollable window
-    if ( virtsize.x < (width + 500) ) virtsize.x = (width + 500);
-    SetVirtualSize(virtsize);
+
+    /// drawing the horizontal arrows
+    if ( !exporting && ( WindowState == SelectingText ||
+                         WindowState == TextFieldSelected ) )
+    {
+        dc.SetBackgroundMode(wxSOLID);
+        dc.SetTextBackground(col);
+    }
+    HArrowOffsets.clear();
+    HArrowToOffset.clear();
+    for ( wxUint32 n = 0 ; n < doc->harrows.size() ; ++n )
+    {
+        wxInt32 distancfortimeline = 0;
+        if ( !exporting )
+            distancfortimeline = DistanceToTimeline + DistanceFromTimeline;
+        HArrow &ha = doc->harrows[n];
+        wxPoint offset(signalNamesWidth + doc->vertlines[ha.fromVLine].vpos * GridStepWidth,
+                ha.pos + heightOffsets[ha.signalnmbr]);
+        if ( doc->vertlines[ha.fromVLine].vposoffset == 1 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+        else if ( doc->vertlines[ha.fromVLine].vposoffset == 2 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+
+        if ( editingNumber >= 0 && (wxUint32)editingNumber == n && WindowState == MovingHArrow )
+            offset.y = editingValA + heightOffsets[editingValB];
+        wxPoint tooffset(signalNamesWidth + doc->vertlines[ha.toVLine].vpos * GridStepWidth,
+            offset.y);
+        if ( doc->vertlines[ha.toVLine].vposoffset == 1 )
+            tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+        else if ( doc->vertlines[ha.toVLine].vposoffset == 2 )
+            tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+
+
+        if ( !exporting && editingNumber >= 0 && (wxUint32)editingNumber == n && WindowState == ChangingHArrowLengthLeft )
+        {
+            if (editingValA == -1 )
+                offset.x = cursorpos.x;
+            else
+            {
+                offset.x = signalNamesWidth + doc->vertlines[editingValA].vpos * GridStepWidth;
+                if ( doc->vertlines[editingValA].vposoffset == 1 )
+                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                else if ( doc->vertlines[editingValA].vposoffset == 2 )
+                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+            }
+        }
+        if ( !exporting && editingNumber>=0 && (wxUint32)editingNumber == n && WindowState == ChangingHArrowLengthRight )
+        {
+            if (editingValB == -1 )
+                tooffset.x = cursorpos.x;
+            else
+            {
+                tooffset.x = signalNamesWidth + doc->vertlines[editingValB].vpos * GridStepWidth;
+                if ( doc->vertlines[editingValB].vposoffset == 1 )
+                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                else if ( doc->vertlines[editingValB].vposoffset == 2 )
+                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+            }
+        }
+
+        if ( offset.x > tooffset.x ) // swap
+        {
+            wxCoord t = offset.x;
+            offset.x = tooffset.x;
+            tooffset.x = t;
+        }
+        if ( !exporting && editingNumber>=0 && (wxUint32)editingNumber == n &&
+            (WindowState == ChangingHArrowLengthRight ||
+             WindowState == ChangingHArrowLengthLeft    ) &&
+            (editingValA == -1 || editingValB == -1))
+        {
+            wxPen pen(*wxBLACK, 1, wxDOT);//wxLONG_DASH );
+            dc.SetPen(pen);
+            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
+            //dc.SetPen(wxNullPen);
+            dc.SetPen(*wxBLACK_PEN);
+        }
+        else
+            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
+        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y-3);
+        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y+3);
+        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y-3);
+        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y+3);
+        HArrowOffsets.push_back(offset);
+        HArrowToOffset.push_back(tooffset.x);
+
+        ///the text:
+        wxPoint textoff;
+        if ( editingNumber>=0 && (wxUint32)editingNumber == n && WindowState == HArrowMovingText )
+        {
+            textoff.x  = (offset.x + tooffset.x)/2 + editingValA;
+            textoff.y  = offset.y + editingValB - dc.GetCharHeight();
+        }
+        else
+        {
+            textoff.x  = (offset.x + tooffset.x)/2;
+            if ( ha.textoffset.x > GridStepWidth ) textoff.x += GridStepWidth;
+            else                                   textoff.x += ha.textoffset.x;
+            textoff.x += ha.textgridoffset*GridStepWidth;
+            textoff.y  = offset.y + ha.textoffset.y - dc.GetCharHeight();
+        }
+        bool viz = true;
+        if ( textoff.y + dc.GetCharHeight()/2 < heightOffsets[0]+unscrolledPosition.y) viz = false;
+        if ( textoff.x                        < signalNamesWidth - 5 + unscrolledPosition.x) viz = false;
+        DrawEditableText( dc, ha.text, textoff, viz );
+
+        /// blue boxes to manipulate positions
+        if ( !exporting && editingNumber>=0 && (wxUint32)editingNumber == n && ( WindowState == HArrowIsMarked ||
+               WindowState == ChangingHArrowLengthLeft ||
+               WindowState == ChangingHArrowLengthRight ))
+        {
+            dc.SetBrush(*wxBLUE_BRUSH);
+            dc.DrawRectangle(  offset.x-3, offset.y - 3, 7, 7);
+            dc.DrawRectangle(tooffset.x-3, offset.y - 3, 7, 7);
+            dc.SetBrush(wxNullBrush);
+        }
+        if ( !exporting && editingNumber>=0 && (wxUint32)editingNumber == n &&
+            ( WindowState == HArrowIsMarked ||
+              WindowState == HArrowMovingText ))
+        {
+            dc.SetBrush(*wxBLUE_BRUSH);
+            dc.DrawRectangle(
+                textoff.x - 3,
+                textoff.y + dc.GetCharHeight() - 3,
+                7, 7);
+            dc.SetBrush(wxNullBrush);
+        }
+        if ( !exporting && editingNumber>=0 && (wxUint32)editingNumber == n &&
+            ( WindowState == HArrowIsMarked ||
+              WindowState == HArrowMovingText ||
+              WindowState == ChangingHArrowLengthLeft ||
+              WindowState == ChangingHArrowLengthRight ||
+              WindowState == SelectingText))
+        {
+            wxPen pen(*wxBLACK, 1, wxSHORT_DASH );
+            dc.SetPen(pen);
+            dc.DrawLine(  (offset.x + tooffset.x)/2,   offset.y, textoff.x,   textoff.y+dc.GetCharHeight());
+            dc.SetPen(*wxBLACK_PEN);
+        }
+    }
+    if ( WindowState == InsertingHArrowWaitingSecondPoint )
+    {
+        wxPoint offset(signalNamesWidth + doc->vertlines[editingNumber].vpos * GridStepWidth,
+        //        heightOffsets[doc->vertlines[ha.fromVLine].StartPos] + ha.pos);
+                editingValA + heightOffsets[editingValC]);
+        if ( doc->vertlines[editingNumber].vposoffset == 1 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+        else if ( doc->vertlines[editingNumber].vposoffset == 2 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+        wxPoint tooffset;
+        tooffset.y = offset.y;
+        if ( editingValB == -1 )
+            tooffset.x = cursorpos.x;
+        else
+        {
+            tooffset.x = signalNamesWidth + doc->vertlines[editingValB].vpos * GridStepWidth;
+            if ( doc->vertlines[editingValB].vposoffset == 1 )
+                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+            else if ( doc->vertlines[editingValB].vposoffset == 2 )
+                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+        }
+        if ( offset.x > tooffset.x ) // swap
+        {
+            wxCoord t = offset.x;
+            offset.x = tooffset.x;
+            tooffset.x = t;
+        }
+        if ( editingValB == -1)
+        {
+            wxPen pen(*wxBLACK, 1, wxLONG_DASH );
+            dc.SetPen(pen);
+            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
+            //dc.SetPen(wxNullPen);
+            dc.SetPen(*wxBLACK_PEN);
+        }
+        else
+            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
+        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y-3);
+        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y+3);
+        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y-3);
+        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y+3);
+    }
+    dc.SetTextBackground(bgcol);
+    dc.SetBackgroundMode(wxTRANSPARENT);
 
 
     /// drawing the vertical lines
+    dc.DestroyClippingRegion();
+    if ( !exporting )
+        dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,heightOffsets[0]+unscrolledPosition.y-3, virtsize.x, virtsize.y+3);
     VLineOffsets.clear();
     VLineToOffset.clear();
-    for ( wxInt32 k = 0 ; k < doc->vertlines.size() ; ++k)
+    for ( wxUint32 k = 0 ; k < doc->vertlines.size() ; ++k)
     {
         wxPoint offset(signalNamesWidth + doc->vertlines[k].vpos * GridStepWidth,
         /*offset.y =*/ heightOffsets[doc->vertlines[k].StartPos]);
@@ -1254,7 +1322,7 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
             offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
         wxInt32 tolen = heightOffsets[doc->vertlines[k].EndPos + 1];
-        if ( editingNumber == k )
+        if ( !exporting && editingNumber>=0 && (wxUint32)editingNumber == k )
         {
             if ( WindowState == VLineIsMarked )
             {
@@ -1344,190 +1412,124 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
         dc.SetBrush(wxNullBrush);
     }
 
-    /// drawing the horizontal arrows
-    if ( !exporting && ( WindowState == SelectingText ||
-                         WindowState == TextFieldSelected ) )
+
+    /// drawing around the selected signal
+    dc.DestroyClippingRegion();
+    if ( !exporting )
+        dc.SetClippingRegion(0, heightOffsets[0]+unscrolledPosition.y-3,virtsize.x, virtsize.y+6);
+    if ( !exporting && (WindowState == SignalIsSelected ||
+        WindowState == ChangingLowerSpace ||
+        WindowState == ChangingUpperSpace ||
+        WindowState == MovingSignal))
     {
-        dc.SetBackgroundMode(wxSOLID);
-        dc.SetTextBackground(col);
-    }
-    HArrowOffsets.clear();
-    HArrowToOffset.clear();
-    for ( wxInt32 n = 0 ; n < doc->harrows.size() ; ++n )
-    {
-        wxInt32 distancfortimeline = 0;
-        if ( !exporting )
-            distancfortimeline = DistanceToTimeline + DistanceFromTimeline;
-        HArrow &ha = doc->harrows[n];
-        wxPoint offset(signalNamesWidth + doc->vertlines[ha.fromVLine].vpos * GridStepWidth,
-        //        heightOffsets[doc->vertlines[ha.fromVLine].StartPos] + ha.pos);
-                ///distancfortimeline + ha.pos);
-                ha.pos + heightOffsets[ha.signalnmbr]);
-        if ( doc->vertlines[ha.fromVLine].vposoffset == 1 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-        else if ( doc->vertlines[ha.fromVLine].vposoffset == 2 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+        dc.SetPen(*wxBLACK_PEN);
+        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        wxInt32 newSpace = editingValA;
+        wxCoord xstart, ystart, width, height;
+        xstart = manipXoffset-2*manipRadius;
+        width = axisStop-xstart+10;
+        ystart=heightOffsets[editingNumber];
+        height = doc->SignalHeight + doc->MinimumSignalDistance +
+                 doc->signals[editingNumber].space +
+                 doc->signals[editingNumber].prespace;
 
-        if ( editingNumber == n && WindowState == MovingHArrow )
+        if ( WindowState != SignalIsSelected && WindowState != MovingSignal )
         {
-            //offset.y = editingValA + DistanceToTimeline + DistanceFromTimeline;
-            offset.y = editingValA + heightOffsets[editingValB];
-        }
-        wxPoint tooffset(signalNamesWidth + doc->vertlines[ha.toVLine].vpos * GridStepWidth,
-            offset.y);
-        if ( doc->vertlines[ha.toVLine].vposoffset == 1 )
-            tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-        else if ( doc->vertlines[ha.toVLine].vposoffset == 2 )
-            tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
-
-
-        if ( editingNumber == n && WindowState == ChangingHArrowLengthLeft )
-        {
-            if (editingValA == -1 )
-                offset.x = cursorpos.x;
-            else
+            if ( WindowState == ChangingLowerSpace )
             {
-                offset.x = signalNamesWidth + doc->vertlines[editingValA].vpos * GridStepWidth;
-                if ( doc->vertlines[editingValA].vposoffset == 1 )
-                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-                else if ( doc->vertlines[editingValA].vposoffset == 2 )
-                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                height += newSpace - doc->signals[editingNumber].space;
+                editingPoint[0].y += newSpace - doc->signals[editingNumber].space;
             }
-        }
-        if ( editingNumber == n && WindowState == ChangingHArrowLengthRight )
-        {
-            if (editingValB == -1 )
-                tooffset.x = cursorpos.x;
             else
             {
-                tooffset.x = signalNamesWidth + doc->vertlines[editingValB].vpos * GridStepWidth;
-                if ( doc->vertlines[editingValB].vposoffset == 1 )
-                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-                else if ( doc->vertlines[editingValB].vposoffset == 2 )
-                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                ystart += doc->signals[editingNumber].prespace - newSpace;
+                height += newSpace - doc->signals[editingNumber].prespace;
+                editingPoint[1].y +=  doc->signals[editingNumber].prespace - newSpace;
             }
         }
 
-        if ( offset.x > tooffset.x ) // swap
+        width-=unscrolledPosition.x;
+        xstart+=unscrolledPosition.x;
+        editingPoint[0].x = xstart + width/2;
+        if ( clientsize.x + unscrolledPosition.x - 5 < editingPoint[0].x)
+            editingPoint[0].x = clientsize.x + unscrolledPosition.x - 5;
+        editingPoint[0].y = ystart+height;
+        editingPoint[1].x = editingPoint[0].x;
+        editingPoint[1].y = ystart;
+        if ( width > signalNamesWidth )
         {
-            wxCoord t = offset.x;
-            offset.x = tooffset.x;
-            tooffset.x = t;
-        }
-        if ( editingNumber == n &&
-            (WindowState == ChangingHArrowLengthRight ||
-             WindowState == ChangingHArrowLengthLeft    ) &&
-            (editingValA == -1 || editingValB == -1))
-        {
-            wxPen pen(*wxBLACK, 1, wxDOT);//wxLONG_DASH );
-            dc.SetPen(pen);
-            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
-            //dc.SetPen(wxNullPen);
+            dc.DrawRoundedRectangle(xstart, ystart, width, height, 10.0);
             dc.SetPen(*wxBLACK_PEN);
-        }
-        else
-            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
-        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y-3);
-        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y+3);
-        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y-3);
-        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y+3);
-        HArrowOffsets.push_back(offset);
-        HArrowToOffset.push_back(tooffset.x);
-
-        ///the text:
-        wxPoint textoff;
-        if ( editingNumber == n && WindowState == HArrowMovingText )
-        {
-            textoff.x  = (offset.x + tooffset.x)/2 + editingValA;
-            textoff.y  = offset.y + editingValB - dc.GetCharHeight();
-        }
-        else
-        {
-            textoff.x  = (offset.x + tooffset.x)/2 + ha.textoffset.x;
-            textoff.y  = offset.y + ha.textoffset.y - dc.GetCharHeight();
-        }
-        DrawEditableText( dc, ha.text, textoff );
-
-        /// blue boxes to manipulate positions
-        if ( editingNumber == n && ( WindowState == HArrowIsMarked ||
-               WindowState == ChangingHArrowLengthLeft ||
-               WindowState == ChangingHArrowLengthRight ))
-        {
-            dc.SetBrush(*wxBLUE_BRUSH);
-            dc.DrawRectangle(  offset.x-3, offset.y - 3, 7, 7);
-            dc.DrawRectangle(tooffset.x-3, offset.y - 3, 7, 7);
             dc.SetBrush(wxNullBrush);
-        }
-        if ( editingNumber == n &&
-            ( WindowState == HArrowIsMarked ||
-              WindowState == HArrowMovingText ))
-        {
+
             dc.SetBrush(*wxBLUE_BRUSH);
             dc.DrawRectangle(
-                textoff.x - 3,
-                textoff.y + dc.GetCharHeight() - 3,
-                7, 7);
-            dc.SetBrush(wxNullBrush);
-        }
-        if ( editingNumber == n &&
-            ( WindowState == HArrowIsMarked ||
-              WindowState == HArrowMovingText ||
-              WindowState == ChangingHArrowLengthLeft ||
-              WindowState == ChangingHArrowLengthRight ||
-              WindowState == SelectingText))
-        {
-            wxPen pen(*wxBLACK, 1, wxSHORT_DASH );
-            dc.SetPen(pen);
-            dc.DrawLine(  (offset.x + tooffset.x)/2,   offset.y, textoff.x,   textoff.y+dc.GetCharHeight());
-            dc.SetPen(*wxBLACK_PEN);
+                editingPoint[0].x - 3,
+                editingPoint[0].y -3,
+                7, 7
+            );
+            dc.DrawRectangle(
+                editingPoint[1].x - 3,
+                editingPoint[1].y -3,
+                7, 7
+            );
         }
     }
-    if ( WindowState == InsertingHArrowWaitingSecondPoint )
+
+    /// drawing discontinuities triangles and time line
+    dc.DestroyClippingRegion();
+    if ( !exporting )
+        dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,unscrolledPosition.y, virtsize.x, virtsize.y);
+    for ( it = doc->discontinuities.begin() ; it != doc->discontinuities.end() ; it++)
     {
-        wxPoint offset(signalNamesWidth + doc->vertlines[editingNumber].vpos * GridStepWidth,
-        //        heightOffsets[doc->vertlines[ha.fromVLine].StartPos] + ha.pos);
-                editingValA + heightOffsets[editingValC]);
-        if ( doc->vertlines[editingNumber].vposoffset == 1 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-        else if ( doc->vertlines[editingNumber].vposoffset == 2 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
-        wxPoint tooffset;
-        tooffset.y = offset.y;
-        if ( editingValB == -1)
-            tooffset.x = cursorpos.x;
-        else
+        /// triangle
+        offset.x = signalNamesWidth  +
+                    (0.5 + *it) * GridStepWidth
+                    - 3
+                    ;
+        offset.y = DistanceToTimeline-3;
+        wxPoint points[] =
         {
-            tooffset.x = signalNamesWidth + doc->vertlines[editingValB].vpos * GridStepWidth;
-            if ( doc->vertlines[editingValB].vposoffset == 1 )
-                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-            else if ( doc->vertlines[editingValB].vposoffset == 2 )
-                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
-        }
-        if ( offset.x > tooffset.x ) // swap
+            offset + wxPoint(0, unscrolledPosition.y),
+            offset + wxPoint(8, unscrolledPosition.y),
+            offset + wxPoint(4, unscrolledPosition.y + 6)
+        };
+        dc.SetBrush(*wxBLACK_BRUSH);
+        if (  !exporting )
         {
-            wxCoord t = offset.x;
-            offset.x = tooffset.x;
-            tooffset.x = t;
+            if ( WindowState == DisconSelected && *it == editingValA )
+            {
+                wxPen pen(*wxBLUE);
+                dc.SetBrush(*wxBLUE_BRUSH);
+                dc.SetPen(pen);
+                dc.DrawPolygon(3, points);
+                dc.SetBrush(*wxBLACK_BRUSH);
+                dc.SetPen(*wxBLACK_PEN);
+            }
+            else
+                dc.DrawPolygon(3, points);
         }
-        if ( editingValB == -1)
+
+        /// over the axis
+        offset.x = signalNamesWidth  +
+                    (0.5 + *it) * GridStepWidth - 1
+                    ;
+        offset.y = DistanceToAxis - 3 + unscrolledPosition.y;
+        if ( !exporting )
+            offset.y += DistanceToTimeline + DistanceFromTimeline;
+        for ( wxInt32 n = 0 ; n < 4 ; ++n )
         {
-            wxPen pen(*wxBLACK, 1, wxLONG_DASH );
-            dc.SetPen(pen);
-            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
-            //dc.SetPen(wxNullPen);
-            dc.SetPen(*wxBLACK_PEN);
+            if ( n == 0 || n == 3 )
+                dc.SetPen(*wxBLACK_PEN);
+            else
+                dc.SetPen( *wxWHITE_PEN );
+            dc.DrawLine(offset.x + n-1 , offset.y,
+                        offset.x + n-1 , offset.y + 6);
         }
-        else
-            dc.DrawLine(  offset.x,   offset.y, tooffset.x,   tooffset.y);
-        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y-3);
-        dc.DrawLine(  offset.x,   offset.y,   offset.x+5,   offset.y+3);
-        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y-3);
-        dc.DrawLine(tooffset.x, tooffset.y, tooffset.x-5, tooffset.y+3);
     }
-    dc.SetTextBackground(bgcol);
-    dc.SetBackgroundMode(wxTRANSPARENT);
 
     /// cursor cross over the whole canvas:
+    dc.DestroyClippingRegion();
     if ( mouseoverwindow &&
         WindowState != SelectingText &&
         WindowState != TextFieldSelected
@@ -1538,17 +1540,17 @@ void TimingWindow::Draw(wxDC& dc, bool exporting)
     }
 
     //dropcaret->Draw(dc);
+    //dc.DrawText(wxString::Format(_T("cursor x: %d, virtsize.x: %d"), cursorpos.x, virtsizex),
+    //unscrolledPosition.x+5, unscrolledPosition.y+5 );
 }
 
-/////////////////don't use this event methods///////////////////////////////////
 void TimingWindow::OnEraseBackground(wxEraseEvent &event){/* must be empty */}
-//void TimingWindow::OnDraw(wxDC& dc){/* must be empty */}
-///////////////////////////////////////////////////////////////////////////////
+
 void TimingWindow::OnPaint(wxPaintEvent &event)
 {
     wxBufferedPaintDC dc(this);
-    PrepareDC(dc);
     PaintBackground(dc);
+    DoPrepareDC(dc);
     Draw(dc);
 }
 void TimingWindow::PaintBackground(wxDC &dc)
@@ -1562,7 +1564,6 @@ void TimingWindow::PaintBackground(wxDC &dc)
     dc.SetBrush(wxBrush(backgroundColour));
     dc.SetPen(wxPen(backgroundColour, 1));
     wxRect windowRect(wxPoint(0,0), GetClientSize());
-    CalcUnscrolledPosition(windowRect.x, windowRect.y, &windowRect.x, &windowRect.y);
     dc.DrawRectangle(windowRect);
     dc.SetBrush(wxNullBrush);
     dc.SetPen(wxNullPen);
@@ -1571,7 +1572,7 @@ void TimingWindow::PaintBackground(wxDC &dc)
 void TimingWindow::OnLeaveWindow(wxMouseEvent &event)
 {
     mouseoverwindow = false;
-    this->Refresh();
+    this->Refresh(true);
 }
 void TimingWindow::OnEnterWindow(wxMouseEvent &event)
 {
@@ -1627,7 +1628,7 @@ void TimingWindow::OnEnterWindow(wxMouseEvent &event)
             break;
     }
 
-    Refresh();
+    Refresh(true);
 }
 void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
 {
@@ -1638,26 +1639,31 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
     SetFocus();
 
     wxClientDC dc(this);
-    PrepareDC(dc);
+    DoPrepareDC(dc);
     dc.SetFont(font);
     wxPoint pt(event.GetLogicalPosition(dc));
 
+    wxPoint p(event.GetPosition());
+
     bool dorefresh = false;
 
+    wxPoint unscrolledPosition;
+    CalcUnscrolledPosition(0, 0, &unscrolledPosition.x, &unscrolledPosition.y);
 
     states newstate = WindowState;
     switch ( WindowState )
     {
         case Neutral:
-            /// check if user clicked onto discont
-            if (pt.x > axisStart &&
+            /// check if user clicked onto discont triangle
+            if (p.x > signalNamesWidth-10 &&
+                pt.x > axisStart &&
                 pt.x < axisStop &&
-                pt.y > DistanceToTimeline - 5 &&
-                pt.y < DistanceToTimeline + 5 )
+                p.y > DistanceToTimeline - 5 &&
+                p.y < DistanceToTimeline + 5 )
             {
                 wxCoord p = pt.x-axisStart;
                 wxInt32 discontpos = p / (GridStepWidth);
-                wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+                //wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 if ( doc->discontinuities.find(discontpos) != doc->discontinuities.end() )
                 {
                     newstate = DisconSelected;
@@ -1667,10 +1673,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 }
             }
             /// check click on axis
-            if (pt.x > axisStart &&
+            if (p.x > signalNamesWidth-10 &&
+                pt.x > axisStart &&
                 pt.x < axisStop &&
-                pt.y > DistanceToTimeline - 5 &&
-                pt.y < DistanceToTimeline + 5)
+                p.y > DistanceToTimeline - 5 &&
+                p.y < DistanceToTimeline + 5)
             {
                 newstate = AxisIsMarked;
                 dorefresh = true;
@@ -1678,10 +1685,13 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             }
             /// check click on left points
             editingNumber = -1;
-            for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
+            for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n )
             {
-                if ( pt.x >= manipXoffset - 2*manipRadius && pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
-                    pt.x <=  manipXoffset + 2*manipRadius && pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
+                if (p.y >   heightOffsets[0] &&
+                    p.x >=  manipXoffset - 2*manipRadius &&
+                    pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
+                    p.x <=  manipXoffset + 2*manipRadius &&
+                    pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
                 {
                     newstate = SignalIsSelected;
                     editingNumber = n;
@@ -1690,9 +1700,9 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 }
             }
             /// check if user clicked into a waveform
-            for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
+            for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n )
             {
-                if ( ! doc->signals[n].IsClock )
+                if ( ! doc->signals[n].IsClock && p.x > signalNamesWidth && p.y > heightOffsets[0] )
                     if ( pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2+ doc->signals[n].prespace && pt.x >= axisStart &&
                         pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->signals[n].prespace + doc->SignalHeight && pt.x <= axisStop )
                     {
@@ -1768,9 +1778,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                     }
             }
             /// check if user clicked onto a vertical line
-            for ( wxInt32 k = 0 ; k < VLineOffsets.size() ; ++k )
+            for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
             {
-                if (pt.x >= VLineOffsets[k].x - 3 &&
+                if (p.x > signalNamesWidth-10 &&
+                    p.y > heightOffsets[0]-5 &&
+                    pt.x >= VLineOffsets[k].x - 3 &&
                     pt.x <= VLineOffsets[k].x + 3 &&
                     pt.y >= VLineOffsets[k].y &&
                     pt.y <= VLineToOffset[k] )
@@ -1784,9 +1796,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 }
             }
             /// check if user clicked onto horizontal arrow
-            for ( wxInt32 k = 0 ; k < HArrowOffsets.size() ; ++k)
+            for ( wxUint32 k = 0 ; k < HArrowOffsets.size() ; ++k)
             {
-                if ( pt.x >= HArrowOffsets[k].x &&
+                if ( p.x > signalNamesWidth-10 &&
+                     p.y > heightOffsets[0]-5 &&
+                     pt.x >= HArrowOffsets[k].x &&
                      pt.x <= HArrowToOffset[k] &&
                      pt.y >= HArrowOffsets[k].y - 3 &&
                      pt.y <= HArrowOffsets[k].y + 3 )
@@ -1806,22 +1820,24 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             return;
         case AxisIsMarked:
             /// check if user clicked the end of marked axis
-            if (pt.x >= axisStop-5 && pt.y >= DistanceToTimeline - 5 &&
-                pt.x <= axisStop+5 && pt.y <= DistanceToTimeline + 5 )
+            if (p.x > signalNamesWidth-10 &&
+                pt.x >= axisStop-5 &&
+                p.y >= DistanceToTimeline - 5 &&
+                pt.x <= axisStop+5 &&
+                p.y <= DistanceToTimeline + 5 )
             {
                 newstate = EditAxisRight;
-                /*changingLength = true;
-                changingLeftLength = false;*/
-                //oldlength = doc->length;
                 editingValA = doc->length;
                 editingValB = editingValA;
-                //newLength = oldlength;
                 dorefresh = true;
                 break;
             }
             /// check if user clicked the start of marked axis
-            if (pt.x >= axisStart-5 && pt.y >= DistanceToTimeline - 5 &&
-                pt.x <= axisStart+5 && pt.y <= DistanceToTimeline + 5)
+            if (p.x > signalNamesWidth-10 &&
+                pt.x >= axisStart-5 &&
+                p.y >= DistanceToTimeline - 5 &&
+                pt.x <= axisStart+5 &&
+                p.y <= DistanceToTimeline + 5)
             {
                 newstate = EditAxisLeft;
                 /*changingLength = true;
@@ -1839,7 +1855,9 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             return;
         case VLineIsMarked:
             /// check click on begin of vline (top)
-            if (pt.x >= VLineOffsets[editingNumber].x - 3 &&
+            if (p.x > signalNamesWidth-10 &&
+                p.y > heightOffsets[0]-5 &&
+                pt.x >= VLineOffsets[editingNumber].x - 3 &&
                 pt.x <= VLineOffsets[editingNumber].x + 3 &&
                 pt.y >= VLineOffsets[editingNumber].y - 3 &&
                 pt.y <= VLineOffsets[editingNumber].y + 3 )
@@ -1850,7 +1868,9 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 break;
             }
             /// check click on end of vline (bottom)
-            if (pt.x >= VLineOffsets[editingNumber].x - 3 &&
+            if (p.x > signalNamesWidth-10 &&
+                p.y > heightOffsets[0]-5 &&
+                pt.x >= VLineOffsets[editingNumber].x - 3 &&
                 pt.x <= VLineOffsets[editingNumber].x + 3 &&
                 pt.y >= VLineToOffset[editingNumber] - 3 &&
                 pt.y <= VLineToOffset[editingNumber] + 3 )
@@ -1861,7 +1881,9 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 break;
             }
             /// check moving of vline
-            if (pt.x >= VLineOffsets[editingNumber].x - 3 &&
+            if (p.x > signalNamesWidth-10 &&
+                p.y > heightOffsets[0]-5 &&
+                pt.x >= VLineOffsets[editingNumber].x - 3 &&
                 pt.x <= VLineOffsets[editingNumber].x + 3 &&
                 pt.y >= VLineOffsets[editingNumber].y + 3 &&
                 pt.y <= VLineToOffset[editingNumber] - 3 )
@@ -1881,15 +1903,23 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             return;
         case SignalIsSelected:
             /// check change of space around signal
-            if (pt.x >= editingPoint[0].x - 4 && pt.y >= editingPoint[0].y - 4 &&
-                pt.x <= editingPoint[0].x + 4 && pt.y <= editingPoint[0].y + 4)
+            if (p.x > signalNamesWidth-10 &&
+                p.y > heightOffsets[0]-5 &&
+                pt.x >= editingPoint[0].x - 4 &&
+                pt.y >= editingPoint[0].y - 4 &&
+                pt.x <= editingPoint[0].x + 4 &&
+                pt.y <= editingPoint[0].y + 4)
             {
                 newstate = ChangingLowerSpace;
                 editingValA = doc->signals[editingNumber].space;
                 break;
             }
-            if (pt.x >= editingPoint[1].x - 4 && pt.y >= editingPoint[1].y - 4 &&
-                pt.x <= editingPoint[1].x + 4 && pt.y <= editingPoint[1].y + 4)
+            if (p.x > signalNamesWidth-10 &&
+                p.y > heightOffsets[0]-5 &&
+                pt.x >= editingPoint[1].x - 4 &&
+                pt.y >= editingPoint[1].y - 4 &&
+                pt.x <= editingPoint[1].x + 4 &&
+                pt.y <= editingPoint[1].y + 4)
             {
                 newstate = ChangingUpperSpace;
                 editingValA = doc->signals[editingNumber].prespace;
@@ -1901,10 +1931,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             return;
         case EditingDiscontinuity:
             /// check insertion/remove of discont
-            if (pt.x > axisStart &&
-                pt.x < axisStop &&
-                pt.y > DistanceToTimeline - 5 &&
-                pt.y < DistanceToTimeline + 5 )
+            if (p.x > signalNamesWidth-10 &&
+                pt.x > axisStart && pt.x < axisStop
+                //&& pt.y > DistanceToTimeline - 5 && pt.y < DistanceToTimeline + 5
+                //&& pt.y < heightOffsets[heightOffsets.size()-1] + 10
+               )
             {
                 wxCoord p = pt.x-axisStart;
                 wxInt32 discontpos = p / (GridStepWidth);
@@ -1923,6 +1954,7 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             {
                 wxInt32 n = doc->signals.size();
                 if ( n && // some signals in the document
+                    p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
                     pt.x > axisStart &&
                     pt.x < axisStop )
                 {
@@ -1988,9 +2020,10 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             break;
         case InsertingHArrowWaitingFirstPoint:
             /// check if user clicked onto a vertical line
-            for ( wxInt32 k = 0 ; k < VLineOffsets.size() ; ++k )
+            for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
             {
-                if (pt.x >= VLineOffsets[k].x - 3 &&
+                if (p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+                    pt.x >= VLineOffsets[k].x - 3 &&
                     pt.x <= VLineOffsets[k].x + 3 &&
                     pt.y >= VLineOffsets[k].y &&
                     pt.y <= VLineToOffset[k] )
@@ -1998,7 +2031,7 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                     newstate = InsertingHArrowWaitingSecondPoint;
                     editingNumber = k;
                     //editingValA = pt.y - DistanceToTimeline - DistanceFromTimeline;
-                    for ( editingValC = 0 ; editingValC < heightOffsets.size() ; ++editingValC )
+                    for ( editingValC = 0 ; editingValC < (wxInt32)heightOffsets.size() ; ++editingValC )
                     {
                         if ( pt.y < heightOffsets[editingValC] )
                         {
@@ -2015,10 +2048,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             break;
         case HArrowIsMarked:
             /// check click on start of harrow (left)
-            if ( pt.x >= HArrowOffsets[editingNumber].x - 3 &&
-                 pt.x <= HArrowOffsets[editingNumber].x + 3 &&
-                 pt.y >= HArrowOffsets[editingNumber].y - 3 &&
-                 pt.y <= HArrowOffsets[editingNumber].y + 3)
+            if (p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+                pt.x >= HArrowOffsets[editingNumber].x - 3 &&
+                pt.x <= HArrowOffsets[editingNumber].x + 3 &&
+                pt.y >= HArrowOffsets[editingNumber].y - 3 &&
+                pt.y <= HArrowOffsets[editingNumber].y + 3)
             {
                 if ( HArrowOffsets[editingNumber].x ==
                     signalNamesWidth + doc->vertlines[doc->harrows[editingNumber].fromVLine].vpos *
@@ -2035,10 +2069,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 break;
             }
             /// check click on end of harrow (right)
-            if ( pt.x >= HArrowToOffset[editingNumber] - 3 &&
-                 pt.x <= HArrowToOffset[editingNumber] + 3 &&
-                 pt.y >= HArrowOffsets[editingNumber].y - 3 &&
-                 pt.y <= HArrowOffsets[editingNumber].y + 3)
+            if (p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+                pt.x >= HArrowToOffset[editingNumber] - 3 &&
+                pt.x <= HArrowToOffset[editingNumber] + 3 &&
+                pt.y >= HArrowOffsets[editingNumber].y - 3 &&
+                pt.y <= HArrowOffsets[editingNumber].y + 3)
             {
                 if ( HArrowToOffset[editingNumber] ==
                     signalNamesWidth + doc->vertlines[doc->harrows[editingNumber].toVLine].vpos *
@@ -2053,11 +2088,13 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             }
             /// check moving of the text
             {
-                wxCoord
-                x = (HArrowOffsets[editingNumber].x + HArrowToOffset[editingNumber])/2 +
-                    doc->harrows[editingNumber].textoffset.x,
-                y = HArrowOffsets[editingNumber].y + doc->harrows[editingNumber].textoffset.y;
-                if ( pt.x >=  x  - 3 &&
+                wxCoord x = (HArrowOffsets[editingNumber].x + HArrowToOffset[editingNumber])/2;
+                if ( doc->harrows[editingNumber].textoffset.x > GridStepWidth ) x += GridStepWidth;
+                else  x += doc->harrows[editingNumber].textoffset.x;
+                x += doc->harrows[editingNumber].textgridoffset*GridStepWidth;
+                wxCoord y = HArrowOffsets[editingNumber].y + doc->harrows[editingNumber].textoffset.y;
+                if ( p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+                     pt.x >=  x  - 3 &&
                      pt.x <=  x  + 3 &&
                      pt.y >=  y  - 3 &&
                      pt.y <=  y  + 3 )
@@ -2070,7 +2107,8 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 }
             }
             /// check moving of harrow
-            if ( pt.x >= HArrowOffsets[editingNumber].x - 3 &&
+            if ( p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+                 pt.x >= HArrowOffsets[editingNumber].x - 3 &&
                  pt.x <= HArrowToOffset[editingNumber] + 3 &&
                  pt.y >= HArrowOffsets[editingNumber].y - 3 &&
                  pt.y <= HArrowOffsets[editingNumber].y + 3)
@@ -2085,10 +2123,13 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             OnMouseLeftDown(event);
             return;
         case TextFieldSelected:
-            if (pt.x > textOffsets[editingNumber].x &&
+            if (//p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+                pt.x > textOffsets[editingNumber].x &&
                 pt.x < textOffsets[editingNumber].x + textSizes[editingNumber].x &&
                 pt.y > textOffsets[editingNumber].y &&
-                pt.y < textOffsets[editingNumber].y + textSizes[editingNumber].y )
+                pt.y < textOffsets[editingNumber].y + textSizes[editingNumber].y &&
+                textvisible[editingNumber]
+               )
             {
                 /// calc with of the texts
                 wxArrayInt widths;
@@ -2096,7 +2137,7 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 widths.Insert(0, 0);
 
                 /// serch position of click in text
-                wxInt32 k;
+                wxUint32 k;
                 for ( k = 0 ; k < widths.GetCount()-1; ++k )
                     if ( pt.x <= textOffsets[editingNumber].x + (widths[k] + widths[k+1] )/2 )
                         break;
@@ -2109,8 +2150,6 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                     editingValA = k;
                     if ( editingValB == editingValC )
                         editingValB = editingValC = -1;
-                    //dndpt = wxPoint( -1, -1);
-                    //selectpossible = true;
                 }
                 else
                 {
@@ -2123,7 +2162,6 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             else
             {
                 /// generate the command to change the text
-                // TODO (daniel#1#): command to change text
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 cmdproc->Submit(
                     new ChangeTextCommand(doc, editingNumber, editingText)
@@ -2142,10 +2180,12 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 bool clickedText = false;
                 for ( wxInt32 n = textOffsets.size() - 1 ; n >= 0 ; n-- )
                 {
-                    if ( pt.x > textOffsets[n].x &&
-                        pt.x < textOffsets[n].x + textSizes[n].x &&
-                        pt.y > textOffsets[n].y &&
-                        pt.y < textOffsets[n].y + textSizes[n].y )
+                    if ( //p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+                         pt.x > textOffsets[n].x &&
+                         pt.x < textOffsets[n].x + textSizes[n].x &&
+                         pt.y > textOffsets[n].y &&
+                         pt.y < textOffsets[n].y + textSizes[n].y &&
+                         textvisible[n] )
                     {
                         editingNumber = n;
                         newstate = TextFieldSelected;
@@ -2163,11 +2203,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                         widths.Insert(0, 0);
 
                         /// serch position of click in text
-                        wxInt32 k;
+                        wxUint32 k;
                         for ( k = 0 ; k < widths.GetCount()-1; ++k )
                             if ( pt.x <= textOffsets[n].x + (widths[k] + widths[k+1] )/2 )
                                 break;
-                        editingValA = k;
+                        editingValA = (wxInt32)k;
                         editingValB = -1;
                         editingValC = -1;
                         break;
@@ -2206,23 +2246,65 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
     if ( newstate == SignalIsSelected && doc->signals[editingNumber].IsClock )
         UpdateClockPanel();
 
-    if ( dorefresh ) this->Refresh();
+    if ( dorefresh ) this->Refresh(true);
     return;
 }
-void TimingWindow::SetNeutralState(void)
+//p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+void TimingWindow::OnMouseLeftDClick(wxMouseEvent &event)
 {
-    WindowState = Neutral;
-    if ( caret->IsVisible() ) caret->Show(false);
-    scrollingleft = false;
-    scrollingright = false;
-    scrolltimer.Stop();
-    editingNumber = -1;
-    editingValA = -1;
-    editingValB = -1;
-    editingValC = -1;
+
+    if (!view) return;
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
+
+    SetFocus();
+
+    wxClientDC dc(this);
+    DoPrepareDC(dc);
+    dc.SetFont(font);
+    wxPoint pt(event.GetLogicalPosition(dc));
+
+    bool dorefresh = false;
+
+    if ( WindowState == TextFieldSelected )
+    {
+        bool clickedText = false;
+        for ( wxInt32 n = textOffsets.size() - 1 ; n >= 0 ; n-- )
+        {
+            if ( pt.x > textOffsets[n].x &&
+                pt.x < textOffsets[n].x + textSizes[n].x &&
+                pt.y > textOffsets[n].y &&
+                pt.y < textOffsets[n].y + textSizes[n].y &&
+                textvisible[n])
+            {
+                // clicked into textfield
+                editingNumber = n;
+                editingText = texts[n];
+                dorefresh = true;
+                clickedText = true;
+
+                if ( !caret->IsVisible() ) caret->Show();
+                caret->SetSize(1, dc.GetCharHeight());
+                //select all text
+                editingValA = 0;
+                editingValC = editingText.Len();
+                editingValB = 0;
+                break;
+            }
+        }
+    }
+    // text field is selected after first half of dclick
+    //else if ( WindowState == SelectingText ){}
+//    else
+//    {
+//        OnMouseLeftDown(event);
+//        return;
+//    }
+
+    if ( dorefresh ) this->Refresh(true);
+    return;
 }
-
-
+/// moving of objects or changing length (moving start/end) of objects
 void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
 {
     if (!view) return;
@@ -2426,10 +2508,13 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
         case HArrowMovingText:
             //if ( editingValA != -1 && editingValB != -1 )
             {
+                wxCoord gridoff = editingValA / GridStepWidth;
+                wxCoord off     = editingValA - GridStepWidth * gridoff;
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 cmdproc->Submit(new ChangeHArrowTextPosCommand(doc, editingNumber,
-                    editingValA, // the new x offset
-                    editingValB // the new y offset
+                    off,//editingValA, // the new x offset
+                    editingValB, // the new y offset
+                    gridoff
                 ));
             }
             newstate = HArrowIsMarked;
@@ -2438,7 +2523,21 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
     WindowState = newstate;
     if ( newstate == Neutral )
         SetNeutralState();
-    Refresh();
+    Refresh(true);
+}
+
+void TimingWindow::SetNeutralState(void)
+{
+    WindowState = Neutral;
+    if ( caret->IsVisible() ) caret->Show(false);
+    editingTextIsVisible = false;
+    scrollingleft = false;
+    scrollingright = false;
+    scrolltimer.Stop();
+    editingNumber = -1;
+    editingValA = -1;
+    editingValB = -1;
+    editingValC = -1;
 }
 
 void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
@@ -2450,7 +2549,7 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
     SetFocus();
 
     wxClientDC dc(this);
-    PrepareDC(dc);
+    DoPrepareDC(dc);
     dc.SetFont(font);
     wxPoint pt(event.GetLogicalPosition(dc));
 
@@ -2470,12 +2569,12 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
 
     if ( WindowState == TextFieldSelected )
     {
-        caret->Show(false);
+        if ( caret->IsVisible() ) caret->Show(false);
         WindowState = SelectingText;
         editingValA = -1;
         editingValB = -1;
         editingValC = -1;
-        this->Refresh();
+        this->Refresh(true);
         return;
     }
 
@@ -2483,9 +2582,14 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
     SetNeutralState();
 
     editingNumber = -1;
-    for ( wxInt32 n = 0 ; n < doc->signals.size() ; ++n )
-        if ( pt.x >= manipXoffset - 2*manipRadius && pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
-            pt.x <=  manipXoffset + 2*manipRadius && pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
+    wxPoint unscrolledPosition;
+    CalcUnscrolledPosition(0, 0, &unscrolledPosition.x, &unscrolledPosition.y);
+    for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n )
+    {
+        if ( pt.x >= manipXoffset - 2*manipRadius + unscrolledPosition.x &&
+            pt.y >= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace - 2*manipRadius &&
+            pt.x <=  manipXoffset + 2*manipRadius + unscrolledPosition.x &&
+            pt.y <= heightOffsets[n]+doc->MinimumSignalDistance/2 + doc->SignalHeight/2 + doc->signals[n].prespace + 2*manipRadius)
         {
             editingNumber = n;
             WindowState = SignalIsSelected;
@@ -2496,13 +2600,47 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
 //                menu.Append(TIMING_ID_CHANGECLOCK, _T("Change clock settings"));
             menu.Append(TIMING_ID_DELETE, _T("Delet signal"));
             PopupMenu(&menu);
+            break;
         }
+    }
 
-    if ( dorefresh ) this->Refresh();
+    if ( dorefresh ) this->Refresh(true);
     return;
 
 }
 
+void TimingWindow::CheckHScroll(wxPoint pos)
+{
+    wxSize clientSize;
+    clientSize = this->GetClientSize();
+
+    if ( pos.x <= signalNamesWidth )
+    {
+        scrollingleft = true;
+        scrolltimer.Start(200, wxTIMER_ONE_SHOT);
+    }
+    else if ( (pos.x - clientSize.x) >=-5 )
+    {
+        scrollingright = true;
+        scrolltimer.Start(200, wxTIMER_ONE_SHOT);
+    }
+}
+void TimingWindow::CheckVScroll(wxPoint pos)
+{
+    wxSize clientSize;
+    clientSize = this->GetClientSize();
+
+    if ( pos.y <= heightOffsets[0] )
+    {
+        scrollingup = true;
+        scrolltimer.Start(200, wxTIMER_ONE_SHOT);
+    }
+    else if ( (pos.y -clientSize.y) >= -5 )
+    {
+        scrollingdown = true;
+        scrolltimer.Start(200, wxTIMER_ONE_SHOT);
+    }
+}
 void TimingWindow::OnMouseMove(wxMouseEvent &event)
 {
     if ( !view ) return;
@@ -2510,7 +2648,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
     if ( !doc ) return;
 
     wxClientDC dc(this);
-    PrepareDC(dc);
+    DoPrepareDC(dc);
     dc.SetFont(font);
     wxPoint pt(event.GetLogicalPosition(dc));
 
@@ -2519,6 +2657,12 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
     wxPoint textOffset(0,0);
 
     states newstate = WindowState;
+    scrollingleft = false;
+    scrollingright = false;
+    scrollingup = false;
+    scrollingdown = false;
+    scrolltimer.Stop();
+    wxPoint pos(event.GetPosition());
     switch ( WindowState )
     {
         default:
@@ -2531,9 +2675,6 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
         case SelectingText:
             break;
         case EditAxisLeft:
-            scrollingleft = false;
-            scrollingright = false;
-            scrolltimer.Stop();
             if ( event.LeftIsDown() )
             {
                 wxCoord p = pt.x - axisStart;
@@ -2541,15 +2682,13 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     editingValB = editingValA;
                 else
                     editingValB = editingValA - p / (GridStepWidth);
+                CheckHScroll(pos);
             }
             else
                 newstate = AxisIsMarked;
             break;
         /// the user is changing the length of the time axis
         case EditAxisRight:
-            scrollingleft = false;
-            scrollingright = false;
-            scrolltimer.Stop();
             if ( event.LeftIsDown()  )
             {
                 wxCoord p = pt.x-axisStart;
@@ -2557,29 +2696,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     editingValB = editingValA;
                 else
                     editingValB = p / (GridStepWidth);
-                wxSize clientSize;
-                clientSize = this->GetClientSize();
-                wxCoord startx, starty;
-                this->GetViewStart(&startx, &starty);
-                wxPoint pos(event.GetPosition());
-                if ( pos.x <=5 )
-                {
-                    wxCoord dx, dy;//, desc;
-                    dx = dc.GetCharWidth();
-                    dy = dc.GetCharHeight();
-                    Scroll(startx-dx/4, starty);
-                    scrollingleft = true;
-                    scrolltimer.Start(400, wxTIMER_ONE_SHOT);
-                }
-                else if ( (pos.x - clientSize.x) >=-5 )
-                {
-                    wxCoord dx, dy;//, desc;
-                    dx = dc.GetCharWidth();
-                    dy = dc.GetCharHeight();
-                    Scroll(startx+dx/4, starty);
-                    scrollingright = true;
-                    scrolltimer.Start(400, wxTIMER_ONE_SHOT);
-                }
+                CheckHScroll(pos);
             }
             else
                 newstate = AxisIsMarked;
@@ -2627,19 +2744,17 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                 newstate = MovingSignal;
             break;
         case MovingSignal:
-            /// moving signal
             if ( event.LeftIsDown() )
             {
-                wxInt32 n;
+                wxUint32 n;
                 for ( n = 0 ; n < doc->signals.size() ; ++n)
                     if ( pt.y < (heightOffsets[n] + heightOffsets[n+1])/2 )
                         break;
-                if (editingNumber != n &&
-                    editingNumber +1 != n )
+                if ( editingNumber>=0 && (wxUint32)editingNumber != n && (wxUint32)editingNumber +1 != n )
                 {
-                    if ( editingValA != n )
+                    if ( editingValA != (wxInt32)n )
                         dorefresh = true;
-                    editingValA = n;
+                    editingValA = (wxInt32)n;
                 }
                 else
                 {
@@ -2647,29 +2762,29 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                         dorefresh = true;
                     editingValA = -1;
                 }
-
+                CheckVScroll(pos);
             }
             break;
         case ChangingUpperSpace:
             if ( event.LeftIsDown() )
             {
-                wxCoord p = pt.y;
-                if ( p >= ( heightOffsets[editingNumber] + doc->signals[editingNumber].prespace ) )
+                if ( pt.y >= ( heightOffsets[editingNumber] + doc->signals[editingNumber].prespace ) )
                     editingValA = 0;
                 else
-                    editingValA = ( heightOffsets[editingNumber] + doc->signals[editingNumber].prespace) - p;
+                    editingValA = ( heightOffsets[editingNumber] + doc->signals[editingNumber].prespace) - pt.y;
+                CheckVScroll(pos);
             }
             break;
         case ChangingLowerSpace:
             if ( event.LeftIsDown() )
             {
-                wxCoord p = pt.y;
-                if ( p <= (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
+                if ( pt.y <= (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
                                 doc->SignalHeight + doc->MinimumSignalDistance ) )
-                        editingValA = 0;
-                    else
-                        editingValA = p - (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
+                    editingValA = 0;
+                else
+                    editingValA = pt.y - (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
                                 doc->SignalHeight + doc->MinimumSignalDistance );
+                CheckVScroll(pos);
             }
             break;
         case InsertingVLineWaitingSecondPoint:
@@ -2693,6 +2808,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     if ( editingPoint[1].y != k )
                         dorefresh = true;
                     editingPoint[1].y = k;
+                    CheckVScroll(pos);
                 }
             }
             break;
@@ -2748,6 +2864,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                         editingValA = k;
                     }
                 }
+                CheckVScroll(pos);
             }
             break;
         case VLineIsMarked:
@@ -2811,6 +2928,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                         editingValB = 0;
                     }
                 }
+                CheckHScroll(pos);
             }
             break;
         case HArrowIsMarked:
@@ -2819,7 +2937,6 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
         case MovingHArrow:
             if ( event.LeftIsDown() )
             {
-                ///offset.y = editingValA + heightOffsets[editingValB];
                 wxCoord top, bottom, tmp;
                 wxInt32 topline;
                 wxInt32 bottomline;
@@ -2847,11 +2964,6 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                 }
                 else if ( pt.y > bottom )
                 {
-                    //editingValA = bottom - heightOffsets[0];
-                    editingValA =   doc->signals[bottomline].prespace +
-                                    doc->signals[bottomline].space +
-                                    doc->SignalHeight +
-                                    doc->MinimumSignalDistance;
                     editingValA = bottom-heightOffsets[bottomline];
                     editingValB = bottomline;
                 }
@@ -2864,14 +2976,14 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                             break;
                     }
                     editingValB = k;
-
                     editingValA = pt.y - heightOffsets[editingValB];
                 }
+                CheckVScroll(pos);
             }
             break;
         case InsertingHArrowWaitingSecondPoint:
             /// check if user mover over a vertical line
-            for ( wxInt32 k = 0 ; k < VLineOffsets.size() ; ++k )
+            for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
             {
                 //wxInt32 pos = DistanceToTimeline + DistanceFromTimeline + editingValA;
                 wxInt32 pos = heightOffsets[editingValC] + editingValA;
@@ -2882,22 +2994,19 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     pos >= VLineOffsets[k].y &&
                     pos <= VLineToOffset[k] )
                 {
-                    //newstate = InsertingHArrowWaitingSecondPoint;
-                    //editingNumber = k;
-                    //editingValA = pt.y - DistanceToTimeline - DistanceFromTimeline;
                     editingValB = k;
-
                     break;
                 }
                 else
                     editingValB = -1;
             }
+            CheckHScroll(pos);
             dorefresh = true;
             break;
 
         case ChangingHArrowLengthLeft:
         case ChangingHArrowLengthRight:
-            for ( wxInt32 k = 0 ; k < VLineOffsets.size() ; ++k )
+            for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
             {
                 wxInt32 pos = doc->harrows[editingNumber].pos + DistanceToTimeline + DistanceFromTimeline;
                 if (pt.x >= VLineOffsets[k].x - 3 &&
@@ -2920,16 +3029,24 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                         editingValB = -1;
             }
             dorefresh = true;
+            CheckHScroll(pos);
             break;
         case HArrowMovingText:
             if ( event.LeftIsDown() )
             {
-                editingValA = pt.x - (HArrowOffsets[editingNumber].x + HArrowToOffset[editingNumber])/2;
-                editingValB = pt.y - HArrowOffsets[editingNumber].y;
+                if ( pt.x > axisStart && pt.x < axisStop &&
+                     pt.y > heightOffsets[0]+dc.GetCharHeight() && pt.y < heightOffsets[heightOffsets.size()-1]
+                   )
+                {
+                    editingValA = pt.x - (HArrowOffsets[editingNumber].x + HArrowToOffset[editingNumber])/2;
+                    editingValB = pt.y - HArrowOffsets[editingNumber].y;
+                }
             }
+            CheckHScroll(pos);
+            CheckVScroll(pos);
             break;
         case TextFieldSelected:
-            if ( event.LeftIsDown() )
+            if ( event.LeftIsDown() && textvisible[editingNumber] )
             {
                 wxString text = editingText;
                 /// calc width of the texts
@@ -2940,10 +3057,11 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     editingValB = editingValA;
 
                 ///get position of cursor in the text and move the cursor to this place
-                wxInt32 &k = editingValA;
+                wxUint32 k = (wxUint32)editingValA;
                 for ( k = 0 ; k < widths.GetCount() - 1 ; ++k )
                     if ( pt.x <= textOffsets[editingNumber].x + (widths[k] + widths[k+1] )/2 )
                         break;
+                editingValA = (wxInt32)k;
                 editingValC = editingValA;
                 dorefresh = true;
             }
@@ -2957,7 +3075,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
         dorefresh = true;
     }
 
-    if ( dorefresh ) this->Refresh();
+    if ( dorefresh ) this->Refresh(true);
     return;
 }
 
@@ -2967,33 +3085,32 @@ void TimingWindow::OnMouseWheel(wxMouseEvent& event)
         return;
 
     wxClientDC dc(this);
-    PrepareDC(dc);
+    DoPrepareDC(dc);
 
-    //wxFont font(fontsize, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);//, const bool underline = false, const wxString& faceName = _T(""), wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
-    //dc.SetFont(font);
     dc.SetFont(font);
-    //dc.SetPen(*wxBLACK_PEN);
-    wxCoord dx, dy;//, desc;
-    //dc.GetTextExtent(_T("H"), &dx, &dy, &desc);
+    wxCoord dx, dy;
     dx = dc.GetCharWidth();
     dy = dc.GetCharHeight();
 
     if ( ! event.IsPageScroll() )
     {
         wxInt32 nWheelRotation = event.GetWheelRotation();
-        wxInt32 x, y;
+        wxInt32 x, y,yy;
         GetViewStart(&x, &y);
         if (nWheelRotation < 0)
-            y += dy/4;
+            yy = dy/4;
         else
-            y -= dy/4;
+            yy = -dy/4;
+        y += yy;
         Scroll(x, y);
+        //cursorpos.y += yy;
+        this->Refresh();
     }
 }
 /// //////////////unused event methods//////////////////////////////////////////
 void TimingWindow::OnMouseRightUp(wxMouseEvent& event){}
-//void MyCanvas::OnSetFocus(wxFocusEvent &event){}
-//void MyCanvas::OnKillFocus(wxFocusEvent &event){}
+//void TimingWindow::OnSetFocus(wxFocusEvent &event){}
+//void TimingWindow::OnKillFocus(wxFocusEvent &event){}
 /// ////////////////////////////////////////////////////////////////////////////
 
 void TimingWindow::OnChar(wxKeyEvent &event)
@@ -3029,7 +3146,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
             if ( event.GetKeyCode() == WXK_ESCAPE )
             {
                 SetNeutralState();
-                Refresh();
+                Refresh(true);
             }
             break;
         case DisconSelected:
@@ -3039,12 +3156,12 @@ void TimingWindow::OnChar(wxKeyEvent &event)
             if ( event.GetKeyCode() == WXK_ESCAPE )
             {
                 SetNeutralState();
-                Refresh();
+                Refresh(true);
             }
             else if ( event.GetKeyCode() == WXK_DELETE )
             {
                 DeleteSelection();
-                Refresh();
+                Refresh(true);
             }
             break;
         case SignalIsSelected:
@@ -3057,7 +3174,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         {
                             editingNumber = 0;
                             UpdateClockPanel();
-                            this->Refresh();
+                            this->Refresh(true);
                         }
                         break;
                     case WXK_END:
@@ -3065,7 +3182,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         {
                             editingNumber = n-1;
                             UpdateClockPanel();
-                            this->Refresh();
+                            this->Refresh(true);
                         }
                         break;
                     case WXK_UP:
@@ -3073,7 +3190,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         {
                             --editingNumber;
                             UpdateClockPanel();
-                            this->Refresh();
+                            this->Refresh(true);
                         }
                         break;
                     case WXK_DOWN:
@@ -3081,7 +3198,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         {
                             ++editingNumber;
                             UpdateClockPanel();
-                            this->Refresh();
+                            this->Refresh(true);
                         }
                         break;
                     case WXK_DELETE:
@@ -3093,7 +3210,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         scrolltimer.Stop();
                         editingValA = -1;
                         editingValB = -1;
-                        this->Refresh();
+                        this->Refresh(true);
                         break;
                     default:
                         break;
@@ -3105,114 +3222,63 @@ void TimingWindow::OnChar(wxKeyEvent &event)
             {
                 SetCursor(*wxCROSS_CURSOR);
                 SetNeutralState();
-                Refresh();
+                Refresh(true);
             }
             break;
         case TextFieldSelected:
             {
                 //MyCommandProcessor *cmdproc = (MyCommandProcessor *)doc->GetCommandProcessor();
                 wxString ch;
-                switch (event.GetKeyCode())
+                if ( editingTextIsVisible )
                 {
-                    case WXK_TAB:
+                    switch (event.GetKeyCode())
                     {
-                        ch = _T("    ");
-                        break;
-                    }
-                    case WXK_BACK:
-                    {
-                        if ( editingValB == -1 || editingValC == -1 )
+                        case WXK_TAB:
                         {
-                            if ( editingValA > 0 )
-                            {
-                                //wxString chtd = text.Mid(editingValA-1, 1);
-                                editingText = editingText.Mid(0, editingValA-1) + editingText.Mid(editingValA);
-                                editingValA--;
-                            }
+                            ch = _T("    ");
+                            break;
                         }
-                        else
-                        {
-                            if ( editingValB < editingValC )
-                            {
-                                editingText = editingText.Mid(0, editingValB) + editingText.Mid(editingValC);
-                                editingValA = editingValB;
-                            }
-                            else
-                            {
-                                editingText = editingText.Mid(0, editingValC) + editingText.Mid(editingValB);
-                                editingValA = editingValC;
-                            }
-                            editingValB = -1;
-                            editingValC = -1;
-                        }
-                        Refresh();
-                        return;
-                    }
-                    case WXK_DELETE:
-                    {
-                        DeleteSelection();
-                        return;
-                    }
-                    case WXK_HOME:
-                    {
-                        if ( event.ShiftDown() && editingValA != 0 )
-                        {
-                            if ( editingValB == -1 || editingValC == -1)
-                            {
-                                editingValB = editingValA;
-                                editingValC = 0;
-                            }
-                            else
-                            {
-                                editingValC = 0;
-                            }
-                        }
-                        else
-                        {
-                            editingValB = -1;
-                            editingValC = -1;
-                        }
-                        editingValA = 0;
-                        this->Refresh();
-                        return;
-                    }
-                    case WXK_END:
-                    {
-                        if ( event.ShiftDown() && editingValA < editingText.Length() )
+                        case WXK_BACK:
                         {
                             if ( editingValB == -1 || editingValC == -1 )
                             {
-                                editingValB = editingValA;
-                                editingValC = editingText.Length();
+                                if ( editingValA > 0 )
+                                {
+                                    //wxString chtd = text.Mid(editingValA-1, 1);
+                                    editingText = editingText.Mid(0, editingValA-1) + editingText.Mid(editingValA);
+                                    editingValA--;
+                                }
                             }
                             else
                             {
-                                editingValC = editingText.Length();
+                                if ( editingValB < editingValC )
+                                {
+                                    editingText = editingText.Mid(0, editingValB) + editingText.Mid(editingValC);
+                                    editingValA = editingValB;
+                                }
+                                else
+                                {
+                                    editingText = editingText.Mid(0, editingValC) + editingText.Mid(editingValB);
+                                    editingValA = editingValC;
+                                }
+                                editingValB = -1;
+                                editingValC = -1;
                             }
+                            Refresh(true);
+                            return;
                         }
-                        else
+                        case WXK_HOME:
                         {
-                            editingValB = -1;
-                            editingValC = -1;
-                        }
-                        editingValA = editingText.Length();
-                        Refresh();
-                        return;
-                    }
-                    case WXK_LEFT:
-                    {
-                        if ( editingValA > 0 )
-                        {
-                            if ( event.ShiftDown() )
+                            if ( event.ShiftDown() && editingValA != 0 )
                             {
                                 if ( editingValB == -1 || editingValC == -1)
                                 {
                                     editingValB = editingValA;
-                                    editingValC = editingValA-1;
+                                    editingValC = 0;
                                 }
                                 else
                                 {
-                                    editingValC--;
+                                    editingValC = 0;
                                 }
                             }
                             else
@@ -3220,25 +3286,22 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                                 editingValB = -1;
                                 editingValC = -1;
                             }
-                            editingValA--;
-                            Refresh();
+                            editingValA = 0;
+                            this->Refresh(true);
+                            return;
                         }
-                        return;
-                    }
-                    case WXK_RIGHT:
-                    {
-                        if ( editingValA < editingText.Length() )
+                        case WXK_END:
                         {
-                            if ( event.ShiftDown() )
+                            if ( event.ShiftDown() && (wxUint32)editingValA < editingText.Length() )
                             {
                                 if ( editingValB == -1 || editingValC == -1 )
                                 {
                                     editingValB = editingValA;
-                                    editingValC = editingValA+1;
+                                    editingValC = editingText.Length();
                                 }
                                 else
                                 {
-                                    editingValC++;
+                                    editingValC = editingText.Length();
                                 }
                             }
                             else
@@ -3246,117 +3309,156 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                                 editingValB = -1;
                                 editingValC = -1;
                             }
-                            editingValA++;
-                            Refresh();
+                            editingValA = editingText.Length();
+                            Refresh(true);
+                            return;
                         }
-                        return;
+                        case WXK_LEFT:
+                        {
+                            if ( editingValA > 0 )
+                            {
+                                if ( event.ShiftDown() )
+                                {
+                                    if ( editingValB == -1 || editingValC == -1)
+                                    {
+                                        editingValB = editingValA;
+                                        editingValC = editingValA-1;
+                                    }
+                                    else
+                                    {
+                                        editingValC--;
+                                    }
+                                }
+                                else
+                                {
+                                    editingValB = -1;
+                                    editingValC = -1;
+                                }
+                                editingValA--;
+                                Refresh(true);
+                            }
+                            return;
+                        }
+                        case WXK_RIGHT:
+                        {
+                            if ( (wxUint32)editingValA < editingText.Length() )
+                            {
+                                if ( event.ShiftDown() )
+                                {
+                                    if ( editingValB == -1 || editingValC == -1 )
+                                    {
+                                        editingValB = editingValA;
+                                        editingValC = editingValA+1;
+                                    }
+                                    else
+                                    {
+                                        editingValC++;
+                                    }
+                                }
+                                else
+                                {
+                                    editingValB = -1;
+                                    editingValC = -1;
+                                }
+                                editingValA++;
+                                Refresh(true);
+                            }
+                            return;
+                        }
+                        case WXK_DELETE:
+                        {
+                            DeleteSelection();
+                            return;
+                        }
+                        case WXK_UP: return;
+                        case WXK_DOWN: return;
+                        case WXK_RETURN:
+                        case WXK_NUMPAD_ENTER:
+                        {
+                            /// generate the command to change the text
+                            wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+                            cmdproc->Submit(
+                                new ChangeTextCommand(doc, editingNumber, editingText)
+                            );
+                            editingNumber = -1;
+                            editingValA = -1;
+                            editingValB = -1;
+                            editingValC = -1;
+                            if ( caret->IsVisible() ) caret->Show(false);
+                            WindowState = SelectingText;
+                            return;
+                        }
+                        case WXK_ESCAPE:
+                        {
+                            editingValA = -1;
+                            editingValB = -1;
+                            editingValC = -1;
+                            if ( caret->IsVisible() ) caret->Hide();
+                            editingTextIsVisible = false;
+                            editingNumber = -1;
+                            /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            WindowState = SelectingText;
+                            Refresh(true);
+                            return;
+                        }
+                        default:
+                        {
+                            if ( !event.AltDown() && wxIsprint(event.GetKeyCode()) )
+                            {
+                                ch = wxString( (wxChar)event.GetKeyCode() );
+                                break;
+                            }
+                            else
+                            {
+                                event.Skip();
+                                return;
+                            }
+                        }
                     }
-                    case WXK_UP: return;
-                    case WXK_DOWN: return;
-                    case WXK_RETURN:
-                    case WXK_NUMPAD_ENTER:
+                    if ( editingValB == -1 || editingValC == -1 )
                     {
-                        /// generate the command to change the text
-                        wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-                        cmdproc->Submit(
-                            new ChangeTextCommand(doc, editingNumber, editingText)
-                        );
-                        editingNumber = -1;
-                        editingValA = -1;
-                        editingValB = -1;
-                        editingValC = -1;
-                        caret->Show(false);
-                        WindowState = SelectingText;
-                        return;
+                        editingText = editingText.Mid(0, editingValA) + ch + editingText.Mid(editingValA);
+                        editingValA += ch.Length();
                     }
-                    case WXK_ESCAPE:
+                    else
+                    {
+                        if ( editingValB < editingValC )
+                        {
+                            ch = editingText.Mid( 0, editingValB ) + ch;
+                            editingText = ch + editingText.Mid(editingValC);
+                        }
+                        else
+                        {
+                            ch = editingText.Mid(0, editingValC) + ch;
+                            editingText = ch + editingText.Mid(editingValB);
+                        }
+                        editingValA = ch.Length();
+                    }
+                    editingValB = -1;
+                    editingValC = -1;
+                    this->Refresh(true);
+                }
+                else{
+                    if ( event.GetKeyCode() == WXK_ESCAPE )
                     {
                         editingValA = -1;
                         editingValB = -1;
                         editingValC = -1;
                         if ( caret->IsVisible() ) caret->Hide();
+                        editingTextIsVisible = false;
                         editingNumber = -1;
                         /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         WindowState = SelectingText;
-                        Refresh();
+                        Refresh(true);
                         return;
                     }
-                    default:
-                    {
-                        if ( !event.AltDown() && wxIsprint(event.GetKeyCode()) )
-                        {
-                            ch = wxString( (wxChar)event.GetKeyCode() );
-                            break;
-                        }
-                        else
-                        {
-                            event.Skip();
-                            return;
-                        }
-                    }
                 }
-                if ( editingValB == -1 || editingValC == -1 )
-                {
-                    editingText = editingText.Mid(0, editingValA) + ch + editingText.Mid(editingValA);
-                    editingValA += ch.Length();
-                }
-                else
-                {
-                    if ( editingValB < editingValC )
-                    {
-                        ch = editingText.Mid( 0, editingValB ) + ch;
-                        editingText = ch + editingText.Mid(editingValC);
-                    }
-                    else
-                    {
-                        ch = editingText.Mid(0, editingValC) + ch;
-                        editingText = ch + editingText.Mid(editingValB);
-                    }
-                    editingValA = ch.Length();
-                }
-                editingValB = -1;
-                editingValC = -1;
-                this->Refresh();
             }
             break;
         //case ...
     }
 }
 
-void TimingWindow::OnKeyDown(wxKeyEvent &event)
-{
-    ///special key-handling here
-    /// most of the time EVT_CHAR will call OnChar, thanks to Skip()
-
-    //if ( WindowState == MovingVLine )
-    //    if ( event.GetModifiers() == wxMOD_CONTROL )
-
-    if (!view) return;
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-
-//    if ( WindowState == TextFieldSelected )
-//    {
-//        int ch = event.GetKeyCode();
-//        if ( ch == WXK_RETURN ||
-//             ch == WXK_NUMPAD_ENTER )
-//        {
-//            /// generate the command to change the text
-//            // TODO (daniel#1#): command to change text
-//            wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-//            cmdproc->Submit(
-//                new ChangeTextCommand(doc, editingNumber, editingText)
-//            );
-//            editingNumber = -1;
-//            editingValA = -1;
-//            editingValB = -1;
-//            editingValC = -1;
-//            WindowState = SelectingText;
-//            return;
-//        }
-//    }
-    event.Skip();
-}
 
 void TimingWindow::OnSelectInsertDiscontTool(void)
 {
@@ -3382,7 +3484,7 @@ void TimingWindow::OnSelectInsertDiscontTool(void)
     scrollingright = false;
     scrolltimer.Stop();
 
-    this->Refresh();
+    this->Refresh(true);
 }
 
 void TimingWindow::OnSelectRulerTool(void)
@@ -3409,7 +3511,7 @@ void TimingWindow::OnSelectRulerTool(void)
     scrollingright = false;
     scrolltimer.Stop();
 
-    this->Refresh();
+    this->Refresh(true);
 }
 void TimingWindow::OnSelectHArrowTool(void)
 {
@@ -3435,7 +3537,7 @@ void TimingWindow::OnSelectHArrowTool(void)
     scrollingright = false;
     scrolltimer.Stop();
 
-    this->Refresh();
+    this->Refresh(true);
 }
 void TimingWindow::OnSelectTextTool(void)
 {
@@ -3461,7 +3563,7 @@ void TimingWindow::OnSelectTextTool(void)
     scrollingright = false;
     scrolltimer.Stop();
 
-    this->Refresh();
+    this->Refresh(true);
 }
 void TimingWindow::OnSelectNeutralTool(void)
 {
@@ -3508,7 +3610,7 @@ void TimingWindow::OnSelectNeutralTool(void)
             break;
     }
 
-    Refresh();
+    Refresh(true);
 
 }
 
@@ -3537,7 +3639,7 @@ void TimingWindow::InsertText(wxString str)
             editingValB = -1;
             editingValC = -1;
         }
-        Refresh();
+        Refresh(true);
     }
 }
 
@@ -3566,7 +3668,7 @@ void TimingWindow::DeleteText(void)
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
     if ( !doc ) return;
 
-    if ( WindowState != TextFieldSelected) return;
+    if ( WindowState != TextFieldSelected || !editingTextIsVisible) return;
 
     if ( IsTextSelected() )
     {
@@ -3586,7 +3688,7 @@ void TimingWindow::DeleteText(void)
     else
         editingText = editingText.Mid(0, editingValA) + editingText.Mid(editingValA+1);
 
-    this->Refresh();
+    this->Refresh(true);
 }
 void TimingWindow::SelectAll(void)
 {
@@ -3594,7 +3696,7 @@ void TimingWindow::SelectAll(void)
 
     editingValB = 0;
     editingValC = editingText.Length();
-    this->Refresh();
+    this->Refresh(true);
 }
 bool TimingWindow::CanDeleteText(void)
 {
@@ -3604,8 +3706,7 @@ bool TimingWindow::CanDeleteText(void)
 
     if ( IsTextSelected() ) return true;
 
-    if ( WindowState == TextFieldSelected  &&
-            editingValA < editingText.Len() )
+    if ( WindowState == TextFieldSelected  && (wxUint32)editingValA < editingText.Len() && editingValA >= 0 )
         return true;
 
     return false;
@@ -3624,7 +3725,7 @@ void TimingWindow::DeleteSignal(void)
         );
         editingNumber = -1;
         SetNeutralState();
-        Refresh();
+        Refresh(true);
     }
 }
 void TimingWindow::DeleteVLine(void)
@@ -3641,7 +3742,7 @@ void TimingWindow::DeleteVLine(void)
         );
         editingNumber = -1;
         SetNeutralState();
-        Refresh();
+        Refresh(true);
     }
 }
 void TimingWindow::DeleteHArrow(void)
@@ -3660,7 +3761,7 @@ void TimingWindow::DeleteHArrow(void)
         editingValA = -1;
         editingValB = -1;
         SetNeutralState();
-        Refresh();
+        Refresh(true);
     }
 }
 void TimingWindow::DeleteSelection(void)
@@ -3713,13 +3814,13 @@ void TimingWindow::OnDragEnter(void)
 {
     /*drop = true;
     dropcaret->Show();
-    Refresh();*/
+    Refresh(true);*/
 }
 void TimingWindow::OnDragLeave(void)
 {
     /*drop = false;
     dropcaret->Hide();
-    Refresh();*/
+    Refresh(true);*/
 }
 wxDragResult TimingWindow::OnDragOver(wxPoint p, wxDragResult def)
 {
@@ -3730,7 +3831,7 @@ wxDragResult TimingWindow::OnDragOver(wxPoint p, wxDragResult def)
         return (wxDragNone);
 /*
     wxClientDC dc(this);
-    PrepareDC(dc);
+    DoPrepareDC(dc);
     wxCoord xx, yy;
     CalcUnscrolledPosition( p.x, p.y, &xx, &yy);
     dc.SetFont(font);
@@ -3778,7 +3879,7 @@ wxDragResult TimingWindow::OnDragOver(wxPoint p, wxDragResult def)
             if ( !dropcaret->IsVisible() ) dropcaret->Show();
             dropcaret->SetSize(1, dc.GetCharHeight() );
             droppos = n;
-            this->Refresh();
+            this->Refresh(true);
             return def;
         }
         else
@@ -3789,7 +3890,7 @@ wxDragResult TimingWindow::OnDragOver(wxPoint p, wxDragResult def)
         }
     }
     /// check that a wxCaret is shown where needed and refresh
-    this->Refresh();
+    this->Refresh(true);
 */
 /// ////////////////////////////////////////////////////////////////////////////
     return(wxDragNone);
@@ -3810,45 +3911,322 @@ bool TimingWindow::OnDrop(wxPoint pt, wxString str )
         InsertDroppedText(str);
     }
 */
-    Refresh();
+    Refresh(true);
     /// /////////////////////////////////////////////////////////////////////////////////////////////////
     return true;
 }
 void TimingWindow::OnTimer(wxTimerEvent& event)
 {
-    wxClientDC dc(this);
-    PrepareDC(dc);
+    if ( !view ) return;
+    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+    if ( !doc ) return;
 
-    if ( scrollingleft || scrollingright )
+    wxClientDC dc(this);
+    DoPrepareDC(dc);
+
+    if ( scrollingleft || scrollingright || scrollingup || scrollingdown )
     {
+        wxSize virtsize = GetVirtualSize();
+
         wxCoord startx, starty;
         this->GetViewStart(&startx, &starty);
-        wxCoord dx;//, desc;
-        dx = dc.GetCharWidth();
-        if (scrollingleft)
-            Scroll(startx-dx, starty);
-        else
+
+        wxCoord dx = 0, dy = 0;
+        if ( scrollingleft || scrollingright ) dx = 5;//dx = dc.GetCharWidth();
+        if ( scrollingup || scrollingdown ) dy = 5;//dy = dc.GetCharHeight();
+
+        if (scrollingleft) dx = -dx;
+        if (scrollingup) dy = -dy;
+
+        int xu,yu;
+        GetScrollPixelsPerUnit(&xu, &yu);
+        xu *= dx;
+        yu *= dy;
+        wxPoint newcursorpos = cursorpos;
+        newcursorpos.x += xu;
+        newcursorpos.y += yu;
+
+        if ( newcursorpos.x < signalNamesWidth || newcursorpos.x >= virtsize.x )
         {
-            Scroll(startx+dx, starty);
-            cursorpos.x += dx;
+            newcursorpos.x = cursorpos.x;
+            dx = 0;
+        }
+        if ( newcursorpos.y < 0 || newcursorpos.y > virtsize.y)
+        {
+            newcursorpos.y = cursorpos.y;
+            dy = 0;
         }
 
+        Scroll(startx+dx, starty+dy);
+
+        wxPoint &pt = newcursorpos;
+        switch ( WindowState )
+        {
+            case EditAxisRight:
+                editingValB = (newcursorpos.x-axisStart) / GridStepWidth;
+                break;
+            case EditAxisLeft:
+                if ( newcursorpos.x < axisStop )
+                    editingValB = editingValA - (newcursorpos.x-axisStart) / (GridStepWidth);
+                else
+                    editingValB = editingValA;
+                break;
+            case ChangingUpperSpace:
+                if ( newcursorpos.y >= ( heightOffsets[editingNumber] + doc->signals[editingNumber].prespace ) )
+                    editingValA = 0;
+                else
+                    editingValA = ( heightOffsets[editingNumber] + doc->signals[editingNumber].prespace) - newcursorpos.y;
+                break;
+            case ChangingLowerSpace:
+                if ( newcursorpos.y <= (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
+                                doc->SignalHeight + doc->MinimumSignalDistance ) )
+                    editingValA = 0;
+                else
+                    editingValA = newcursorpos.y - (heightOffsets[editingNumber] + doc->signals[editingNumber].prespace +
+                                doc->SignalHeight + doc->MinimumSignalDistance );
+                break;
+            case MovingSignal:
+                {
+                    wxUint32 n;
+                    for ( n = 0 ; n < doc->signals.size() ; ++n)
+                        if ( pt.y < (heightOffsets[n] + heightOffsets[n+1])/2 )
+                            break;
+                    if ( editingNumber>=0 && (wxUint32)editingNumber != n && (wxUint32)editingNumber +1 != n )
+                        editingValA = (wxInt32)n;
+                    else
+                        editingValA = -1;
+                }
+                break;
+            case InsertingVLineWaitingSecondPoint:
+                {
+                    wxInt32 n = doc->signals.size();
+                    if ( n //&&  some signals in the document
+                        //pt.x > axisStart &&
+                        //pt.x < axisStop /*&&
+                        //pt.y > heightOffsets[0] &&
+                        //pt.y < heightOffsets[n]
+                    )
+                    {
+                        wxCoord p = newcursorpos.x-axisStart - (GridStepWidth)/2;
+                        editingPoint[1].x = p / (GridStepWidth);
+
+                        wxInt32 k;
+                        for ( k = 0 ; k < n ; ++k )
+                            if ( pt.y < (heightOffsets[k] + heightOffsets[k+1])/2 )
+                                break;
+                        editingPoint[1].y = k;
+                    }
+                }
+                break;
+            case ChangingVLineLengthUpper:
+            case ChangingVLineLengthLower:
+                {
+                    wxInt32 n = doc->signals.size();
+                    if ( n && pt.x > axisStart && pt.x < axisStop )
+                    {
+                        wxCoord p = newcursorpos.x-axisStart + (GridStepWidth)/2;
+                        editingPoint[1].x = p / (GridStepWidth);
+
+                        wxInt32 kmax = n, kmin = 0;
+                        for ( wxUint32 j = 0 ; j < doc->harrows.size() ; ++j )
+                        {
+                            if ( editingNumber == doc->harrows[j].fromVLine ||
+                                 editingNumber == doc->harrows[j].toVLine )
+                            {
+                                wxInt32 off =
+                                doc->harrows[j].pos + heightOffsets[doc->harrows[j].signalnmbr];
+
+                                wxInt32 k;
+                                for ( k = 0 ; k < n ; ++k )
+                                {
+                                    if ( off >= heightOffsets[k] &&
+                                         off <  heightOffsets[k+1] )
+                                    {
+                                        if ( kmax > k ) kmax = k;
+                                        if ( kmin < k+1 ) kmin = k+1;
+                                    }
+                                }
+                            }
+                        }
+                        wxInt32 k;
+                        for ( k = 0 ; k < n ; ++k )
+                            if ( newcursorpos.y < (heightOffsets[k] + heightOffsets[k+1])/2 )
+                                break;
+                        bool AllowedMove = true;
+                        if ( WindowState == ChangingVLineLengthUpper )
+                            if ( k > kmax ) AllowedMove = false;
+                        else
+                            if ( k < kmin ) AllowedMove = false;
+                        if ( editingValA != k && AllowedMove )
+                            editingValA = k;
+                    }
+                }
+                break;
+            case MovingVLine:
+                if ( pt.x < axisStart || pt.x > axisStop )
+                {
+                    editingValA = doc->vertlines[editingNumber].vpos;
+                    editingValB = doc->vertlines[editingNumber].vposoffset;
+                }
+                else
+                {
+                    editingValA = (pt.x - axisStart)/GridStepWidth;
+                    wxCoord p = pt.x - axisStart - editingValA*GridStepWidth;
+                    if ( doc->en50 && doc->en90 )
+                    {
+                        if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
+                            editingValB = 0;
+                        else if ( p < GridStepWidth*((3.0*doc->TransitWidth/4.0)/100.0) )
+                            editingValB = 1;
+                        else if ( p < GridStepWidth*(50.0+doc->TransitWidth/2.0)/100.0 )
+                            editingValB = 2;
+                        else
+                        {
+                            editingValA++;
+                            editingValB = 0;
+                        }
+                    }
+                    else if ( doc->en50 )
+                    {
+                        if ( p < GridStepWidth*(doc->TransitWidth/4.0)/100.0 )
+                            editingValB = 0;
+                        else if ( p < GridStepWidth *((50.0+doc->TransitWidth/4.0)/100.0) )
+                            editingValB = 1;
+                        else
+                        {
+                            editingValA++;
+                            editingValB = 0;
+                        }
+                    }
+                    else if ( doc->en90 )
+                    {
+                        if ( p < GridStepWidth*(doc->TransitWidth/2.0)/100.0 )
+                            editingValB = 0;
+                        else if ( p < GridStepWidth * (50.0+doc->TransitWidth/2.0) / 100.0 )
+                            editingValB = 2;
+                        else
+                        {
+                            editingValA++;
+                            editingValB = 0;
+                        }
+                    }
+                    else
+                    {
+                        if ( p > GridStepWidth/2 )
+                            editingValA++;
+                        editingValB = 0;
+                    }
+                }
+            case MovingHArrow:
+                {
+                    wxCoord top, bottom, tmp;
+                    wxInt32 topline;
+                    wxInt32 bottomline;
+                    top = heightOffsets[doc->vertlines[doc->harrows[editingNumber].fromVLine].StartPos];
+                    topline = doc->vertlines[doc->harrows[editingNumber].fromVLine].StartPos;
+                    tmp = heightOffsets[doc->vertlines[doc->harrows[editingNumber].toVLine].StartPos];
+                    if ( tmp > top )
+                    {
+                        top = tmp;
+                        topline = doc->vertlines[doc->harrows[editingNumber].toVLine].StartPos;
+                    }
+                    bottom = heightOffsets[doc->vertlines[doc->harrows[editingNumber].fromVLine].EndPos+1];
+                    bottomline = doc->vertlines[doc->harrows[editingNumber].fromVLine].EndPos;
+                    tmp = heightOffsets[doc->vertlines[doc->harrows[editingNumber].toVLine].EndPos+1];
+                    if ( tmp < bottom )
+                    {
+                        bottom = tmp;
+                        bottomline = doc->vertlines[doc->harrows[editingNumber].toVLine].EndPos;
+                    }
+
+                    if ( pt.y < top )
+                    {
+                        editingValA = 0;
+                        editingValB = topline;
+                    }
+                    else if ( pt.y > bottom )
+                    {
+                        editingValA = bottom-heightOffsets[bottomline];
+                        editingValB = bottomline;
+                    }
+                    else
+                    {
+                        wxInt32 k = 0;
+                        for ( k = topline; k <= bottomline ; k++)
+                        {
+                            if ( heightOffsets[k+1] > pt.y )
+                                break;
+                        }
+                        editingValB = k;
+                        editingValA = pt.y - heightOffsets[editingValB];
+                    }
+                }
+                break;
+            case InsertingHArrowWaitingSecondPoint:
+                /// check if user mover over a vertical line
+                for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
+                {
+                    //wxInt32 pos = DistanceToTimeline + DistanceFromTimeline + editingValA;
+                    wxInt32 pos = heightOffsets[editingValC] + editingValA;
+                    if (pt.x >= VLineOffsets[k].x - 3 &&
+                        pt.x <= VLineOffsets[k].x + 3 &&
+                        pt.y >= VLineOffsets[k].y &&
+                        pt.y <= VLineToOffset[k] &&
+                        pos >= VLineOffsets[k].y &&
+                        pos <= VLineToOffset[k] )
+                    {
+                        editingValB = k;
+                        break;
+                    }
+                    else
+                        editingValB = -1;
+                }
+                break;
+            case ChangingHArrowLengthLeft:
+            case ChangingHArrowLengthRight:
+                for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
+                {
+                    wxInt32 pos = doc->harrows[editingNumber].pos + DistanceToTimeline + DistanceFromTimeline;
+                    if (pt.x >= VLineOffsets[k].x - 3 &&
+                        pt.x <= VLineOffsets[k].x + 3 &&
+                        pt.y >= VLineOffsets[k].y &&
+                        pt.y <= VLineToOffset[k] &&
+                        pos >= VLineOffsets[k].y &&
+                        pos <= VLineToOffset[k] )
+                    {
+                        if ( WindowState == ChangingHArrowLengthLeft )
+                            editingValA = k;
+                        else
+                            editingValB = k;
+                        break;
+                    }
+                    else
+                        if ( WindowState == ChangingHArrowLengthLeft )
+                            editingValA = -1;
+                        else
+                            editingValB = -1;
+                }
+                break;
+            case HArrowMovingText:
+                if ( pt.x > axisStart && pt.x < axisStop &&
+                     pt.y > heightOffsets[0]+dc.GetCharHeight() && pt.y < heightOffsets[heightOffsets.size()-1]
+                   )
+                {
+                    editingValA = pt.x - (HArrowOffsets[editingNumber].x + HArrowToOffset[editingNumber])/2;
+                    editingValB = pt.y - HArrowOffsets[editingNumber].y;
+                }
+                break;
+            default:
+                break;
+        }
+
+        cursorpos = newcursorpos;
+
         scrolltimer.Start(200,wxTIMER_ONE_SHOT);
-
-
-        /*wxCoord p = cursorpos.x-axisStart+2;
-        if ( cursorpos.x < axisStart )
-            newLength = oldlength;
-        else
-            newLength = p / (GridStepWidth);
-        */
-
-
-        this->Refresh();
+        this->Refresh(true);
     }
     else
         scrolltimer.Stop();
-
 }
 
 bool TimingWindow::CanZoomTicksOut(void)
@@ -3868,14 +4246,14 @@ void TimingWindow::ZoomTicksOut(void)
     if ( GridStepWidth > 6 )
         GridStepWidth  *= 0.7;
     if ( GridStepWidth < 6 ) GridStepWidth = 6;
-    Refresh();
+    Refresh(true);
 }
 void TimingWindow::ZoomTicksIn(void)
 {
     if ( GridStepWidth < 150 )
         GridStepWidth  *= 1.4;
     if ( GridStepWidth > 150 ) GridStepWidth = 150;
-    Refresh();
+    Refresh(true);
 }
 
 bool TimingWindow::DiscontSelected(void)
@@ -4050,4 +4428,43 @@ void TimingWindow::SetTimeCompressor(wxInt32 time)
     );
 
     UpdateTimeCompressorPanel();
+}
+
+void TimingWindow::OnScroll(wxScrollWinEvent &event)
+{
+    int nScrollInc = CalcScrollInc(event);
+    if ( nScrollInc == 0 )// can't scroll further
+    {
+        event.Skip();
+        return;
+    }
+
+    int dx = 0,
+        dy = 0;
+    int orient = event.GetOrientation();
+    if (orient == wxHORIZONTAL)
+       if ( m_xScrollingEnabled )
+           dx = -m_xScrollPixelsPerLine * nScrollInc;
+    else
+        if ( m_yScrollingEnabled )
+            dy = -m_yScrollPixelsPerLine * nScrollInc;
+
+    if (orient == wxHORIZONTAL)
+    {
+        m_xScrollPosition += nScrollInc;
+        m_win->SetScrollPos(orient, m_xScrollPosition);
+    }
+    else
+    {
+        m_yScrollPosition += nScrollInc;
+        m_win->SetScrollPos(orient, m_yScrollPosition);
+    }
+
+    this->Refresh(true, GetScrollRect());
+}
+
+void TimingWindow::OnSize(wxSizeEvent &event)
+{
+    event.Skip();
+    this->Refresh();
 }

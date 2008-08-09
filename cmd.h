@@ -261,7 +261,7 @@ protected:
 class ChangeHArrowTextPosCommand : public wxCommand
 {
 public:
-    ChangeHArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff);
+    ChangeHArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff, wxInt32 gridoff);
     ~ChangeHArrowTextPosCommand();
     bool Do(void);
     bool Undo(void);
@@ -269,6 +269,7 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_nmbr;
     wxPoint m_off;
+    wxInt32 m_gridoff;
 };
 
 class ChangeTextCommand : public wxCommand

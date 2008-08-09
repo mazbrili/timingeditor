@@ -1214,11 +1214,12 @@ bool AddHArrowCommand::Undo(void)
 }
 
 
-ChangeHArrowTextPosCommand::ChangeHArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff)
+ChangeHArrowTextPosCommand::ChangeHArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff, wxInt32 gridoff)
     : wxCommand(true, _("change position of text")),
     m_doc(doc),
     m_nmbr(editingNumber),
-    m_off(xoff, yoff)
+    m_off(xoff, yoff),
+    m_gridoff(gridoff)
 {}
 ChangeHArrowTextPosCommand::~ChangeHArrowTextPosCommand(){}
 bool ChangeHArrowTextPosCommand::Do(void)
@@ -1226,6 +1227,10 @@ bool ChangeHArrowTextPosCommand::Do(void)
     wxPoint tmp = m_doc->harrows[m_nmbr].textoffset;
     m_doc->harrows[m_nmbr].textoffset = m_off;
     m_off = tmp;
+
+    wxInt32 tempc = m_doc->harrows[m_nmbr].textgridoffset;
+    m_doc->harrows[m_nmbr].textgridoffset = m_gridoff;
+    m_gridoff = tempc;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();

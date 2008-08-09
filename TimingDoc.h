@@ -75,7 +75,8 @@ public:
     wxInt32 pos;
     wxInt32 signalnmbr;
     wxString text;
-    wxPoint textoffset;
+    wxPoint  textoffset;
+    wxInt32  textgridoffset;
 
     bool serialize(wxDataOutputStream &store);
     bool deserialize(wxDataInputStream &load);
