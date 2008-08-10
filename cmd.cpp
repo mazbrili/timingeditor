@@ -316,6 +316,8 @@ bool DeleteSignalCommand::Undo(void)
 
     m_doc->vertlines = vlines;
 
+    m_doc->harrows = harrows;
+
     while ( delVlineCom.size() )
     {
         DeleteVLineCommand *cmd = delVlineCom.back();
@@ -324,8 +326,6 @@ bool DeleteSignalCommand::Undo(void)
         delVlineCom.pop_back();
 
     }
-
-    m_doc->harrows = harrows;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -1254,16 +1254,7 @@ bool ChangeTextCommand::Do(void)
     wxString str;
     wxInt32 n = 0;
     bool found = false;
-    /*for ( ; n < m_doc->signals.size() && !found ; ++n )
-    {
-        if ( n == m_nmbr )
-        {
-            tmp = m_doc->signals[n].name;
-            m_doc->signals[n].name = m_newText;
-            m_newText = tmp;
-            found = true;
-        }
-    }*/
+
     for ( wxUint32 k = 0 ; k < m_doc->signals.size() && !found ; ++k)
     {
         if ( n == m_nmbr )
