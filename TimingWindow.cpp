@@ -121,17 +121,17 @@ TimingWindow::TimingWindow(wxView *v, wxWindow *parent,
     SetCaret(caret);
     //dropcaret = new DropCaret();
 
-    //selpos[0] = -1;
-    //selpos[1] = -1;
     SetScrollRate(5, 5);
     SetCursor(*wxCROSS_CURSOR);
     SetNeutralState();
     Refresh(true);
 }
+
 TimingWindow::~TimingWindow()
 {
     //delete dropcaret;
 }
+
 bool TimingWindow::IsTextSelected(void)
 {
     if (
@@ -143,6 +143,7 @@ bool TimingWindow::IsTextSelected(void)
         return true;
     return false;
 }
+
 bool TimingWindow::CanPaste(void)
 {
     if ( WindowState == TextFieldSelected && editingValA != -1  )
@@ -174,6 +175,7 @@ wxPoint TimingWindow::GetBitmapSize()
         heightOffsets[heightOffsets.size()-1] - DistanceToTimeline - DistanceFromTimeline
     );
 }
+
 void TimingWindow::InitTextDrawing()
 {
     textOffsets.clear();
@@ -298,7 +300,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     GetClientSize(&clientsize.x, &clientsize.y);
     dc.DestroyClippingRegion();
 
-    /// calc grid
+    /// calc vertical grid
     heightOffsets.clear();
     for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
     {
@@ -366,7 +368,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     dc.SetTextBackground(bgcol);
     dc.SetBackgroundMode(wxTRANSPARENT);
 
-    /// points to manipulate the signal (through right click)
+    /// points to manipulate the signal (through right click) will be removed in the future
     if ( !exporting )
     {
         dc.SetBrush(*wxBLACK_BRUSH);
@@ -394,11 +396,14 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
 
 
     /// where to start the waves and how big will the virtual window be
+    wxInt32 gridSteps = doc->length;
+    wxInt32 gridWidth = GridStepWidth;
+
     signalNamesWidth = offset.x + width + 25;
-    if ( virtsize.y < offset.y ) virtsize.y = offset.y;// change the size of the scrollable window
-    width += 20 + GridStepWidth * doc->length;
+    if ( virtsize.y < offset.y ) virtsize.y = offset.y;
+    width += 20 + GridStepWidth * gridSteps;
     if ( virtsize.x < (width + 500) ) virtsize.x = (width + 500);
-    SetVirtualSize(virtsize);
+    SetVirtualSize(virtsize);// change the size of the scrollable window
 
 
 
@@ -407,8 +412,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     /// drawing the ticks
     if ( !exporting )
     {
-        wxInt32 gridWidth = GridStepWidth;
-        wxInt32 gridSteps = doc->length;
         axisStart = signalNamesWidth;
         axisStop = signalNamesWidth + gridWidth*gridSteps;
         wxCoord drawstartx, drawy, drawstopx;
@@ -448,9 +451,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     if ( !exporting )
         dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,unscrolledPosition.y, virtsize.x, virtsize.y+10);
     {
-        wxInt32 gridWidth = GridStepWidth;
-        wxInt32 gridSteps = doc->length;
-
         wxCoord axispos =  DistanceToAxis + unscrolledPosition.y;
         wxCoord start = signalNamesWidth, stop = start + axisStop-axisStart;
         if ( ! exporting )
@@ -469,9 +469,10 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
 
                 double t = ticks * doc->TickLength;
                 wxInt8 u = doc->TickLengthUnit;
-                while ( u < 3 && t >= 1000.0)
+                while ( u < 3 && (t >= 1000.0 || t <= -1000.0))
                 {
-                    u++; t /= 1000.0;
+                    u++;
+                    t /= 1000.0;
                 }
                 wxString str(wxString::Format(_("%.1f "), t));
                 switch (u)
@@ -1553,6 +1554,7 @@ void TimingWindow::OnPaint(wxPaintEvent &event)
     DoPrepareDC(dc);
     Draw(dc);
 }
+
 void TimingWindow::PaintBackground(wxDC &dc)
 {
     wxColour backgroundColour = *wxWHITE;
@@ -1574,6 +1576,7 @@ void TimingWindow::OnLeaveWindow(wxMouseEvent &event)
     mouseoverwindow = false;
     this->Refresh(true);
 }
+
 void TimingWindow::OnEnterWindow(wxMouseEvent &event)
 {
     mouseoverwindow = true;
@@ -1630,6 +1633,7 @@ void TimingWindow::OnEnterWindow(wxMouseEvent &event)
 
     Refresh(true);
 }
+
 void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
 {
     if (!view) return;
@@ -2245,11 +2249,13 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
     WindowState = newstate;
     if ( newstate == SignalIsSelected && doc->signals[editingNumber].IsClock )
         UpdateClockPanel();
+    if ( newstate == DisconSelected )
+        UpdateTimeCompressorPanel();
 
     if ( dorefresh ) this->Refresh(true);
     return;
 }
-//p.x > signalNamesWidth-10 && p.y > heightOffsets[0]-5 &&
+
 void TimingWindow::OnMouseLeftDClick(wxMouseEvent &event)
 {
 
@@ -2304,6 +2310,7 @@ void TimingWindow::OnMouseLeftDClick(wxMouseEvent &event)
     if ( dorefresh ) this->Refresh(true);
     return;
 }
+
 /// moving of objects or changing length (moving start/end) of objects
 void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
 {
@@ -2625,6 +2632,7 @@ void TimingWindow::CheckHScroll(wxPoint pos)
         scrolltimer.Start(200, wxTIMER_ONE_SHOT);
     }
 }
+
 void TimingWindow::CheckVScroll(wxPoint pos)
 {
     wxSize clientSize;
@@ -2641,6 +2649,7 @@ void TimingWindow::CheckVScroll(wxPoint pos)
         scrolltimer.Start(200, wxTIMER_ONE_SHOT);
     }
 }
+
 void TimingWindow::OnMouseMove(wxMouseEvent &event)
 {
     if ( !view ) return;
@@ -3107,6 +3116,7 @@ void TimingWindow::OnMouseWheel(wxMouseEvent& event)
         this->Refresh();
     }
 }
+
 /// //////////////unused event methods//////////////////////////////////////////
 void TimingWindow::OnMouseRightUp(wxMouseEvent& event){}
 //void TimingWindow::OnSetFocus(wxFocusEvent &event){}
@@ -3459,7 +3469,6 @@ void TimingWindow::OnChar(wxKeyEvent &event)
     }
 }
 
-
 void TimingWindow::OnSelectInsertDiscontTool(void)
 {
     if (!view) return;
@@ -3513,6 +3522,7 @@ void TimingWindow::OnSelectRulerTool(void)
 
     this->Refresh(true);
 }
+
 void TimingWindow::OnSelectHArrowTool(void)
 {
     if (!view) return;
@@ -3539,6 +3549,7 @@ void TimingWindow::OnSelectHArrowTool(void)
 
     this->Refresh(true);
 }
+
 void TimingWindow::OnSelectTextTool(void)
 {
     if (!view) return;
@@ -3565,6 +3576,7 @@ void TimingWindow::OnSelectTextTool(void)
 
     this->Refresh(true);
 }
+
 void TimingWindow::OnSelectNeutralTool(void)
 {
     if (!view) return;
@@ -3661,6 +3673,7 @@ wxString TimingWindow::GetText(void)
         str = text.Mid(editingValC, editingValB - editingValC);
     return str;
 }
+
 void TimingWindow::DeleteText(void)
 {
     if ( !view ) return;
@@ -3690,6 +3703,7 @@ void TimingWindow::DeleteText(void)
 
     this->Refresh(true);
 }
+
 void TimingWindow::SelectAll(void)
 {
     if ( WindowState != TextFieldSelected ) return;
@@ -3698,6 +3712,7 @@ void TimingWindow::SelectAll(void)
     editingValC = editingText.Length();
     this->Refresh(true);
 }
+
 bool TimingWindow::CanDeleteText(void)
 {
     if (!view) return false;
@@ -3711,6 +3726,7 @@ bool TimingWindow::CanDeleteText(void)
 
     return false;
 }
+
 void TimingWindow::DeleteSignal(void)
 {
     if (!view) return;
@@ -3728,6 +3744,7 @@ void TimingWindow::DeleteSignal(void)
         Refresh(true);
     }
 }
+
 void TimingWindow::DeleteVLine(void)
 {
     if (!view) return;
@@ -3745,6 +3762,7 @@ void TimingWindow::DeleteVLine(void)
         Refresh(true);
     }
 }
+
 void TimingWindow::DeleteHArrow(void)
 {
     if (!view) return;
@@ -3764,6 +3782,7 @@ void TimingWindow::DeleteHArrow(void)
         Refresh(true);
     }
 }
+
 void TimingWindow::DeleteSelection(void)
 {
     if ( !view ) return;
@@ -3816,12 +3835,14 @@ void TimingWindow::OnDragEnter(void)
     dropcaret->Show();
     Refresh(true);*/
 }
+
 void TimingWindow::OnDragLeave(void)
 {
     /*drop = false;
     dropcaret->Hide();
     Refresh(true);*/
 }
+
 wxDragResult TimingWindow::OnDragOver(wxPoint p, wxDragResult def)
 {
     if ( !view )
@@ -3895,6 +3916,7 @@ wxDragResult TimingWindow::OnDragOver(wxPoint p, wxDragResult def)
 /// ////////////////////////////////////////////////////////////////////////////
     return(wxDragNone);
 }
+
 bool TimingWindow::OnDrop(wxPoint pt, wxString str )
 {
     if (!view)
@@ -3915,6 +3937,7 @@ bool TimingWindow::OnDrop(wxPoint pt, wxString str )
     /// /////////////////////////////////////////////////////////////////////////////////////////////////
     return true;
 }
+
 void TimingWindow::OnTimer(wxTimerEvent& event)
 {
     if ( !view ) return;
@@ -4234,6 +4257,7 @@ bool TimingWindow::CanZoomTicksOut(void)
     if ( GridStepWidth > 6 ) return true;
     return false;
 }
+
 bool TimingWindow::CanZoomTicksIn(void)
 {
     if ( GridStepWidth < 150 )
@@ -4248,6 +4272,7 @@ void TimingWindow::ZoomTicksOut(void)
     if ( GridStepWidth < 6 ) GridStepWidth = 6;
     Refresh(true);
 }
+
 void TimingWindow::ZoomTicksIn(void)
 {
     if ( GridStepWidth < 150 )
@@ -4262,18 +4287,21 @@ bool TimingWindow::DiscontSelected(void)
         return true;
     return false;
 }
+
 bool TimingWindow::IsSignalSelected(void)
 {
     if ( WindowState == SignalIsSelected )
         return true;
     return false;
 }
+
 bool TimingWindow::VLineIsSelected(void)
 {
     if ( WindowState == VLineIsMarked )
         return true;
     return false;
 }
+
 bool TimingWindow::HArrowIsSelected(void)
 {
     if ( WindowState == HArrowIsMarked )
@@ -4287,6 +4315,7 @@ wxInt32 TimingWindow::GetSelectedSignalNr()
         return editingNumber;
     return -1;
 }
+
 bool TimingWindow::IsSelectedSignalClock(void)
 {
     if ( !IsSignalSelected() ) return false;
@@ -4305,6 +4334,7 @@ void TimingWindow::DetachPanels()
     AxisSetPanel->wnd = (TimingWindow *)NULL;
     TmeCmprssrPanel->wnd = (TimingWindow *)NULL;
 }
+
 void TimingWindow::AttachPanels()
 {
     ClkSetPanel->wnd = this;
@@ -4323,6 +4353,7 @@ void TimingWindow::AttachPanels()
     TmeCmprssrPanel->wnd = this;
     UpdateTimeCompressorPanel();
 }
+
 void TimingWindow::UpdateClockPanel()
 {
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
@@ -4342,6 +4373,7 @@ void TimingWindow::UpdateClockPanel()
         ClkSetPanel->SetTicksText(str);
     }
 }
+
 void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks)
 {
     SetFocus();
@@ -4356,6 +4388,7 @@ void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks)
         );
     }
 }
+
 void TimingWindow::UpdateAxisPanel()
 {
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
@@ -4366,6 +4399,7 @@ void TimingWindow::UpdateAxisPanel()
     AxisSetPanel->SetTackLength(doc->TackLength);
     AxisSetPanel->SetOffset(doc->timeOffset);
 }
+
 void TimingWindow::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset)
 {
     SetFocus();
@@ -4378,6 +4412,7 @@ void TimingWindow::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, 
     );
     UpdateAxisPanel();
 }
+
 void TimingWindow::UpdateTransitionPanel()
 {
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
@@ -4388,6 +4423,7 @@ void TimingWindow::UpdateTransitionPanel()
     TranSetPanel->Set90(doc->en90);
 
 }
+
 wxInt8 TimingWindow::GetTransitionWidth()
 {
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
@@ -4395,6 +4431,7 @@ wxInt8 TimingWindow::GetTransitionWidth()
 
     return doc->TransitWidth;
 }
+
 void TimingWindow::SetTransition(wxInt8 width, bool en50, bool en90)
 {
     SetFocus();
@@ -4407,15 +4444,21 @@ void TimingWindow::SetTransition(wxInt8 width, bool en50, bool en90)
     );
     UpdateTransitionPanel();
 }
+
 void TimingWindow::UpdateTimeCompressorPanel(void)
 {
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
     if ( !doc ) return;
 
     if ( !DiscontSelected() ) return;
-    wxInt32 n = doc->discontlength[editingValA];
-    TmeCmprssrPanel->SetTimeText(wxString::Format( _("%d"), n) );
+    wxInt32 n = editingValA;
+    n = doc->discontlength[n];
+
+    TmeCmprssrPanel->SetTimeText(
+        wxString::Format( _("%d"), n )
+    );
 }
+
 void TimingWindow::SetTimeCompressor(wxInt32 time)
 {
     SetFocus();

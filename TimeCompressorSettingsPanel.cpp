@@ -50,14 +50,16 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
     : wxPanel( parent, id, pos, size, style ),
     wnd(NULL)
 {
+    wxStaticText* staticText;
+
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxVERTICAL );
 
 	wxFlexGridSizer* fgSizer1;
 	fgSizer1 = new wxFlexGridSizer( 2, 2, 0, 0 );
 
-	m_staticText3 = new wxStaticText( this, ID_DEFAULT, wxT("Length of gap [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
-	fgSizer1->Add( m_staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Length of gap [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
+	fgSizer1->Add( staticText, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
 	m_textTime = new wxTextCtrl( this, TIMING_ID_PANEL_TC_TXTFIELD, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	fgSizer1->Add( m_textTime, 0, wxALL, 5 );
@@ -100,7 +102,7 @@ void TimeCompressorSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
     {
         long val;
         m_textTime->GetValue().ToLong(&val);
-        if ( val <= 0 )
+        if ( val <= 1 )
         {
             event.Enable(false);
             return;

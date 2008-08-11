@@ -54,7 +54,6 @@ class TimeCompressorSettingsPanel : public wxPanel
 
 
 	protected:
-		wxStaticText* m_staticText3;
 		wxTextCtrl* m_textTime;
 		wxButton* m_buttonApply;
     public:
