@@ -46,6 +46,7 @@
 #include "TimingApp.h"
 #include "cmd.h"
 #include "enumers.h"
+#include "DataObject.h"
 
 
 IMPLEMENT_DYNAMIC_CLASS(TimingView, wxView)
@@ -167,10 +168,22 @@ void TimingView::OnCopy(wxCommandEvent& WXUNUSED(event) )
     {
         // This data objects are held by the clipboard,
         // so do not delete them in the app.
-        wxString str(window->GetText());
-        wxTheClipboard->SetData( new wxTextDataObject(str) );
+        if ( window->IsTextSelected() )
+        {
+            wxString str(window->GetText());
+            wxTheClipboard->SetData( new wxTextDataObject(str) );
+        }
+        else if ( window->IsSignalSelected() )
+        {
+            TimingDocument *doc = (TimingDocument*)m_viewDocument;
+            if ( doc )
+            {
+                Signal *sig = new Signal;
+                *sig = doc->signals[window->GetSelectedSignalNr()];
+                wxTheClipboard->SetData( new TimingEditorSignaDataObject(sig) );
+            }
+        }
         wxTheClipboard->Close();
-        //window->DeleteText();
     }
 }
 
@@ -180,10 +193,23 @@ void TimingView::OnCut(wxCommandEvent& WXUNUSED(event) )
     {
         // This data objects are held by the clipboard,
         // so do not delete them in the app.
-        wxString str(window->GetText());
-        wxTheClipboard->SetData( new wxTextDataObject(str) );
+        if ( window->IsTextSelected() )
+        {
+            wxString str(window->GetText());
+            wxTheClipboard->SetData( new wxTextDataObject(str) );
+        }
+        else if ( window->IsSignalSelected() )
+        {
+            TimingDocument *doc = (TimingDocument*)m_viewDocument;
+            if ( doc )
+            {
+                Signal *sig = new Signal;
+                *sig = doc->signals[window->GetSelectedSignalNr()];
+                wxTheClipboard->SetData( new TimingEditorSignaDataObject(sig) );
+            }
+        }
         wxTheClipboard->Close();
-        window->DeleteText();
+        window->DeleteSelection();
     }
 }
 
@@ -195,11 +221,26 @@ void TimingView::OnPaste(wxCommandEvent& WXUNUSED(event) )
         {
             wxTextDataObject data;
             wxTheClipboard->GetData( data );
-            //wxMessageBox( data.GetText() );
             window->InsertText( data.GetText() );
+        }
+        else if (wxTheClipboard->IsSupported( wxDataFormat(TimingEditorSignalFormatId) ) )
+        {
+            Signal *sig = new Signal;
+            TimingEditorSignaDataObject data(sig);
+
+            wxTheClipboard->GetData( data );
+            AddSignal( *sig );
         }
         wxTheClipboard->Close();
     }
+}
+void TimingView::AddSignal(Signal sig)
+{
+    TimingDocument *doc = (TimingDocument*)m_viewDocument;
+    if ( !doc ) return;
+
+    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+    cmdproc->Submit(new AddSignalCommand(doc, window->GetSelectedSignalNr(), sig) );
 }
 
 void TimingView::OnSelectAll(wxCommandEvent& WXUNUSED(event) )
@@ -286,12 +327,10 @@ void TimingView::OnAddBus(wxCommandEvent& event)
 
     cmdproc->Submit( new AddSignalCommand(doc, n, sig) );
 }
-
 void TimingView::OnInsertDiscontTool(wxCommandEvent& event)
 {
     window->OnSelectInsertDiscontTool();
 }
-
 void TimingView::OnSelectRuler(wxCommandEvent& event)
 {
     window->OnSelectRulerTool();
@@ -300,12 +339,10 @@ void TimingView::OnSelectHArrow(wxCommandEvent& event)
 {
     window->OnSelectHArrowTool();
 }
-
 void TimingView::OnSelectTextTool(wxCommandEvent& event)
 {
     window->OnSelectTextTool();
 }
-
 void TimingView::OnSelectNeutral(wxCommandEvent& event)
 {
     window->OnSelectNeutralTool();
@@ -324,8 +361,19 @@ bool TimingView::CanZoomOut(void)
 }
 bool TimingView::CanPaste(void)
 {
+    if (wxTheClipboard->Open())
+    {
+        if ( wxTheClipboard->IsSupported( wxDataFormat(TimingEditorSignalFormatId) ) )
+        {
+            wxTheClipboard->Close();
+            return true;
+        }
+        wxTheClipboard->Close();
+    }
+
     if ( window && window->CanPaste() )
         return true;
+
     return false;
 }
 bool TimingView::IsSomethingSelected(void)
@@ -343,6 +391,12 @@ bool TimingView::IsSomethingSelected(void)
 bool TimingView::IsTextSelected(void)
 {
     if ( window && window->IsTextSelected() )
+        return true;
+    return false;
+}
+bool TimingView::IsSignalSelected(void)
+{
+    if ( window && window->IsSignalSelected() )
         return true;
     return false;
 }

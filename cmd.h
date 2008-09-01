@@ -27,18 +27,6 @@
 #include <wx/cmdproc.h>
 
 class TimingDocument;
-class ChangeText : public wxCommand
-{
-public:
-    ChangeText(TimingDocument *doc, wxString *target, wxString newText);
-    ~ChangeText();
-    bool Do(void);
-    bool Undo(void);
-protected:
-    TimingDocument *m_doc;
-    wxString *m_target;
-    wxString m_newText;
-};
 class DeleteVLineCommand : public wxCommand
 {
 public:
@@ -67,6 +55,7 @@ protected:
     std::vector< Signal > signals;
     std::set<wxInt32> discont;
     std::map<wxInt32, wxInt32> disclen;
+    std::map<wxInt32, bool> discen;
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
 class ChangeLengthLeft : public wxCommand
@@ -83,6 +72,7 @@ protected:
     std::vector< Signal > signals;
     std::set<wxInt32> discont;
     std::map<wxInt32, wxInt32> disclen;
+    std::map<wxInt32, bool> discen;
 
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
@@ -116,7 +106,7 @@ protected:
 class ChangeClockParamCommand : public wxCommand
 {
 public:
-    ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay);
+    ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay, bool shadow);
     ~ChangeClockParamCommand();
     bool Do(void);
     bool Undo(void);
@@ -125,6 +115,7 @@ protected:
     wxInt32 m_changingSigNr;
     wxInt32 m_newPer;
     wxInt32 m_newDelay;
+    bool    m_shadow;
 };
 class MoveSignalPosCommand : public wxCommand
 {
@@ -315,7 +306,7 @@ protected:
 class ChangeTimeCompressor : public wxCommand
 {
 public:
-    ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time);
+    ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time, bool en);
     ~ChangeTimeCompressor();
     bool Do(void);
     bool Undo(void);
@@ -323,6 +314,7 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_time;
     wxInt32 m_index;
+    bool    m_en;
 };
 
 #endif //__CMD__

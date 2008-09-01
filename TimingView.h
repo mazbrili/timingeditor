@@ -28,6 +28,7 @@
 class TimingWindow;
 class ClockSettingsPanel;
 class TransitionSettingsPanel;
+class Signal;
 
 class TimingView: public wxView
 {
@@ -51,7 +52,9 @@ class TimingView: public wxView
         bool CanPaste(void);
         bool IsSomethingSelected(void);
         bool IsTextSelected(void);
+        bool IsSignalSelected(void);
         bool CanDelete(void);
+        void AddSignal(Signal sig);
 
     private:
         virtual void OnActivateView(bool activate, wxView *activeView, wxView *deactiveView);

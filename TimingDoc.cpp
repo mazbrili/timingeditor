@@ -36,7 +36,7 @@
 #endif
 
 #include <wx/wfstream.h>
-//#include <wx/txtstrm.h>
+#include <wx/txtstrm.h>
 #include <wx/datstrm.h>
 
 #include "TimingDoc.h"
@@ -76,7 +76,7 @@ TimingDocument::TimingDocument(void)
     HArrow ar;
     ar.fromVLine = 0;
     ar.toVLine = 1;
-    ar.text = _T("t_1");
+    ar.text = _T("$t$");
     ar.textoffset = wxPoint(0, -10);
     ar.signalnmbr = 0;
     ar.pos = 10;
@@ -96,6 +96,7 @@ TimingDocument::TimingDocument(void)
     Signal sig1;
     {
     sig1.IsClock = true;
+    sig1.GenerateBackground = true;
     sig1.IsBus = false;
     sig1.ticks = 3;
     sig1.delay = 0;
@@ -107,10 +108,12 @@ TimingDocument::TimingDocument(void)
 
     discontinuities.insert(3);
     discontlength[3] = 7;
+    discontEn[3] = true;
 
     Signal sig2;
     {
     sig2.IsClock = false;
+    sig2.GenerateBackground = false;
     sig2.IsBus = false;
     sig2.name = _T("Rst");
     for ( wxInt32 n = 0 ; n < 4 ; ++n )
@@ -161,7 +164,7 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     store << ui;
     for ( wxUint32 n = 0 ; n < ui ; ++n )
     {
-        if ( !(signals[n].serialize(store)) )
+        if ( !(signals[n].serialize(outp)) )
             return false;
     }
 
@@ -189,6 +192,10 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
         i = *it;
         store << i;
         store << discontlength[i];
+
+        wxUint8 en = 0;
+        if ( discontEn[i] ) en = 1;
+        store << en;
     }
 
     // new with version 2:
@@ -238,7 +245,7 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         for ( wxUint32 n = 0 ; n < ui ; ++n )
         {
             Signal sig;
-            if ( !(sig.deserialize( load )) )
+            if ( !(sig.deserialize( inp )) )
                 return false;
             signals.push_back(sig);
         }
@@ -266,6 +273,7 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
 
         discontinuities.clear();
         discontlength.clear();
+        discontEn.clear();
         load >> ui;
         for ( wxUint32 n = 0 ; n < ui ; ++n )
         {
@@ -280,6 +288,17 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
             }
             else
                 discontlength[dis] = 2;
+            if ( version >= 5 )
+            {
+                wxUint8 en;
+                load >> en;
+                if (en == 0)
+                    discontEn[dis] = false;
+                else
+                    discontEn[dis] = true;
+            }
+            else discontEn[dis] = true;
+
         }
     }
 
@@ -363,16 +382,15 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
 //    return new TimingCommandProcessor();
 //}
 
-/*bool TimingDocument::OnOpenDocument(const wxString& filename)
+
+bool Signal::serialize(wxOutputStream &outp)
 {
-    return true;
-}*/
-bool Signal::serialize(wxDataOutputStream &store)
-{
+    wxDataOutputStream store( outp );
+
     wxInt32 i;
 
     /// version
-    i = 2;
+    i = 3;
     store << i;
     store << name;
     store << prespace;
@@ -441,15 +459,23 @@ bool Signal::serialize(wxDataOutputStream &store)
         }
     }
 
+    ui8 = 0;
+    if ( GenerateBackground )
+        ui8 = 1;
+    store << ui8;
+
 
     return true;
 }
-bool Signal::deserialize(wxDataInputStream &load)
+
+bool Signal::deserialize(wxInputStream &inp)
 {
+    wxDataInputStream load( inp );
     wxInt32 i, ver;
+    GenerateBackground = false;
 
     load >> ver;
-    if ( ver <= 2 )
+    if ( ver >= 1 )
     {
         values.clear();
         TextValues.clear();
@@ -509,10 +535,18 @@ bool Signal::deserialize(wxDataInputStream &load)
                 }
             }
         }
-        return true;
     }
-    else
+    if ( ver == 3 )
+    {
+        wxUint8 ui8;
+        load >> ui8;
+        if ( ui8 != 0 )
+            GenerateBackground = true;
+    }
+    if ( ver > 3)
         return false; // wrong format version
+
+    return true;
 }
 bool VLine::serialize(wxDataOutputStream &store)
 {
@@ -620,3 +654,78 @@ bool TimingDocument::OnNewDocument()
     UpdateAllViews();
     return res;
 }
+wxString TimingDocument::GetText(wxInt32 number)
+{
+    wxInt32 n = 0;
+    for ( wxUint32 k = 0 ; k < signals.size() ; ++k )
+    {
+        if( n == number )
+            return signals[k].name;
+        ++n;
+        if ( signals[k].IsBus )
+        {
+            if ( n == number )
+                return signals[k].buswidth;
+            ++n;
+        }
+    }
+    for ( wxUint32 k = 0 ; k < signals.size() ; ++k)
+        if ( !signals[k].IsClock && signals[k].IsBus )
+            for ( wxUint32 i = 0 ; i < (wxUint32)length ; ++i )
+                if ( signals[k].values[i] == one ||
+                     signals[k].values[i] == zero )
+                    if ( i == 0 || signals[k].values[i] != signals[k].values[i-1] )
+                    {
+                        if ( n == number )
+                            return signals[k].TextValues[i];
+                        ++n;
+                    }
+    for ( wxUint32 k = 0 ; k < harrows.size() ; ++k, n++ )
+        if ( n == number )
+            return harrows[k].text;
+
+    return wxEmptyString;
+}
+void TimingDocument::SetText(wxInt32 number, wxString text)
+{
+    wxInt32 n = 0;
+    for ( wxUint32 k = 0 ; k < signals.size() ; ++k )
+    {
+        if( n == number )
+        {
+            signals[k].name = text;
+            return;
+        }
+        ++n;
+        if ( signals[k].IsBus )
+        {
+            if ( n == number )
+            {
+                signals[k].buswidth = text;
+                return;
+            }
+            ++n;
+        }
+    }
+    for ( wxUint32 k = 0 ; k < signals.size() ; ++k)
+        if ( !signals[k].IsClock && signals[k].IsBus )
+            for ( wxUint32 i = 0 ; i < (wxUint32)length ; ++i )
+                if ( signals[k].values[i] == one ||
+                     signals[k].values[i] == zero )
+                    if ( i == 0 || signals[k].values[i] != signals[k].values[i-1] )
+                    {
+                        if ( n == number )
+                        {
+                            signals[k].TextValues[i] = text;
+                            return;
+                        }
+                        ++n;
+                    }
+    for ( wxUint32 k = 0 ; k < harrows.size() ; ++k, n++ )
+        if ( n == number )
+        {
+            harrows[k].text = text;
+            return;
+        }
+}
+

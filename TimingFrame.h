@@ -73,6 +73,7 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
 
         bool IsSomethingSelected();
         bool IsTextSelected(void);
+        bool IsSignalSelected(void);
         bool CanDelete(void);
 
     public:

@@ -25,6 +25,9 @@
 
 #include <wx/docview.h>
 #include <wx/cmdproc.h>
+#include <wx/mstream.h>
+
+
 
 #include <vector>
 #include <set>
@@ -49,6 +52,7 @@ public:
     std::vector<vals> values;
     bool IsClock;
     bool IsBus;
+    bool GenerateBackground;
     // infos about the clock (if it is a clock)
     wxInt32 ticks; // of a half clock period
     wxInt32 delay; // of the clock in ticks
@@ -63,8 +67,11 @@ public:
 
     std::map<int, wxString> TextValues;
 
-    bool serialize(wxDataOutputStream &store);
-    bool deserialize(wxDataInputStream &load);
+    bool serialize(wxOutputStream &store);
+    bool deserialize(wxInputStream &load);
+    //void Store(wxMemoryOutputStream &store);
+    //void Restore(wxMemoryInputStream & inp);
+
 };
 //class VLine;
 class HArrow
@@ -116,11 +123,14 @@ class TimingDocument: public wxDocument
 //        wxInputStream& LoadObject(wxInputStream& stream);
 //        #endif
     public:
+
         bool IsReadOnly(void){return m_readOnly;}
+
+        void SetText(wxInt32 number, wxString text);
+        wxString GetText(wxInt32 number);
 
     private:
         bool m_readOnly;
-
     public:
         //wxArrayString SignalNames;
         wxInt32 length;
@@ -130,6 +140,7 @@ class TimingDocument: public wxDocument
         //std::vector<SplArrow> splarrows;
         std::set<wxInt32> discontinuities;
         std::map<wxInt32, wxInt32> discontlength;
+        std::map<wxInt32, bool> discontEn;
         wxInt32 SignalHeight;
         wxInt32 MinimumSignalDistance;
 
@@ -163,20 +174,6 @@ class TimingDocument: public wxDocument
     protected:
         DECLARE_DYNAMIC_CLASS(TimingDocument)
 };
-
-/*class DrawingCommand: public wxCommand
-{
- protected:
-  DoodleSegment *segment;
-  DrawingDocument *doc;
-  int cmd;
- public:
-  DrawingCommand(const wxString& name, int cmd, DrawingDocument *ddoc, DoodleSegment *seg);
-  ~DrawingCommand(void);
-
-  bool Do(void);
-  bool Undo(void);
-};*/
 
 #endif
 

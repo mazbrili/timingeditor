@@ -68,11 +68,10 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
 
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxVERTICAL );
-
 	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_TC_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer4->Add( m_buttonApply, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer4->Add( m_buttonApply, 0, wxALL/*|wxALIGN_CENTER_HORIZONTAL*/, 5 );
 
-	bSizer3->Add( bSizer4, 1, wxEXPAND, 5 );
+	bSizer3->Add( bSizer4, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 	this->SetSizer( bSizer3 );
 	this->Layout();

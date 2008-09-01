@@ -145,11 +145,11 @@ void TimingFrame::OnAbout(wxCommandEvent &event)
 
 void TimingFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 {
-    event.Enable(IsTextSelected());
+    event.Enable(IsTextSelected() || IsSignalSelected());
 }
 void TimingFrame::OnUpdateCut(wxUpdateUIEvent& event)
 {
-    event.Enable(IsTextSelected());
+    event.Enable(IsTextSelected() || IsSignalSelected());
 }
 void TimingFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 {
@@ -173,6 +173,13 @@ bool TimingFrame::IsTextSelected(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->IsTextSelected() )
+        return true;
+    return false;
+}
+bool TimingFrame::IsSignalSelected(void)
+{
+    TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
+    if ( view && view->IsSignalSelected() )
         return true;
     return false;
 }

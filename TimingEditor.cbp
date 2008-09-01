@@ -123,6 +123,8 @@
 		<Unit filename="AxisSettingsPanel.h" />
 		<Unit filename="ClockSettingsPanel.cpp" />
 		<Unit filename="ClockSettingsPanel.h" />
+		<Unit filename="DataObject.cpp" />
+		<Unit filename="DataObject.h" />
 		<Unit filename="TimeCompressorSettingsPanel.cpp" />
 		<Unit filename="TimeCompressorSettingsPanel.h" />
 		<Unit filename="TimingApp.cpp" />

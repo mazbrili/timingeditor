@@ -40,7 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(ClockSettingsPanel, wxPanel)
     EVT_UPDATE_UI(TIMING_ID_PANEL_CLK_APPLY,  ClockSettingsPanel::OnUpdatePanelClkApply)
-    EVT_UPDATE_UI_RANGE(TIMING_ID_PANEL_CLK_TXTPERIOD, TIMING_ID_PANEL_CLK_TXTDELAY,
+    EVT_UPDATE_UI_RANGE(TIMING_ID_PANEL_CLK_TXTPERIOD, TIMING_ID_PANEL_CLK_SHADOW,
         ClockSettingsPanel::OnUpdateTextFields)
     EVT_BUTTON(TIMING_ID_PANEL_CLK_APPLY, ClockSettingsPanel::OnApply)
 END_EVENT_TABLE()
@@ -50,6 +50,7 @@ void ClockSettingsPanel::SetUnmodified()
 {
     m_textDelay->SetModified(false);
     m_textPeriod->SetModified(false);
+    Shadowed = m_checkShadow->GetValue();
 }
 void ClockSettingsPanel::OnUpdateTextFields(wxUpdateUIEvent& event)
 {
@@ -69,7 +70,12 @@ void ClockSettingsPanel::OnApply(wxCommandEvent &event)
     if ( valp <= 0 ) return;
     m_textDelay->GetValue().ToLong(&vald);
     if ( vald < 0 ) return;
-    if ( wnd ) wnd->SetClock(vald, valp);
+    if ( wnd ) wnd->SetClock(vald, valp, Shadowed);
+}
+void ClockSettingsPanel::SetShadowed(bool sha)
+{
+    m_checkShadow->SetValue(sha);
+    Shadowed = sha;
 }
 void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
 {
@@ -88,7 +94,7 @@ void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
             event.Enable(false);
             return;
         }
-        if ( ! ( m_textDelay->IsModified() || m_textPeriod->IsModified() ) )
+        if ( ! ( m_textDelay->IsModified() || m_textPeriod->IsModified() || Shadowed != m_checkShadow->GetValue()) )
         {
             event.Enable(false);
             return;
@@ -102,37 +108,39 @@ ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, w
     wxPanel( parent, id, pos, size, style ),
     wnd(NULL)
 {
+    wxStaticText *staticText;
 	wxBoxSizer* bSizer1;
+
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
 
 	wxFlexGridSizer* gSizer1;
 	gSizer1 = new wxFlexGridSizer( 2, 2, 0, 0 );
 
-	m_staticText1 = new wxStaticText( this, ID_DEFAULT, wxT("Legth of half period [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
-	gSizer1->Add( m_staticText1, 0, wxALL, 5 );
-
+	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Legth of half period [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer1->Add( staticText, 0, wxALL, 5 );
 	m_textPeriod = new wxTextCtrl( this, TIMING_ID_PANEL_CLK_TXTPERIOD, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	gSizer1->Add( m_textPeriod, 0, wxEXPAND|wxALL, 5 );
 
-	m_staticText2 = new wxStaticText( this, ID_DEFAULT, wxT("Delay [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
-	gSizer1->Add( m_staticText2, 0, wxALL, 5 );
-
+	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Delay [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer1->Add( staticText, 0, wxALL, 5 );
 	m_textDelay = new wxTextCtrl( this, TIMING_ID_PANEL_CLK_TXTDELAY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	gSizer1->Add( m_textDelay, 0, wxEXPAND|wxALL, 5 );
 
+
 	bSizer1->Add( gSizer1, 1, wxEXPAND, 5 );
 
-	wxBoxSizer* bSizer2;
+
+    wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
-
-	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_CLK_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer2->Add( m_buttonApply, 0, wxALL, 5 );
-
-    m_buttonCancel = (wxButton*)NULL;
-	//m_buttonCancel = new wxButton( this, TIMING_ID_PANEL_CLK_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-	//bSizer2->Add( m_buttonCancel, 0, wxALL, 5 );
-
+	m_checkShadow = new wxCheckBox(this, TIMING_ID_PANEL_CLK_SHADOW, _T("generate vertical shadow"));
+	bSizer2->Add(m_checkShadow, wxEXPAND|wxALL, 5);
 	bSizer1->Add( bSizer2, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
+	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_CLK_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer3->Add( m_buttonApply, 0, wxALL, 5 );
+	bSizer1->Add( bSizer3, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 	this->SetSizer( bSizer1 );
 	this->Layout();

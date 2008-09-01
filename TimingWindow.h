@@ -124,8 +124,9 @@ private: /// event methods
     wxInt32 textNumber;
     wxPoint DrawEditableText(wxDC &dc, wxString str, wxPoint &offset, bool visible);
 
-    void CheckVScroll(wxPoint pos);
-    void CheckHScroll(wxPoint pos);
+    void CheckStartVScroll(wxPoint pos);
+    void CheckStartHScroll(wxPoint pos);
+    void Scroll( int x_pos, int y_pos );
 
 private:
     wxCaret *caret;
@@ -171,6 +172,8 @@ private:
     std::vector<wxPoint> HArrowOffsets;
     std::vector<wxInt32> HArrowToOffset;
 
+    std::vector<wxInt32> VisibleTicks;
+
      enum states
     {
         Neutral,
@@ -202,8 +205,8 @@ private:
         InsertingHArrowWaitingFirstPoint,
         InsertingHArrowWaitingSecondPoint,
         HArrowIsMarked,
-        ChangingHArrowLengthLeft,
-        ChangingHArrowLengthRight,
+        ChangingHArrowLengthStart,
+        ChangingHArrowLengthEnd,
         MovingHArrow,
         HArrowMovingText,
         SelectingText,
@@ -222,7 +225,7 @@ private:
 public:
     wxInt8 GetTransitionWidth();
     //bool GetEn5090();
-    void SetClock(wxInt32 delay, wxInt32 ticks);
+    void SetClock(wxInt32 delay, wxInt32 ticks, bool shadow);
     void SetNeutralState(void);
     wxInt32 GetSelectedSignalNr();
     void SetTransition(wxInt8 width, bool en50, bool en90);

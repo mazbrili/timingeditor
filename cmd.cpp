@@ -37,30 +37,7 @@
 
 #include "TimingDoc.h"
 #include "cmd.h"
-// TODO (daniel#5#): removed harrow by removed vline by removing signal dont gets  restored with undo
 
-//ChangeText(, wxInt32 n, wxString newText):
-ChangeText::ChangeText(TimingDocument *doc, wxString *target, wxString newText)
-    :wxCommand(true, _T("changing text")),
-    m_doc(doc),
-    m_target(target),
-    m_newText(newText)
-{
-}
-ChangeText::~ChangeText(){}
-bool ChangeText::Do(void)
-{
-    wxString tmp = *m_target;
-    *m_target = m_newText;
-    m_newText = tmp;
-    m_doc->Modify(true);
-    m_doc->UpdateAllViews();
-    return true;
-}
-bool ChangeText::Undo(void)
-{
-    return Do();
-}
 
 
 ChangeLength::ChangeLength(TimingDocument *doc, wxInt32 newLength)
@@ -86,6 +63,7 @@ bool ChangeLength::Do(void)
 
     discont.clear();
     disclen.clear();
+    discen.clear();
     std::set<wxInt32>::iterator it;
     std::set<wxInt32>::iterator itlow;
     itlow = m_doc->discontinuities.lower_bound(m_newLength) ;
@@ -94,8 +72,12 @@ bool ChangeLength::Do(void)
         it++)
     {
         discont.insert(*it);
+
         disclen[*it] = m_doc->discontlength[*it];
         m_doc->discontlength.erase(*it);
+
+        discen[*it] = m_doc->discontEn[*it];
+        m_doc->discontEn.erase(*it);
     }
     m_doc->discontinuities.erase(itlow, m_doc->discontinuities.end() );
 
@@ -134,7 +116,6 @@ bool ChangeLength::Do(void)
         {
             if ( m_doc->vertlines[k].vpos > m_newLength )
             {
-                //std::vector<DeleteVLineCommand*> delVlineCom;
                 DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
                 delVlineCom.push_back(cmd);
                 cmd->Do();
@@ -163,6 +144,7 @@ bool ChangeLength::Undo(void)
     {
         m_doc->discontinuities.insert(*it);
         m_doc->discontlength[*it] = disclen[*it];
+        m_doc->discontEn[*it] = discen[*it];
     }
 
 
@@ -334,17 +316,19 @@ bool DeleteSignalCommand::Undo(void)
 
 
 
-ChangeClockParamCommand::ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay)
+ChangeClockParamCommand::ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay, bool shadow)
     :wxCommand(true, _T("change clock")),
     m_doc(doc),
     m_changingSigNr(changingSigNr),
     m_newPer(per),
-    m_newDelay(delay)
+    m_newDelay(delay),
+    m_shadow(shadow)
 {}
 ChangeClockParamCommand::~ChangeClockParamCommand(){}
 bool ChangeClockParamCommand::Do(void)
 {
     wxInt32 tmp;
+
     tmp = m_doc->signals[m_changingSigNr].ticks;
     m_doc->signals[m_changingSigNr].ticks = m_newPer;
     m_newPer = tmp;
@@ -352,6 +336,11 @@ bool ChangeClockParamCommand::Do(void)
     tmp = m_doc->signals[m_changingSigNr].delay;
     m_doc->signals[m_changingSigNr].delay = m_newDelay;
     m_newDelay = tmp;
+
+    bool btmp;
+    btmp = m_doc->signals[m_changingSigNr].GenerateBackground;
+    m_doc->signals[m_changingSigNr].GenerateBackground = m_shadow;
+    m_shadow = btmp;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -437,6 +426,7 @@ bool AddDiscontCommand::Do(void)
     {
         m_doc->discontinuities.insert(m_discont);
         m_doc->discontlength[m_discont] = 2;
+        m_doc->discontEn[m_discont] = true;
 
         m_doc->Modify(true);
         m_doc->UpdateAllViews();
@@ -790,10 +780,14 @@ bool ChangeLengthLeft::Do(void)
     std::map<int, wxString> BusValues;
 
     discont.clear();
+    disclen.clear();
+    discen.clear();
     discont = m_doc->discontinuities;
     disclen = m_doc->discontlength;
+    discen  = m_doc->discontEn;
     m_doc->discontinuities.clear(); /// add the corrected values later
     m_doc->discontlength.clear();
+    m_doc->discontEn.clear();
 
     /// change the values of the signal
     for ( wxUint32 n = 0 ; n < signals.size() ; ++n )
@@ -879,6 +873,7 @@ bool ChangeLengthLeft::Do(void)
         {
             m_doc->discontinuities.insert( n );
             m_doc->discontlength[n] = disclen[*it];
+            m_doc->discontEn[n] = discen[*it];
         }
     }
 
@@ -915,6 +910,8 @@ bool ChangeLengthLeft::Undo(void)
     m_doc->discontinuities = discont;
     m_doc->discontlength.clear();
     m_doc->discontlength = disclen;
+    m_doc->discontEn.clear();
+    m_doc->discontEn = discen;
 
     m_doc->signals.clear();
     m_doc->signals = signals;
@@ -1250,79 +1247,15 @@ ChangeTextCommand::~ChangeTextCommand()
 {}
 bool ChangeTextCommand::Do(void)
 {
-    wxString tmp;
-    wxString str;
-    wxInt32 n = 0;
-    bool found = false;
+    wxString tmp(
+        m_doc->GetText(m_nmbr)
+    );
+    m_doc->SetText(m_nmbr, m_newText);
+    m_newText = tmp;
 
-    for ( wxUint32 k = 0 ; k < m_doc->signals.size() && !found ; ++k)
-    {
-        if ( n == m_nmbr )
-        {
-            tmp = m_doc->signals[k].name;
-            m_doc->signals[k].name = m_newText;
-            m_newText = tmp;
-            found = true;
-        }
-        ++n;
-
-        if ( m_doc->signals[k].IsBus )
-        {
-            if ( n == m_nmbr )
-            {
-                tmp = m_doc->signals[k].buswidth;
-                m_doc->signals[k].buswidth = m_newText;
-                m_newText = tmp;
-                found = true;
-            }
-            ++n;
-        }
-    }
-    for ( wxUint32 k = 0 ; k < m_doc->signals.size() && !found ; ++k)
-    {
-        if ( !m_doc->signals[k].IsClock && m_doc->signals[k].IsBus )
-        {
-            for ( wxUint32 i = 0 ; i < (wxUint32)m_doc->length && !found ; ++i )
-            {
-                if ( m_doc->signals[k].values[i] == one ||
-                     m_doc->signals[k].values[i] == zero )
-                {
-                    if ( i == 0 || m_doc->signals[k].values[i] != m_doc->signals[k].values[i-1] )
-                    {
-                        if ( n == m_nmbr )
-                        {
-                            tmp = m_doc->signals[k].TextValues[i];
-                            m_doc->signals[k].TextValues[i] = m_newText;
-                            m_newText = tmp;
-                            found = true;
-                        }
-                        n++;
-                    }
-                }
-            }
-        }
-    }
-    for ( wxUint32 k = 0 ; k < m_doc->harrows.size() && !found ; ++k, n++ )
-    {
-        if ( n == m_nmbr )
-        {
-            tmp = m_doc->harrows[k].text;
-            m_doc->harrows[k].text = m_newText;
-            m_newText = tmp;
-            found = true;
-        }
-    }
-
-
-    if ( found )
-    {
-        m_doc->Modify(true);
-        m_doc->UpdateAllViews();
-        return true;
-    }
-    else
-        return false;
-
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
 }
 bool ChangeTextCommand::Undo(void)
 {
@@ -1394,17 +1327,22 @@ bool ChangeAxisSettings::Undo(void)
     return Do();
 }
 
-ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time)
+ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time, bool en)
     :wxCommand(true, _("Change time compressor length") ),
     m_doc(doc),
     m_time(time),
-    m_index(index)
+    m_index(index),
+    m_en(en)
 {}
 bool ChangeTimeCompressor::Do(void)
 {
     wxInt32 tmp = m_doc->discontlength[m_index];
     m_doc->discontlength[m_index] = m_time;
     m_time = tmp;
+
+    bool btmp = m_doc->discontEn[m_index];
+    m_doc->discontEn[m_index] = m_en;
+    m_en = btmp;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();

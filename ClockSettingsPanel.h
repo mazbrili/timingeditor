@@ -48,23 +48,20 @@ class ClockSettingsPanel : public wxPanel
         void OnUpdatePanelClkApply(wxUpdateUIEvent& event);
         void OnUpdateTextFields(wxUpdateUIEvent& event);
         void OnApply(wxCommandEvent &event);
-        //void OnDelete(wxCommandEvent &event);
 
     public:
         TimingWindow *wnd;
 
 	protected:
-		wxStaticText* m_staticText1;
-		wxTextCtrl* m_textPeriod;
-		wxStaticText* m_staticText2;
-		wxTextCtrl* m_textDelay;
-		wxButton* m_buttonApply;
-		wxButton* m_buttonCancel;
+		wxTextCtrl *m_textPeriod;
+		wxTextCtrl *m_textDelay;
+		wxButton *m_buttonApply;
+		wxCheckBox *m_checkShadow;
+		bool Shadowed;
     public:
         void SetDelayText(const wxString &str){m_textDelay->SetValue(str);}
         void SetTicksText(const wxString &str){m_textPeriod->SetValue(str);}
-        //wxString GetDelayText(){return m_textDelay->GetValue();}
-        //wxString GetTicksText(){return m_textPeriod->GetValue();}
+        void SetShadowed(bool sha);
         void SetUnmodified();
 
 	public:
