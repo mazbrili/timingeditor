@@ -20,6 +20,9 @@
 //
 //
 
+
+// 3761, 3180, 2464, 2169, 604
+
 #ifdef __GNUG__
 // #pragma implementation
 #endif
@@ -160,8 +163,8 @@ bool TimingWindow::CanPaste(void)
     return false;
 }
 
-const int DistanceToTimeline    = 25;
-const int DistanceFromTimeline  = 5;
+const int DistanceToTicksLine    = 25;
+const int DistanceFromTicksLine  = 5;
 const int manipXoffset          = 20;
 const int manipRadius           = 4;
 
@@ -173,7 +176,7 @@ wxPoint TimingWindow::GetBitmapSize()
 {
     return wxPoint(
         axisStop-40,
-        heightOffsets[heightOffsets.size()-1] - DistanceToTimeline - DistanceFromTimeline
+        heightOffsets[heightOffsets.size()-1] - DistanceToTicksLine - DistanceFromTicksLine
     );
 }
 
@@ -288,7 +291,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     wxCoord width = 0;
     wxPoint offset(0, 0);
     if ( !exporting )
-        offset = wxPoint(40, DistanceToTimeline + DistanceFromTimeline );
+        offset = wxPoint(40, DistanceToTicksLine + DistanceFromTicksLine );
     else
         offset = wxPoint( 0, 0);
 
@@ -405,14 +408,23 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     while ( n <= doc->length )
     {
         VisibleTicks.push_back(n);
-        if ( doc->discontinuities.find(n) != doc->discontinuities.end() && doc->discontEn[n] )
+        if ( WindowState != AddTime || n != editingValA || editingValC < 1 )
         {
-            n += doc->discontlength[n];
-            if ( n > doc->length )
-                VisibleTicks.push_back(n);
+            if ( doc->discontinuities.find(n) != doc->discontinuities.end() && doc->discontEn[n] )
+            {
+                n += doc->discontlength[n];
+                if ( n > doc->length )
+                    VisibleTicks.push_back(n);
+            }
+            else
+                ++n;
         }
         else
+        {
+            for ( wxInt32 adding = 0 ; adding < editingValC ; ++adding )
+                VisibleTicks.push_back(n);
             ++n;
+        }
     }
     axisStop = signalNamesWidth + GridStepWidth*(VisibleTicks.size() - 1);
     if ( virtsize.x < (axisStop + 500) ) virtsize.x = (axisStop + 500);
@@ -428,13 +440,21 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         wxCoord start = signalNamesWidth;
         wxCoord stop = start + axisStop-axisStart;
         if ( ! exporting )
-            axispos += DistanceToTimeline + DistanceFromTimeline;
+            axispos += DistanceToTicksLine + DistanceFromTicksLine;
 
         dc.DrawLine(start , axispos, stop, axispos);
         wxInt32 tacklen = doc->TackLength;
+        wxInt32 adding = 0;
         for ( wxUint32 n = 0 ; n < VisibleTicks.size() ; ++n )
         {
-            wxInt32 ticks = VisibleTicks[n];//doc->timeOffset;
+            wxInt32 ticks = VisibleTicks[n];
+            if ( WindowState == AddTime && editingValC > 0 && ticks > editingValA )
+                ticks += editingValC;
+            if ( WindowState == AddTime && editingValC > 0 && ticks == editingValA )
+            {
+                ticks += adding;
+                adding++;
+            }
             if ( ((ticks + doc->timeOffset) % tacklen) == 0 )
             {
                 dc.DrawLine(signalNamesWidth + n*GridStepWidth, axispos - 2,
@@ -480,7 +500,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
 
         drawstartx = axisStart;
         drawstopx = axisStop;
-        drawy = DistanceToTimeline;
+        drawy = DistanceToTicksLine;
         drawsteps = VisibleTicks.size()-1;
 
         if ( WindowState != EditAxisLeft && WindowState != EditAxisRight )
@@ -508,9 +528,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             {
                 drawsteps = VisibleTicks.size()-1;
                 if ( editingValB > doc->length )
-                {
                     drawsteps += (editingValB-doc->length);
-                }
                 else
                 {
                     wxInt32 diff = doc->length - editingValB;
@@ -528,6 +546,13 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             }
             drawstopx = axisStop;
         }
+
+        if ( WindowState == AddTime && editingValC > 0)
+        {
+            drawBoxes = false;
+
+        }
+
         drawy += unscrolledPosition.y;
         dc.DrawLine(drawstartx - 3, drawy, drawstopx + 3, drawy);
         for (wxInt32 n = 0 ; n <= drawsteps ; ++n)
@@ -539,7 +564,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             dc.DrawRectangle(drawstopx - 3, drawy - 3, 7, 7);
         }
     }
-
 
     if ( !exporting )
         dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,heightOffsets[0]-5+unscrolledPosition.y, virtsize.x, virtsize.y+10);
@@ -597,6 +621,18 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     }
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
+
+
+    /// indicate "inserting" of time
+    if ( !exporting && WindowState == AddTime && editingValC >= 0 )
+    {
+        dc.SetBrush(*wxMEDIUM_GREY_BRUSH);
+        dc.SetPen(*wxTRANSPARENT_PEN);
+        dc.DrawRectangle( axisStart + editingValB * GridStepWidth, heightOffsets[0],
+                        editingValC * GridStepWidth, -heightOffsets[0] + heightOffsets[heightOffsets.size()-1]);
+        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        dc.SetPen(*wxBLACK_PEN);
+    }
 
 
     /// indicate target position of moving signals
@@ -1444,12 +1480,20 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
 
 
     /// drawing discontinuities
+    bool addingdone = false;
     for ( wxUint32 k = 0 ; k < VisibleTicks.size()-1 ; ++k )
     {
         wxInt32 tick = VisibleTicks[k];
         wxInt32 len = 1;
         if ( doc->discontinuities.find(tick) != doc->discontinuities.end() && doc->discontEn[tick] )
             len = doc->discontlength[tick];
+        if ( WindowState == AddTime && tick == editingValA )
+        {
+            if ( !addingdone )
+                addingdone = true;
+            else
+                len = 0;
+        }
         if ( len > 1 )
         {
             /// splines over signal
@@ -1634,7 +1678,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     }
     wxInt32 distancfortimeline = 0;
     if ( !exporting )
-        distancfortimeline = DistanceToTimeline + DistanceFromTimeline;
+        distancfortimeline = DistanceToTicksLine + DistanceFromTicksLine;
     for ( wxUint32 n = 0 ; n < doc->harrows.size() ; ++n )
     {
         HArrow &ha = doc->harrows[n];
@@ -2004,7 +2048,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                         (0.5 + k) * GridStepWidth
                         - 3
                         ;
-            offset.y = DistanceToTimeline-3;
+            offset.y = DistanceToTicksLine-3;
             wxPoint points[] =
             {
                 offset + wxPoint(0, unscrolledPosition.y),
@@ -2033,7 +2077,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                         ;
             offset.y = DistanceToAxis - 3 + unscrolledPosition.y;
             if ( !exporting )
-                offset.y += DistanceToTimeline + DistanceFromTimeline;
+                offset.y += DistanceToTicksLine + DistanceFromTicksLine;
             for ( wxInt32 n = 0 ; n < 4 ; ++n )
             {
                 if ( n == 0 || n == 3 )
@@ -2048,7 +2092,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         {
             len = doc->discontlength[tick];
             offset.x = signalNamesWidth  + (0.5 + k) * GridStepWidth;
-            offset.y = DistanceToTimeline-4 + unscrolledPosition.y;
+            offset.y = DistanceToTicksLine-4 + unscrolledPosition.y;
             wxPoint points[] =
             {
                 offset + wxPoint(-1, 0),
@@ -2151,6 +2195,43 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             dc.DrawText(str, cursorpos.x+5,  unscrolledPosition.y + 5);
         }
     }
+
+    /// show where to "insert"/"remove" some time
+    if ( !exporting & WindowState == Neutral )
+    {
+        if ( (cursorpos.x - axisStart ) > 0 && (cursorpos.x - axisStart ) < axisStop )
+        {
+            wxInt32 p = (cursorpos.x - axisStart )/GridStepWidth;
+            if ( doc->discontinuities.find(p) == doc->discontinuities.end() )
+            {
+                if (
+                    cursorpos.y - unscrolledPosition.y > DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis - 10 &&
+                    cursorpos.y - unscrolledPosition.y < DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis
+                )
+                {
+                    dc.SetBrush(*wxWHITE_BRUSH);
+                    dc.SetPen(*wxBLACK_PEN);
+                    dc.DrawRectangle(cursorpos.x+2,      cursorpos.y+2 , 11, 11);
+                    dc.DrawLine(     cursorpos.x+2 + 5,  cursorpos.y+2  + 2,
+                                     cursorpos.x+2 + 5,  cursorpos.y+2  + 9);
+                    dc.DrawLine(     cursorpos.x+2 + 2,  cursorpos.y+2  + 5,
+                                     cursorpos.x+2 + 9,  cursorpos.y+2  + 5);
+                }
+                if (
+                    cursorpos.y - unscrolledPosition.y > DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis  &&
+                    cursorpos.y - unscrolledPosition.y < DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis + 10
+                )
+                {
+                    dc.SetBrush(*wxWHITE_BRUSH);
+                    dc.SetPen(*wxBLACK_PEN);
+                    dc.DrawRectangle(cursorpos.x+2,      cursorpos.y+2 , 11, 11);
+                    dc.DrawLine(     cursorpos.x+2 + 2,  cursorpos.y+2  + 5,
+                                     cursorpos.x+2 + 9,  cursorpos.y+2  + 5);
+                }
+            }
+        }
+    }
+
 }
 
 void TimingWindow::OnEraseBackground(wxEraseEvent &event){/* must be empty */}
@@ -2236,6 +2317,11 @@ void TimingWindow::OnEnterWindow(wxMouseEvent &event)
             if ( ! event.LeftIsDown() )
                 WindowState = HArrowIsMarked;
             break;
+        case AddTime:
+        case RemoveTime:
+            if ( ! event.LeftIsDown() )
+                SetNeutralState();
+            break;
     }
 
     Refresh(true);
@@ -2269,8 +2355,8 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             if (p.x > signalNamesWidth-10 &&
                 pt.x > axisStart &&
                 pt.x < axisStop &&
-                p.y > DistanceToTimeline - 5 &&
-                p.y < DistanceToTimeline + 5 )
+                p.y > DistanceToTicksLine - 5 &&
+                p.y < DistanceToTicksLine + 5 )
             {
                 wxCoord p = pt.x-axisStart;
                 wxInt32 discontpos = VisibleTicks[p / (GridStepWidth)];
@@ -2286,12 +2372,12 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             if (p.x > signalNamesWidth-10 &&
                 pt.x > axisStart &&
                 pt.x < axisStop &&
-                p.y > DistanceToTimeline - 5 &&
-                p.y < DistanceToTimeline + 5)
+                p.y > DistanceToTicksLine - 5 &&
+                p.y < DistanceToTicksLine + 5)
             {
                 newstate = AxisIsMarked;
                 dorefresh = true;
-                if ( p.y <= DistanceToTimeline )
+                if ( p.y <= DistanceToTicksLine )
                     editingValC = -2;
                 else
                     editingValC = -3;
@@ -2409,6 +2495,40 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                     break;
                 }
             }
+            /// check click to "insert" time
+            if ( p.x > signalNamesWidth-10 &&
+                pt.x > axisStart &&
+                pt.x < axisStop &&
+                p.y > DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine - 10 &&
+                p.y < DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine)
+            {
+                if ( doc->discontinuities.find((pt.x - axisStart )/GridStepWidth) == doc->discontinuities.end() )
+                {
+                    newstate = AddTime;
+                    editingValB = (pt.x - axisStart) / (GridStepWidth);
+                    editingValA = VisibleTicks[editingValB];
+                    editingValC = 0;
+                    dorefresh = true;
+                }
+                break;
+            }
+            /// check click to "remove" time
+            if ( p.x > signalNamesWidth-10 &&
+                pt.x > axisStart &&
+                pt.x < axisStop &&
+                p.y > DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine &&
+                p.y < DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine + 10 )
+            {
+                //if ( doc->discontinuities.find((pt.x - axisStart )/GridStepWidth) == doc->discontinuities.end() )
+                {
+                    newstate = RemoveTime;
+                    editingValB = (pt.x - axisStart) / (GridStepWidth);
+                    editingValA = VisibleTicks[editingValB];
+                    editingValC = 0;
+                    dorefresh = true;
+                }
+                break;
+            }
             break;
         case DisconSelected:
             SetNeutralState();
@@ -2418,9 +2538,9 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             /// check if user clicked the end of marked axis
             if (p.x > signalNamesWidth-10 &&
                 pt.x >= axisStop-5 &&
-                p.y >= DistanceToTimeline - 5 &&
+                p.y >= DistanceToTicksLine - 5 &&
                 pt.x <= axisStop+5 &&
-                p.y <= DistanceToTimeline + 5 )
+                p.y <= DistanceToTicksLine + 5 )
             {
                 newstate = EditAxisRight;
                 editingValA = doc->length;
@@ -2431,9 +2551,9 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             /// check if user clicked the start of marked axis
             if (p.x > signalNamesWidth-10 &&
                 pt.x >= axisStart-5 &&
-                p.y >= DistanceToTimeline - 5 &&
+                p.y >= DistanceToTicksLine - 5 &&
                 pt.x <= axisStart+5 &&
-                p.y <= DistanceToTimeline + 5)
+                p.y <= DistanceToTicksLine + 5)
             {
                 newstate = EditAxisLeft;
                 editingValA = doc->length;
@@ -2810,7 +2930,8 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
         case ChangingHArrowLengthEnd:
         case MovingVLine:
         case MovingHArrow:
-
+        case AddTime:
+        case RemoveTime:
             /// should not happen in this states: MouseLeftDown
             SetNeutralState();
             break;
@@ -3089,12 +3210,26 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                 wxCoord off     = editingValA - GridStepWidth * gridoff;
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
                 cmdproc->Submit(new ChangeHArrowTextPosCommand(doc, editingNumber,
-                    off,//editingValA, // the new x offset
+                    off,// the new x offset
                     editingValB, // the new y offset
                     gridoff
                 ));
             }
             newstate = HArrowIsMarked;
+            break;
+        case AddTime:
+            if ( editingValC > 0 )
+            {
+                wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+                cmdproc->Submit(new AddTimeCommand(doc, editingValA, editingValC));
+            }
+            newstate = Neutral;
+            break;
+        case RemoveTime:
+            {
+
+            }
+            newstate = Neutral;
             break;
     }
     WindowState = newstate;
@@ -3672,6 +3807,32 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                 editingValC = editingValA;
                 dorefresh = true;
             }
+            break;
+        case AddTime:
+            if ( event.LeftIsDown() && pt.x > axisStart && pt.x < axisStop)
+            {
+                //wxCoord p = pt.x-axisStart;
+
+                //editingValB = ;
+                //editingValA = VisibleTicks[editingValB];
+                editingValC = (pt.x - axisStart) / (GridStepWidth) - editingValB;
+                if ( editingValC < 0 ) editingValC = 0;
+            }
+            else
+                editingValC = 0;
+            break;
+        case RemoveTime:
+            if ( event.LeftIsDown() && pt.x > axisStart && pt.x < axisStop)
+            {
+                editingValC = (pt.x - axisStart) / (GridStepWidth) ;
+                //newstate = RemoveTime;
+                //editingValB = (pt.x - axisStart) / (GridStepWidth);
+                //editingValA = VisibleTicks[editingValB];
+                //editingValC = 0;
+                editingValC = 0;
+            }
+            else
+                editingValC = 0;
             break;
     }
     WindowState = newstate;
@@ -4784,7 +4945,7 @@ void TimingWindow::OnTimer(wxTimerEvent& event)
                 /// check if user mover over a vertical line
                 for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
                 {
-                    //wxInt32 pos = DistanceToTimeline + DistanceFromTimeline + editingValA;
+                    //wxInt32 pos = DistanceToTicksLine + DistanceFromTicksLine + editingValA;
                     wxInt32 pos = heightOffsets[editingValC] + editingValA;
                     if (pt.x >= VLineOffsets[k].x - 3 &&
                         pt.x <= VLineOffsets[k].x + 3 &&
@@ -4804,7 +4965,7 @@ void TimingWindow::OnTimer(wxTimerEvent& event)
             case ChangingHArrowLengthEnd:
                 for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
                 {
-                    //wxInt32 pos = doc->harrows[editingNumber].pos + DistanceToTimeline + DistanceFromTimeline;
+                    //wxInt32 pos = doc->harrows[editingNumber].pos + DistanceToTicksLine + DistanceFromTicksLine;
                     wxInt32 pos = heightOffsets[doc->harrows[editingNumber].signalnmbr] + doc->harrows[editingNumber].pos;
                     if (pt.x >= VLineOffsets[k].x - 3 &&
                         pt.x <= VLineOffsets[k].x + 3 &&

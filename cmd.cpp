@@ -364,6 +364,10 @@ bool AddSignalCommand::Do(void)
     vlines = m_doc->vertlines;
     harrows = m_doc->harrows;
 
+    wxInt32 last = m_sig.values.size() - 1;
+    for ( wxInt32 k = m_sig.values.size() ; k <= m_doc->length && !(m_sig.IsClock) ; ++k )
+        m_sig.values.push_back(m_sig.values[last]);
+
     if ( m_selectedSigNr == -1 )
         m_doc->signals.push_back(m_sig);
     else
@@ -1353,3 +1357,134 @@ bool ChangeTimeCompressor::Undo(void)
     return Do();
 }
 ChangeTimeCompressor::~ChangeTimeCompressor(){}
+
+AddTimeCommand::AddTimeCommand(TimingDocument *doc, wxInt32 pos, wxInt32 len)
+: wxCommand(true, _("Insert duration in time") ),
+    m_doc(doc),
+    m_pos(pos),
+    m_len(len)
+{
+}
+AddTimeCommand::~AddTimeCommand(){}
+bool AddTimeCommand::Do(void)
+{
+    // move vertical lines
+    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    {
+        if ( m_doc->vertlines[n].vpos > m_pos )
+             m_doc->vertlines[n].vpos += m_len;
+    }
+
+
+    // move time compressors
+    std::set<wxInt32> disconts;
+    std::map<wxInt32, wxInt32> dislen;
+    std::map<wxInt32, bool> disEn;
+    for ( wxInt32 n = m_doc->length ; n >= m_pos; n-- )
+    {
+        if ( m_doc->discontinuities.find(n) != m_doc->discontinuities.end() )
+        {
+            m_doc->discontinuities.erase(n);
+            m_doc->discontinuities.insert(n+m_len);
+
+            m_doc->discontlength[n+m_len] = m_doc->discontlength[n];
+            m_doc->discontlength.erase(n);
+
+            m_doc->discontEn[n+m_len] = m_doc->discontEn[n];
+            m_doc->discontEn.erase(n);
+        }
+    }
+
+    // insert signal states
+    for ( wxInt32 n = 0 ; n < (wxInt32)m_doc->signals.size() ; ++n)
+        if ( !m_doc->signals[n].IsClock )
+        {
+            Signal sig = m_doc->signals[n];
+            vals val = sig.values[m_pos];
+            sig.values.clear();
+            for (wxInt32 k = 0 ; k < m_pos ; ++k )
+                sig.values.push_back(m_doc->signals[n].values[k]);
+            for ( wxInt32 k = 0 ; k < m_len ; ++k)
+                sig.values.push_back(val);
+            for ( wxInt32 k = m_pos ; k < (wxInt32)m_doc->signals[n].values.size() ; ++k )
+                sig.values.push_back(m_doc->signals[n].values[k]);
+            m_doc->signals[n].values = sig.values;
+
+            // - move texts of bus signals
+            for ( wxInt32 k = m_doc->length ; k >= m_pos; k-- )
+            {
+                if ( m_doc->signals[n].TextValues.find(k) != m_doc->signals[n].TextValues.end() )
+                {
+                    m_doc->signals[n].TextValues[k+m_len] = m_doc->signals[n].TextValues[k];
+                    m_doc->signals[n].TextValues.erase(k);
+                }
+            }
+        }
+
+    //adjust length stored in document
+    m_doc->length += m_len;
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+bool AddTimeCommand::Undo(void)
+{
+    // move vertical lines
+    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    {
+        if ( m_doc->vertlines[n].vpos > m_pos )
+             m_doc->vertlines[n].vpos -= m_len;
+    }
+
+    // move time compressors back
+    for ( wxInt32 n = m_pos ; n < m_doc->length ; ++n )
+    {
+        if ( m_doc->discontinuities.find(n) != m_doc->discontinuities.end() )
+        {
+            m_doc->discontinuities.erase(n);
+            m_doc->discontinuities.insert(n-m_len);
+
+            m_doc->discontlength[n-m_len] = m_doc->discontlength[n];
+            m_doc->discontlength.erase(n);
+
+            m_doc->discontEn[n-m_len] = m_doc->discontEn[n];
+            m_doc->discontEn.erase(n);
+        }
+    }
+
+
+    // remove signal states
+    for ( wxInt32 n = 0 ; n < (wxInt32)m_doc->signals.size() ; ++n)
+        if ( !m_doc->signals[n].IsClock )
+        {
+
+            Signal sig = m_doc->signals[n];
+            sig.values.clear();
+            for (wxInt32 k = 0 ; k < m_pos ; ++k )
+                sig.values.push_back(m_doc->signals[n].values[k]);
+            for ( wxInt32 k = m_pos+m_len ; k < (wxInt32)m_doc->signals[n].values.size() ; ++k )
+                sig.values.push_back(m_doc->signals[n].values[k]);
+            m_doc->signals[n].values = sig.values;
+
+
+            // - move texts of signals
+            for ( wxInt32 k = m_pos + m_len ; k < m_doc->length; ++k )
+            {
+                if ( m_doc->signals[n].TextValues.find(k) != m_doc->signals[n].TextValues.end() )
+                {
+                    m_doc->signals[n].TextValues[k-m_len] = m_doc->signals[n].TextValues[k];
+                    m_doc->signals[n].TextValues.erase(k);
+                }
+            }
+        }
+
+    //adjust length stored in document
+    m_doc->length -= m_len;
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+
+

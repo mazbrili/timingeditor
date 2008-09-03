@@ -27,6 +27,7 @@
 #include <wx/cmdproc.h>
 
 class TimingDocument;
+
 class DeleteVLineCommand : public wxCommand
 {
 public:
@@ -315,6 +316,19 @@ protected:
     wxInt32 m_time;
     wxInt32 m_index;
     bool    m_en;
+};
+
+class AddTimeCommand : public wxCommand
+{
+public:
+    AddTimeCommand(TimingDocument *doc, wxInt32 pos, wxInt32 len);
+    ~AddTimeCommand();
+    bool Do(void);
+    bool Undo(void);
+protected:
+    TimingDocument *m_doc;
+    wxInt32 m_pos;
+    wxInt32 m_len;
 };
 
 #endif //__CMD__

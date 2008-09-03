@@ -214,6 +214,9 @@ private:
         //TextSelected,
 
         DisconSelected,
+
+        AddTime,
+        RemoveTime,
     };
     states WindowState;
 
