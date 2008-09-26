@@ -54,9 +54,7 @@ protected:
     bool m_shorten;
     wxInt32 m_newLength;
     std::vector< Signal > signals;
-    std::set<wxInt32> discont;
-    std::map<wxInt32, wxInt32> disclen;
-    std::map<wxInt32, bool> discen;
+    std::vector< TimeCompressor > compressors;
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
 class ChangeLengthLeft : public wxCommand
@@ -71,9 +69,7 @@ protected:
     bool m_shorten;
     wxInt32 m_newLength;
     std::vector< Signal > signals;
-    std::set<wxInt32> discont;
-    std::map<wxInt32, wxInt32> disclen;
-    std::map<wxInt32, bool> discen;
+    std::vector< TimeCompressor > compressors;
 
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
@@ -167,8 +163,8 @@ public:
     bool Undo(void);
 protected:
     TimingDocument *m_doc;
-    wxInt32 m_discont;
-    wxInt32 m_len;
+    wxInt32 m_pos;
+    TimeCompressor m_cmprssr;
 };
 class ChangeSpaceCommand : public wxCommand
 {
@@ -330,5 +326,20 @@ protected:
     wxInt32 m_pos;
     wxInt32 m_len;
 };
+class RemoveTimeCommand : public wxCommand
+{
+public:
+    RemoveTimeCommand(TimingDocument *doc, wxInt32 beg, wxInt32 end);
+    ~RemoveTimeCommand();
+    bool Do(void);
+    bool Undo(void);
+protected:
+    TimingDocument *m_doc;
+    wxInt32 m_beg;
+    wxInt32 m_end;
+    std::vector<Signal> m_signals;
+    std::vector<TimeCompressor> m_compressors;
 
+    std::vector<DeleteVLineCommand*> delVlineCom;
+};
 #endif //__CMD__

@@ -57,30 +57,16 @@ ChangeLength::~ChangeLength()
 }
 bool ChangeLength::Do(void)
 {
+    compressors.clear();
+    compressors = m_doc->compressors;
+    for ( std::vector<TimeCompressor>::iterator idx = m_doc->compressors.begin() ; idx != m_doc->compressors.end() ; idx++ )
+    {
+        if ( idx->pos > m_newLength )
+            m_doc->compressors.erase(idx);
+    }
 
     signals.clear();
     signals = m_doc->signals;
-
-    discont.clear();
-    disclen.clear();
-    discen.clear();
-    std::set<wxInt32>::iterator it;
-    std::set<wxInt32>::iterator itlow;
-    itlow = m_doc->discontinuities.lower_bound(m_newLength) ;
-    for(it = itlow;
-        it != m_doc->discontinuities.end() ;
-        it++)
-    {
-        discont.insert(*it);
-
-        disclen[*it] = m_doc->discontlength[*it];
-        m_doc->discontlength.erase(*it);
-
-        discen[*it] = m_doc->discontEn[*it];
-        m_doc->discontEn.erase(*it);
-    }
-    m_doc->discontinuities.erase(itlow, m_doc->discontinuities.end() );
-
     for ( wxUint32 n = 0 ; n < signals.size() ; ++n )
     {
         if ( !signals[n].IsClock )
@@ -136,21 +122,10 @@ bool ChangeLength::Do(void)
 bool ChangeLength::Undo(void)
 {
 
-    for (
-        std::set<wxInt32>::iterator it = discont.begin() ;
-        it != discont.end() ;
-        it++
-    )
-    {
-        m_doc->discontinuities.insert(*it);
-        m_doc->discontlength[*it] = disclen[*it];
-        m_doc->discontEn[*it] = discen[*it];
-    }
+    m_doc->compressors = compressors;
 
-
-    m_doc->signals.clear();
+    //m_doc->signals.clear();
     m_doc->signals = signals;
-
 
     while ( delVlineCom.size() )
     {
@@ -426,23 +401,21 @@ AddDiscontCommand::AddDiscontCommand(TimingDocument *doc, wxInt32 discont)
 AddDiscontCommand::~AddDiscontCommand(){}
 bool AddDiscontCommand::Do(void)
 {
-    if ( m_doc->discontinuities.find(m_discont) == m_doc->discontinuities.end() )
-    {
-        m_doc->discontinuities.insert(m_discont);
-        m_doc->discontlength[m_discont] = 2;
-        m_doc->discontEn[m_discont] = true;
+    TimeCompressor cmprssr;
+    cmprssr.pos = m_discont;
+    cmprssr.length = 2;
+    cmprssr.enabled = true;
 
-        m_doc->Modify(true);
-        m_doc->UpdateAllViews();
-        return true;
-    }
-    else
-        return false;
+    m_doc->compressors.push_back(cmprssr);
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+
 }
 bool AddDiscontCommand::Undo(void)
 {
-    m_doc->discontinuities.erase(m_discont);
-    m_doc->discontlength.erase(m_discont);
+    m_doc->compressors.pop_back();
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -453,17 +426,24 @@ bool AddDiscontCommand::Undo(void)
 RemoveDiscontCommand::RemoveDiscontCommand(TimingDocument *doc, wxInt32 discont)
     :wxCommand(true, _T("removing discont")),
     m_doc(doc),
-    m_discont(discont)
+    m_pos(discont)
 {}
 RemoveDiscontCommand::~RemoveDiscontCommand(){}
 bool RemoveDiscontCommand::Do(void)
 {
-    if ( m_doc->discontinuities.find(m_discont) != m_doc->discontinuities.end() )
+    bool hadcomp = false;
+    for ( std::vector<TimeCompressor>::iterator idx = m_doc->compressors.begin() ;
+        idx != m_doc->compressors.end() ; idx++ )
+    if ( idx->pos == m_pos )
     {
-        m_len = m_doc->discontlength[m_discont];
-        m_doc->discontinuities.erase(m_discont);
-        m_doc->discontlength.erase(m_discont);
+        m_cmprssr = *idx;
+        m_doc->compressors.erase(idx);
+        hadcomp = true;
+        break;
+    }
 
+    if( hadcomp )
+    {
         m_doc->Modify(true);
         m_doc->UpdateAllViews();
         return true;
@@ -473,12 +453,11 @@ bool RemoveDiscontCommand::Do(void)
 }
 bool RemoveDiscontCommand::Undo(void)
 {
-    m_doc->discontinuities.insert(m_discont);
-    m_doc->discontlength[m_discont] = m_len;
+    m_doc->compressors.push_back(m_cmprssr);
+
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
-
 }
 
 MoveSignalPosCommand::MoveSignalPosCommand(TimingDocument *doc, wxInt32 selectedSigNr, wxInt32 targetPos)
@@ -783,15 +762,8 @@ bool ChangeLengthLeft::Do(void)
 
     std::map<int, wxString> BusValues;
 
-    discont.clear();
-    disclen.clear();
-    discen.clear();
-    discont = m_doc->discontinuities;
-    disclen = m_doc->discontlength;
-    discen  = m_doc->discontEn;
-    m_doc->discontinuities.clear(); /// add the corrected values later
-    m_doc->discontlength.clear();
-    m_doc->discontEn.clear();
+    compressors = m_doc->compressors;
+    m_doc->compressors.clear(); /// add the corrected values later
 
     /// change the values of the signal
     for ( wxUint32 n = 0 ; n < signals.size() ; ++n )
@@ -866,18 +838,16 @@ bool ChangeLengthLeft::Do(void)
     }
 
     /// calc new position of dicontinuities (do not add them if outside the graph)
-    for (
-        std::set<wxInt32>::iterator it = discont.begin();
-        it != discont.end();
-        it++
-    )
+    for ( std::vector<TimeCompressor>::iterator it = compressors.begin(); it != compressors.end();it++ )
     {
-        wxInt32 n = *it - (m_doc->length - m_newLength);
+        wxInt32 n = it->pos - (m_doc->length - m_newLength);
         if ( n >= 0 )
         {
-            m_doc->discontinuities.insert( n );
-            m_doc->discontlength[n] = disclen[*it];
-            m_doc->discontEn[n] = discen[*it];
+            TimeCompressor cmprssr;
+            cmprssr.pos = n;
+            cmprssr.length = it->length;
+            cmprssr.enabled = it->enabled;
+            m_doc->compressors.push_back(cmprssr);
         }
     }
 
@@ -910,14 +880,8 @@ bool ChangeLengthLeft::Do(void)
 
 bool ChangeLengthLeft::Undo(void)
 {
-    m_doc->discontinuities.clear();
-    m_doc->discontinuities = discont;
-    m_doc->discontlength.clear();
-    m_doc->discontlength = disclen;
-    m_doc->discontEn.clear();
-    m_doc->discontEn = discen;
+    m_doc->compressors = compressors;
 
-    m_doc->signals.clear();
     m_doc->signals = signals;
 
     wxInt32 diff = m_newLength - m_doc->length;
@@ -1340,13 +1304,17 @@ ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, w
 {}
 bool ChangeTimeCompressor::Do(void)
 {
-    wxInt32 tmp = m_doc->discontlength[m_index];
-    m_doc->discontlength[m_index] = m_time;
-    m_time = tmp;
+    for ( wxUint32 indx = 0 ; indx < m_doc->compressors.size() ; ++indx)
+    if ( m_doc->compressors[indx].pos == m_index )
+    {
+        wxInt32 tmp = m_doc->compressors[indx].length;
+        m_doc->compressors[indx].length = m_time;
+        m_time = tmp;
 
-    bool btmp = m_doc->discontEn[m_index];
-    m_doc->discontEn[m_index] = m_en;
-    m_en = btmp;
+        bool btmp = m_doc->compressors[indx].enabled;
+        m_doc->compressors[indx].enabled = m_en;
+        m_en = btmp;
+    }
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -1375,24 +1343,11 @@ bool AddTimeCommand::Do(void)
              m_doc->vertlines[n].vpos += m_len;
     }
 
-
     // move time compressors
-    std::set<wxInt32> disconts;
-    std::map<wxInt32, wxInt32> dislen;
-    std::map<wxInt32, bool> disEn;
-    for ( wxInt32 n = m_doc->length ; n >= m_pos; n-- )
+    for ( wxUint32 indx = 0 ; indx < m_doc->compressors.size() ; ++indx )
     {
-        if ( m_doc->discontinuities.find(n) != m_doc->discontinuities.end() )
-        {
-            m_doc->discontinuities.erase(n);
-            m_doc->discontinuities.insert(n+m_len);
-
-            m_doc->discontlength[n+m_len] = m_doc->discontlength[n];
-            m_doc->discontlength.erase(n);
-
-            m_doc->discontEn[n+m_len] = m_doc->discontEn[n];
-            m_doc->discontEn.erase(n);
-        }
+        if ( m_doc->compressors[indx].pos >= m_pos )
+            m_doc->compressors[indx].pos += m_len;
     }
 
     // insert signal states
@@ -1438,21 +1393,11 @@ bool AddTimeCommand::Undo(void)
     }
 
     // move time compressors back
-    for ( wxInt32 n = m_pos ; n < m_doc->length ; ++n )
+    for ( wxUint32 indx = 0 ; indx < m_doc->compressors.size() ; ++indx )
     {
-        if ( m_doc->discontinuities.find(n) != m_doc->discontinuities.end() )
-        {
-            m_doc->discontinuities.erase(n);
-            m_doc->discontinuities.insert(n-m_len);
-
-            m_doc->discontlength[n-m_len] = m_doc->discontlength[n];
-            m_doc->discontlength.erase(n);
-
-            m_doc->discontEn[n-m_len] = m_doc->discontEn[n];
-            m_doc->discontEn.erase(n);
-        }
+        if ( m_doc->compressors[indx].pos > m_pos )
+            m_doc->compressors[indx].pos -=m_len;
     }
-
 
     // remove signal states
     for ( wxInt32 n = 0 ; n < (wxInt32)m_doc->signals.size() ; ++n)
@@ -1487,4 +1432,111 @@ bool AddTimeCommand::Undo(void)
     return true;
 }
 
+
+RemoveTimeCommand::RemoveTimeCommand(TimingDocument *doc, wxInt32 beg, wxInt32 end)
+:wxCommand(true, _T("Delete a time slice") ),
+    m_doc(doc),
+    m_beg(beg),
+    m_end(end)
+{}
+
+RemoveTimeCommand::~RemoveTimeCommand()
+{
+    DeleteVLineCommand *dvlc;
+    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
+    {
+        dvlc = delVlineCom[k];
+        if ( dvlc ) delete dvlc;
+    }
+}
+
+bool RemoveTimeCommand::Do(void)
+{
+    //signals
+    m_signals = m_doc->signals;
+    for ( wxUint32 n = 0 ; n < m_doc->signals.size() ; ++n )
+    {
+        if (!m_doc->signals[n].IsClock)
+        {
+            wxInt32 k = 0;
+            std::vector<vals>::iterator st, ed;
+            for( std::vector<vals>::iterator it = m_doc->signals[n].values.begin() ; it != m_doc->signals[n].values.end() ; it++ )
+            {
+                if ( k == m_beg )
+                    st = it;
+                if ( k == m_end )
+                    ed = it;
+                ++k;
+            }
+            m_doc->signals[n].values.erase(st,ed);
+        }
+    }
+
+    //time compressors
+    m_compressors = m_doc->compressors;
+    m_doc->compressors.clear();
+    for ( std::vector<TimeCompressor>::iterator it = m_compressors.begin(); it != m_compressors.end() ; it++ )
+    {
+        if ( it->pos < m_beg )
+            m_doc->compressors.push_back(*it);
+        else if ( it->pos >= m_end )
+        {
+            TimeCompressor cmprssr = *it;
+            cmprssr.pos -= ( m_end - m_beg );
+            m_doc->compressors.push_back(cmprssr);
+        }
+    }
+
+    //vertical lines
+    /// change positoin of vertical lines or remove them
+    delVlineCom.clear();
+    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
+    {
+        if ( m_doc->vertlines[k].vpos >= m_beg && m_doc->vertlines[k].vpos < m_end )
+        {
+            DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
+            delVlineCom.push_back(cmd);
+            cmd->Do();
+            k=-1;
+        }
+    }
+    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
+        if ( m_doc->vertlines[k].vpos >= m_end )
+            m_doc->vertlines[k].vpos -= ( m_end - m_beg );
+
+    //length
+    m_doc->length -= (m_end - m_beg);
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+
+bool RemoveTimeCommand::Undo(void)
+{
+    //signals
+    m_doc->signals = m_signals;
+
+    //compressors
+    m_doc->compressors = m_compressors;
+
+    //vertical lines
+    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size(); ++k )
+        if ( m_doc->vertlines[k].vpos >= m_beg )
+            m_doc->vertlines[k].vpos += (m_end -m_beg);
+    while ( delVlineCom.size() )
+    {
+        DeleteVLineCommand *cmd = delVlineCom.back();
+        cmd->Undo();
+        delete cmd;
+        delVlineCom.pop_back();
+    }
+
+    //length
+    m_doc->length += (m_end - m_beg);
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
 

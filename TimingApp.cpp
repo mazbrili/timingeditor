@@ -42,10 +42,18 @@
 
 
 
+//(*AppHeaders
+#include <wx/image.h>
+//*)
+
 IMPLEMENT_APP(TimingApp);
 
 bool TimingApp::OnInit()
 {
+	//(*AppInitialize
+	bool wxsOK = true;
+	wxInitAllImageHandlers();
+
     wxCmdLineParser parser(argc, argv);
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
@@ -152,7 +160,9 @@ bool TimingApp::OnInit()
 
     mainframe->ShowTip();
 
-    return true;
+
+    //*)
+	return wxsOK;
 }
 
 int TimingApp::OnExit(void)

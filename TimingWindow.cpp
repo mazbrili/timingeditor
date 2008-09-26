@@ -21,7 +21,6 @@
 //
 
 
-// 3761, 3180, 2464, 2169, 604
 
 #ifdef __GNUG__
 // #pragma implementation
@@ -401,6 +400,16 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     }
     dc.DestroyClippingRegion();
 
+    /// drawing a graphical partitionig of the signal names
+    if ( !exporting)
+    {
+        wxPen pen(wxColour(0xf0,0xf0,0xf0));
+        //dc.SetPen(pen);
+        dc.DrawLine(unscrolledPosition.x + signalNamesWidth-6, unscrolledPosition.y + DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis + DistanceFromAxis-5,
+                    unscrolledPosition.x + signalNamesWidth-6, heightOffsets[heightOffsets.size()-1]);
+        dc.SetPen(*wxBLACK_PEN);
+    }
+
     /// where to start the waves and how big will the virtual window be
     signalNamesWidth = offset.x + width + 25;
     axisStart = signalNamesWidth;
@@ -410,13 +419,16 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         VisibleTicks.push_back(n);
         if ( WindowState != AddTime || n != editingValA || editingValC < 1 )
         {
-            if ( doc->discontinuities.find(n) != doc->discontinuities.end() && doc->discontEn[n] )
+            bool hascompressor = false;
+            for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+            if ( doc->compressors[indx].pos == n && doc->compressors[indx].enabled )
             {
-                n += doc->discontlength[n];
+                n += doc->compressors[indx].length;
                 if ( n > doc->length )
                     VisibleTicks.push_back(n);
+                hascompressor = true;
             }
-            else
+            if ( !hascompressor )
                 ++n;
         }
         else
@@ -487,7 +499,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             }
         }
     }
-
 
     if ( WindowState != EditAxisLeft && !exporting  )
         dc.SetClippingRegion(unscrolledPosition.x+signalNamesWidth-5,unscrolledPosition.y, virtsize.x, virtsize.y+10);
@@ -583,8 +594,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
              ; k < 0 ; ++k ) if ( ++n == 4*sig.ticks ) n = 0;
             for (wxUint32 k = 0; k < VisibleTicks.size()-1 ; )
             {
-                if ( doc->discontinuities.find(VisibleTicks[k]) != doc->discontinuities.end() &&
-                    doc->discontEn[VisibleTicks[k]] )
+                bool hascompressor = false;
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == VisibleTicks[k] && doc->compressors[indx].enabled )
                 {
                     if ( n < 2*sig.ticks )// drawing a bar in the first half of the tick
                         dc.DrawRectangle(
@@ -592,7 +604,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                             GridStepWidth/2, heightOffsets[heightOffsets.size()-1] - heightOffsets[0]
                         );
 
-                    wxInt32 len = (doc->discontlength[VisibleTicks[k]]) % (4*sig.ticks);
+                    wxInt32 len = (doc->compressors[indx].length) % (4*sig.ticks);
                     n += len -1;
                     if ( n < 0 ) n += (4*sig.ticks);
                     n %= (4*sig.ticks);
@@ -602,8 +614,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                             GridStepWidth/2+1  , heightOffsets[heightOffsets.size()-1] - heightOffsets[0]
                         );
                     ++n;
+                    hascompressor = true;
                 }
-                else
+                if ( !hascompressor );
                 {
                     if ( n < 2*sig.ticks )// drawing a bar over the whole tick
                         dc.DrawRectangle(
@@ -630,6 +643,34 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         dc.SetPen(*wxTRANSPARENT_PEN);
         dc.DrawRectangle( axisStart + editingValB * GridStepWidth, heightOffsets[0],
                         editingValC * GridStepWidth, -heightOffsets[0] + heightOffsets[heightOffsets.size()-1]);
+        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        dc.SetPen(*wxBLACK_PEN);
+    }
+
+    /// indicate "removal" of time
+    if ( !exporting &&WindowState == RemoveTime && editingValC != -1 )
+    {
+        dc.DrawText(wxString::Format(_T("B:%d C:%d"),editingValB,editingValC),200,200);
+        dc.SetBrush(*wxMEDIUM_GREY_BRUSH);
+        dc.SetPen(*wxTRANSPARENT_PEN);
+        wxInt32 a, b; //a left ,  b right
+        a = editingValA;
+        b = editingValC;
+        if ( b < a ) { a = b; b = editingValA;} //swap
+        for ( wxInt32 n = 0 ; n < (wxInt32)VisibleTicks.size() ; ++n )
+            if ( VisibleTicks[n] == a )
+            {
+                a = n;
+                break;
+            }
+        for ( wxInt32 n = 0 ; n < (wxInt32)VisibleTicks.size() ; ++n )
+            if ( VisibleTicks[n] == b )
+            {
+                b = n;
+                break;
+            }
+        dc.DrawRectangle( axisStart + a * GridStepWidth, heightOffsets[0],
+                        (b-a) * GridStepWidth, -heightOffsets[0] + heightOffsets[heightOffsets.size()-1]);
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.SetPen(*wxBLACK_PEN);
     }
@@ -690,8 +731,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 );
             for (wxUint32 k = 0; k < VisibleTicks.size()-1 ; )
             {
-                if ( doc->discontinuities.find(VisibleTicks[k]) != doc->discontinuities.end() &&
-                    doc->discontEn[VisibleTicks[k]] )
+                bool hascompressor = false;
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == VisibleTicks[k] && doc->compressors[indx].enabled )
                 {
                     if ( n < sig.ticks )// drawing a one
                         dc.DrawLine(
@@ -704,7 +746,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                             offset.x + GridStepWidth/2, offset.y + doc->SignalHeight
                         );
 
-                    wxInt32 len = (doc->discontlength[VisibleTicks[k]]) % (2*sig.ticks);
+                    wxInt32 len = (doc->compressors[indx].length) % (2*sig.ticks);
                     n += len -1;
                     if ( n < 0 ) n += (2*sig.ticks);
                     n %= (2*sig.ticks);
@@ -719,8 +761,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                             offset.x + GridStepWidth  , offset.y + doc->SignalHeight
                         );
                     ++n;
+                    hascompressor = true;
                 }
-                else
+                if ( !hascompressor )
                 {
                     if ( n < sig.ticks )// drawing a one
                         dc.DrawLine(
@@ -755,8 +798,10 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 wxInt32 tick = VisibleTicks[k];
                 wxInt32 len = 1;
                 vals val = sig.values[tick];
-                if ( doc->discontinuities.find(VisibleTicks[k]) != doc->discontinuities.end() && doc->discontEn[VisibleTicks[k]] )
-                    len = doc->discontlength[VisibleTicks[k]];
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == VisibleTicks[k] && doc->compressors[indx].enabled )
+                    len = doc->compressors[indx].length;
+
 
                 /// drawing the transitions:
                 wxCoord w1 = wo;
@@ -943,8 +988,10 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 wxInt32 tick = VisibleTicks[k];
                 wxInt32 len = 1;
                 vals val = sig.values[tick];
-                if ( doc->discontinuities.find(VisibleTicks[k]) != doc->discontinuities.end() && doc->discontEn[VisibleTicks[k]] )
-                    len = doc->discontlength[VisibleTicks[k]];
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == VisibleTicks[k] && doc->compressors[indx].enabled )
+                    len = doc->compressors[indx].length;
+
                 /// drawing the transitions:
                 wxCoord w1 = wo;
                 wxCoord h[6] = {ho[0], ho[1], ho[2], ho[3], ho[4], ho[5]};
@@ -1151,10 +1198,11 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 vals val = sig.values[tick];
                 wxInt32 invislen = 0;
 
-                if ( doc->discontinuities.find(tick) != doc->discontinuities.end() && doc->discontEn[n] )
-                // start of compressor do not draw text if any
+                bool hascompressor = false;
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == tick && doc->compressors[indx].enabled )
                 {
-                    invislen = doc->discontlength[tick];
+                    invislen = doc->compressors[indx].length;
                     for ( wxInt32 i = 0 ; i < invislen ; ++i )
                     {
                         wxInt32 ti = tick + i;
@@ -1162,8 +1210,10 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                         if ( ( ti == 0 || (sig.values[ti-1] != val)) && (val == one || val == zero ))
                             DrawEditableText(dc, sig.TextValues[ti], offset, false);
                     }
+                    hascompressor = true;
+                    break;
                 }
-                else
+                if ( !hascompressor )
                 {
                     if ( (tick == 0 || oldval != val) && (val == one || val == zero ))
                     {
@@ -1179,287 +1229,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                     }
                 }
                 oldval = val;
-            }
-
-            if ( false ){
-            // first transition:
-            if ( doc->length > 0 ) switch(sig.values[0])
-            {
-                case zero:
-                case one:
-                    dc.DrawLine(
-                        offset.x,            offset.y + doc->SignalHeight,
-                        offset.x+transwidth, offset.y + doc->SignalHeight
-                    );
-                    dc.DrawLine(
-                        offset.x,            offset.y,
-                        offset.x+transwidth, offset.y
-                    );
-                break;
-                case hz :
-                    dc.DrawLine(
-                        offset.x,            offset.y+doc->SignalHeight/2,
-                        offset.x+transwidth, offset.y+doc->SignalHeight/2
-                    );
-                    break;
-                case u:
-                default:
-                    {
-                        dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-                        dc.SetPen(*wxLIGHT_GREY_PEN);
-                        wxPoint rec[4];
-                        rec[0] = wxPoint(offset.x+1, offset.y+doc->SignalHeight);
-                        rec[1] = wxPoint(offset.x+transwidth, offset.y+doc->SignalHeight);
-                        rec[2] = wxPoint(offset.x+transwidth, offset.y);
-                        rec[3] = wxPoint(offset.x+1, offset.y);
-                        dc.DrawPolygon(4, rec);
-                        //dc.SetPen(wxNullPen);
-                        //dc.SetPen(*wxBLACK_PEN);
-                        dc.SetPen(boldPen);
-                    }
-                    dc.DrawLine(
-                        offset.x,            offset.y+doc->SignalHeight,
-                        offset.x+transwidth, offset.y+doc->SignalHeight
-                    );
-                    dc.DrawLine(
-                        offset.x,            offset.y,
-                        offset.x+transwidth, offset.y
-                    );
-                break;
-            }
-            offset.x += transwidth;
-            for ( wxInt32 k = 0 ; k < doc->length ; ++k )
-            {
-                switch ( sig.values[k] )
-                {
-                    case zero:
-                    case one:
-                        dc.DrawLine(
-                            offset.x, offset.y + doc->SignalHeight,
-                            offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y + doc->SignalHeight
-                        );
-                        dc.DrawLine(
-                            offset.x, offset.y,
-                            offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y
-                        );
-                        if ( k != doc->length -1 )
-                        {
-                            if ( sig.values[k+1] == sig.values[k])
-                            {
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y + doc->SignalHeight,
-                                    offset.x+GridStepWidth, offset.y + doc->SignalHeight
-                                );
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y,
-                                    offset.x+GridStepWidth, offset.y
-                                );
-                            }
-                            else if ( sig.values[k+1] == hz )
-                            {
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y + doc->SignalHeight,
-                                    offset.x+GridStepWidth, offset.y + doc->SignalHeight/2
-                                );
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y,
-                                    offset.x+GridStepWidth, offset.y+ doc->SignalHeight/2
-                                );
-                            }
-                            else if ( sig.values[k+1] == u )
-                            {
-                                dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-                                dc.SetPen(*wxLIGHT_GREY_PEN);
-                                wxPoint rec[3];
-                                rec[0] = wxPoint(offset.x+GridStepWidth, offset.y + doc->SignalHeight);
-                                rec[1] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth/2.0))/*transitionWidth*(+transitionsPerGridStep-0.5)*/, offset.y + doc->SignalHeight/2);
-                                rec[2] = wxPoint(offset.x+GridStepWidth, offset.y);
-                                dc.DrawPolygon(3, rec);
-                                //dc.SetPen(wxNullPen);
-                                //dc.SetPen(*wxBLACK_PEN);
-                                dc.SetPen(boldPen);
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y + doc->SignalHeight,
-                                    offset.x+GridStepWidth, offset.y
-                                );
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y,
-                                    offset.x+GridStepWidth, offset.y + doc->SignalHeight
-                                );
-                            }
-                            else
-                            {
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y + doc->SignalHeight,
-                                    offset.x+GridStepWidth, offset.y
-                                );
-                                dc.DrawLine(
-                                    offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y,
-                                    offset.x+GridStepWidth, offset.y + doc->SignalHeight
-                                );
-                            }
-
-                        }
-                        if ( k == 0 || sig.values[k] != sig.values[k-1] )
-                        {
-                            /// the text:
-                            wxPoint textoff(
-                                2 + offset.x,
-                                offset.y + doc->SignalHeight/2 -
-                                dc.GetCharHeight()/2
-                            );
-                            bool viz = true;
-                            if ( textoff.y + dc.GetCharHeight()/2 < heightOffsets[0]+unscrolledPosition.y) viz = false;
-                            if ( textoff.x                        < signalNamesWidth - 5 + unscrolledPosition.x) viz = false;
-                            DrawEditableText(dc, sig.TextValues[k], textoff, viz);
-                        }
-                        break;
-                    case hz :
-                        dc.DrawLine(
-                            offset.x, offset.y+doc->SignalHeight/2,
-                            offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight/2
-                        );
-                        if ( k != doc->length -1 )
-                        {
-                            switch ( sig.values[k+1])
-                            {
-                                case u:
-                                default:
-                                {
-                                    dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-                                    dc.SetPen(*wxLIGHT_GREY_PEN);
-                                    wxPoint rec[3];
-                                    rec[0] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight/2);
-                                    rec[1] = wxPoint(offset.x+GridStepWidth,     offset.y+doc->SignalHeight);
-                                    rec[2] = wxPoint(offset.x+GridStepWidth,     offset.y);
-                                    dc.DrawPolygon(3, rec);
-
-                                    //dc.SetPen(wxNullPen);
-                                    //dc.SetPen(*wxBLACK_PEN);
-                                    dc.SetPen(boldPen);
-                                }
-                                case one:
-                                case zero:
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight/2,
-                                        offset.x+GridStepWidth,    offset.y+doc->SignalHeight
-                                    );
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight/2,
-                                        offset.x+GridStepWidth,    offset.y
-                                    );
-                                    break;
-                                case hz :
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight/2,
-                                        offset.x+GridStepWidth,     offset.y+doc->SignalHeight/2
-                                    );
-                                    break;
-                            }
-                        }
-                        break;
-                    case u:
-                    default:
-                        {
-                            dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-                            dc.SetPen(*wxLIGHT_GREY_PEN);
-                            wxPoint rec[4];
-                            rec[0] = wxPoint(offset.x+1, offset.y+doc->SignalHeight);
-                            rec[1] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight);
-                            rec[2] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y);
-                            rec[3] = wxPoint(offset.x+1, offset.y);
-                            dc.DrawPolygon(4, rec);
-                            //dc.SetPen(wxNullPen);
-                            //dc.SetPen(*wxBLACK_PEN);
-                            dc.SetPen(boldPen);
-                        }
-                        dc.DrawLine(
-                            offset.x, offset.y+doc->SignalHeight,
-                            offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight
-                        );
-                        dc.DrawLine(
-                            offset.x, offset.y,
-                            offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y
-                        );
-                        if ( k != doc->length -1 )
-                        {
-                            switch ( sig.values[k+1])
-                            {
-                                case zero:
-                                case one:
-                                    {
-                                        dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-                                        dc.SetPen(*wxLIGHT_GREY_PEN);
-                                        wxPoint rec[3];
-                                        rec[0] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight);
-                                        rec[1] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth/2.0))/*transitionWidth*(-0.5+transitionsPerGridStep)*/, offset.y+doc->SignalHeight/2);
-                                        rec[2] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y);
-                                        dc.DrawPolygon(3, rec);
-                                        //dc.SetPen(wxNullPen);
-                                        //dc.SetPen(*wxBLACK_PEN);
-                                        dc.SetPen(boldPen);
-                                    }
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight,
-                                        offset.x+GridStepWidth,   offset.y
-                                    );
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y,
-                                        offset.x+GridStepWidth,   offset.y+doc->SignalHeight
-                                    );
-                                    break;
-                                case hz:
-                                    {
-                                        dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-                                        dc.SetPen(*wxLIGHT_GREY_PEN);
-                                        wxPoint rec[3];
-                                        rec[0] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight);
-                                        rec[1] = wxPoint(offset.x+GridStepWidth, offset.y+doc->SignalHeight/2);
-                                        rec[2] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y);
-                                        dc.DrawPolygon(3, rec);
-                                        //dc.SetPen(wxNullPen);
-                                        //dc.SetPen(*wxBLACK_PEN);
-                                        dc.SetPen(boldPen);
-                                    }
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight,
-                                        offset.x+GridStepWidth, offset.y+doc->SignalHeight/2
-                                    );
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y,
-                                        offset.x+GridStepWidth, offset.y+doc->SignalHeight/2
-                                    );
-                                    break;
-                                case u:
-                                default:
-                                    {
-                                        dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-                                        dc.SetPen(*wxLIGHT_GREY_PEN);
-                                        wxPoint rec[4];
-                                        rec[0] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight);
-                                        rec[1] = wxPoint(offset.x+GridStepWidth, offset.y+doc->SignalHeight);
-                                        rec[2] = wxPoint(offset.x+GridStepWidth, offset.y);
-                                        rec[3] = wxPoint(offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y);
-                                        dc.DrawPolygon(4, rec);
-                                        //dc.SetPen(wxNullPen);
-                                        //dc.SetPen(*wxBLACK_PEN);
-                                        dc.SetPen(boldPen);
-                                    }
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y+doc->SignalHeight,
-                                        offset.x+GridStepWidth,   offset.y+doc->SignalHeight
-                                    );
-                                    dc.DrawLine(
-                                        offset.x+GridStepWidth/(100.0/(100-doc->TransitWidth)), offset.y,
-                                        offset.x+GridStepWidth,   offset.y
-                                    );
-                                    break;
-                            }
-                        }
-                        break;
-                }
-                offset.x+= GridStepWidth;
-            }
             }
         }
         if ( !exporting && n < doc->signals.size() )
@@ -1485,8 +1254,10 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     {
         wxInt32 tick = VisibleTicks[k];
         wxInt32 len = 1;
-        if ( doc->discontinuities.find(tick) != doc->discontinuities.end() && doc->discontEn[tick] )
-            len = doc->discontlength[tick];
+        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+	        if ( doc->compressors[indx].pos == tick && doc->compressors[indx].enabled )
+	            len = doc->compressors[indx].length;
+
         if ( WindowState == AddTime && tick == editingValA )
         {
             if ( !addingdone )
@@ -2039,8 +1810,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     {
         wxInt32 tick = VisibleTicks[k];
         wxInt32 len = 1;
-        if ( doc->discontinuities.find(tick) != doc->discontinuities.end() && doc->discontEn[tick] )
-            len = doc->discontlength[tick];
+        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+            if ( doc->compressors[indx].pos == tick && doc->compressors[indx].enabled )
+                len = doc->compressors[indx].length;
         if ( len > 1 )
         {
             /// triangle
@@ -2088,9 +1860,10 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                             offset.x + n-1 , offset.y + 6);
             }
         }
-        if ( doc->discontinuities.find(tick) != doc->discontinuities.end() && !doc->discontEn[tick] )
+        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+        if ( doc->compressors[indx].pos == tick && !doc->compressors[indx].enabled )
         {
-            len = doc->discontlength[tick];
+        	len =  doc->compressors[indx].length;
             offset.x = signalNamesWidth  + (0.5 + k) * GridStepWidth;
             offset.y = DistanceToTicksLine-4 + unscrolledPosition.y;
             wxPoint points[] =
@@ -2104,15 +1877,15 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 wxInt32 rlen = len;
                 for ( wxInt32 i = 1 ; i <= len ; ++i )
                 {
-                    if ( doc->discontinuities.find(tick+i) != doc->discontinuities.end() && doc->discontEn[tick+i] )
+                    for ( wxUint32 indx2 = 0 ; indx2 < doc->compressors.size() ; ++indx2)
+                    if ( doc->compressors[indx2].pos == tick+i && doc->compressors[indx2].enabled )
                     {
-                        if ( rlen > i+(doc->discontlength[tick+i]-1 ))
-                            rlen -= (doc->discontlength[tick+i] -1);
-
+                        if ( rlen > i +(doc->compressors[indx2].length-1))
+                            rlen -= (doc->compressors[indx2].length-1);
                         else
                         {
                             rlen = i+1;
-                            break;
+                            i = len;//break outer loop
                         }
                     }
                 }
@@ -2156,23 +1929,51 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         dc.CrossHair(cursorpos.x, cursorpos.y);
 
         /// show current(cursors) position in ticks and time
-        wxInt32 p = (cursorpos.x - axisStart)/GridStepWidth;
-        double r  = 100.0*(cursorpos.x - axisStart -p*GridStepWidth)/GridStepWidth;
-        if ( p >= 0 && p < (wxInt32)VisibleTicks.size() )
+        wxString str;
+        if ( WindowState != AddTime )
         {
-            wxInt32 p1 = VisibleTicks[p];
-            wxInt32 p2 = p1+1;
-            if ( p+1 < (wxInt32)VisibleTicks.size() )
-                p2 = VisibleTicks[p+1];
-            wxString str;
-            if ( r > 50.0 && p1 + 1 != p2)
-                p1 = p2;
-            else
-                p1 = p1+1;
-            str = wxString::Format(_T("tick: %d, t:"), p1);
+            wxInt32 p = (cursorpos.x - axisStart)/GridStepWidth;
+            double r  = 100.0*(cursorpos.x - axisStart -p*GridStepWidth)/GridStepWidth;
+            if ( p >= 0 && p < (wxInt32)VisibleTicks.size() )
+            {
+                wxInt32 p1 = VisibleTicks[p];
+                wxInt32 p2 = p1+1;
+                if ( p+1 < (wxInt32)VisibleTicks.size() )
+                    p2 = VisibleTicks[p+1];
+                if ( r > 50.0 && p1 + 1 != p2)
+                    p1 = p2;
+                else
+                    p1 = p1+1;
+                str = wxString::Format(_T("tick: %d, t:"), p1);
 
-            double t = (p1 + doc->timeOffset-1)*doc->TickLength;
+                double t = (p1 + doc->timeOffset-1)*doc->TickLength;
+                wxInt8 u = doc->TickLengthUnit;
+                while ( u < 3 && (t >= 1000.0 || t <= -1000.0) )
+                {
+                    u++;
+                    t /= 1000.0;
+                }
+                str += wxString::Format(_("%.1f "), t);
+                switch (u)
+                {
+                    case -5: str += _("fs"); break;
+                    case -4: str += _("ps"); break;
+                    case -3: str += _("ns"); break;
+                    case -2: str += _("us"); break;
+                    case -1: str += _("ms"); break;
+                    case  0: str += _("s"); break;
+                    case  1: str += _("ks"); break;
+                    case  2: str += _("Ms"); break;
+                    default:
+                    case  3: str += _("Gs"); break;
+                }
+            }
+        }
+        else
+        {
+            double t = editingValC*doc->TickLength;
             wxInt8 u = doc->TickLengthUnit;
+            str = wxString::Format(_T("Adding  %d ticks = "), editingValC);
             while ( u < 3 && (t >= 1000.0 || t <= -1000.0) )
             {
                 u++;
@@ -2192,8 +1993,8 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 default:
                 case  3: str += _("Gs"); break;
             }
-            dc.DrawText(str, cursorpos.x+5,  unscrolledPosition.y + 5);
         }
+        dc.DrawText(str, cursorpos.x+5,  unscrolledPosition.y + 5);
     }
 
     /// show where to "insert"/"remove" some time
@@ -2202,7 +2003,11 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         if ( (cursorpos.x - axisStart ) > 0 && (cursorpos.x - axisStart ) < axisStop )
         {
             wxInt32 p = (cursorpos.x - axisStart )/GridStepWidth;
-            if ( doc->discontinuities.find(p) == doc->discontinuities.end() )
+            bool hascompressor = false;
+            for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+            if ( doc->compressors[indx].pos == p && doc->compressors[indx].enabled )
+                hascompressor = true;
+            if ( !hascompressor )
             {
                 if (
                     cursorpos.y - unscrolledPosition.y > DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis - 10 &&
@@ -2360,13 +2165,16 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             {
                 wxCoord p = pt.x-axisStart;
                 wxInt32 discontpos = VisibleTicks[p / (GridStepWidth)];
-                if ( doc->discontinuities.find(discontpos) != doc->discontinuities.end() )
+                bool hascompressor = false;
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == discontpos )
                 {
                     newstate = DisconSelected;
                     editingValA = discontpos;
                     dorefresh = true;
-                    break;
+                    hascompressor = true;
                 }
+                if ( hascompressor ) break;
             }
             /// check click on axis
             if (p.x > signalNamesWidth-10 &&
@@ -2502,7 +2310,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 p.y > DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine - 10 &&
                 p.y < DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine)
             {
-                if ( doc->discontinuities.find((pt.x - axisStart )/GridStepWidth) == doc->discontinuities.end() )
+                bool hascompressor = false;
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == ((pt.x - axisStart )/GridStepWidth) )
+                    hascompressor = true;
+                if ( !hascompressor )
                 {
                     newstate = AddTime;
                     editingValB = (pt.x - axisStart) / (GridStepWidth);
@@ -2519,14 +2331,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 p.y > DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine &&
                 p.y < DistanceToTicksLine + DistanceFromTicksLine + DistanceToTicksLine + 10 )
             {
-                //if ( doc->discontinuities.find((pt.x - axisStart )/GridStepWidth) == doc->discontinuities.end() )
-                {
-                    newstate = RemoveTime;
-                    editingValB = (pt.x - axisStart) / (GridStepWidth);
-                    editingValA = VisibleTicks[editingValB];
-                    editingValC = 0;
-                    dorefresh = true;
-                }
+                newstate = RemoveTime;
+                editingValB = (pt.x - axisStart) / (GridStepWidth);
+                editingValA = VisibleTicks[editingValB];
+                editingValC = -1;
+                dorefresh = true;
                 break;
             }
             break;
@@ -2650,7 +2459,11 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
                 wxCoord p = pt.x-axisStart;
                 wxInt32 discontpos = VisibleTicks[p / (GridStepWidth)];
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-                if ( doc->discontinuities.find(discontpos) == doc->discontinuities.end() )
+                bool hascompressor = false;
+                for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+                if ( doc->compressors[indx].pos == discontpos )
+                    hascompressor = true;
+                if ( !hascompressor )
                     cmdproc->Submit(new AddDiscontCommand(doc, discontpos) );
                 else
                 {
@@ -2989,13 +2802,22 @@ void TimingWindow::OnMouseLeftDClick(wxMouseEvent &event)
             }
         }
     }
-    if ( WindowState == DisconSelected )
+    else if ( WindowState == DisconSelected )
     {
         wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-        cmdproc->Submit(
-            new ChangeTimeCompressor(doc, editingValA, doc->discontlength[editingValA], !doc->discontEn[editingValA])
-        );
+
+        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx )
+        if ( doc->compressors[indx].pos == editingValA )
+            cmdproc->Submit(
+                new ChangeTimeCompressor(doc, editingValA, doc->compressors[indx].length, !doc->compressors[indx].enabled)
+            );
     }
+    else if ( WindowState == Neutral )
+    {
+        OnMouseLeftDown(event);
+    }
+
+
     if ( dorefresh ) this->Refresh(true);
     return;
 }
@@ -3226,8 +3048,13 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
             newstate = Neutral;
             break;
         case RemoveTime:
+            if (editingValC  != -1 )
             {
-
+                wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+                if ( editingValC > editingValA )
+                    cmdproc->Submit(new RemoveTimeCommand(doc, editingValA, editingValC));
+                else if ( editingValC < editingValA )
+                    cmdproc->Submit(new RemoveTimeCommand(doc, editingValC, editingValA));
             }
             newstate = Neutral;
             break;
@@ -3390,7 +3217,7 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
 
             break;
         case EditAxisRight:
-            if ( event.LeftIsDown()  )
+            if ( event.LeftIsDown() )
             {
                 wxCoord p = pt.x-axisStart;
                 if ( pt.x < axisStart )
@@ -3441,8 +3268,10 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
             {
                 wxInt32 editingSignalPosStart = editingValA;
                 wxInt32 editingSignalPosStop = editingValB;
-                if ( pt.y >= heightOffsets[editingNumber] + doc->signals[editingNumber].prespace && pt.x >= axisStart &&
-                    pt.y <= heightOffsets[editingNumber] + doc->signals[editingNumber].prespace + doc->SignalHeight && pt.x <= axisStop )
+                if (   pt.y >= heightOffsets[editingNumber]
+                    && pt.x >= axisStart
+                    && pt.y <= heightOffsets[editingNumber+1]
+                    && pt.x <= axisStop )
                 {
                     wxCoord p = pt.x - axisStart;
                     editingSignalPosStop = VisibleTicks[p / (GridStepWidth)];
@@ -3734,7 +3563,6 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
             CheckStartHScroll(pos);
             dorefresh = true;
             break;
-
         case ChangingHArrowLengthStart:
         case ChangingHArrowLengthEnd:
             for ( wxUint32 k = 0 ; k < VLineOffsets.size() ; ++k )
@@ -3823,16 +3651,9 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
             break;
         case RemoveTime:
             if ( event.LeftIsDown() && pt.x > axisStart && pt.x < axisStop)
-            {
-                editingValC = (pt.x - axisStart) / (GridStepWidth) ;
-                //newstate = RemoveTime;
-                //editingValB = (pt.x - axisStart) / (GridStepWidth);
-                //editingValA = VisibleTicks[editingValB];
-                //editingValC = 0;
-                editingValC = 0;
-            }
+                editingValC = VisibleTicks[(pt.x - axisStart) / (GridStepWidth)] ;
             else
-                editingValC = 0;
+                editingValC = -1;
             break;
     }
     WindowState = newstate;
@@ -3860,17 +3681,27 @@ void TimingWindow::OnMouseWheel(wxMouseEvent& event)
     dx = 10;
     dy = 10;
 
-    if ( ! event.IsPageScroll() )
+    if ( ! event.m_controlDown )
     {
-        wxPoint ViewStart; GetViewStart(&ViewStart.x, &ViewStart.y);
-        if (event.GetWheelRotation() >= 0)
-            dy = -dy;
-        Scroll(ViewStart.x, ViewStart.y + dy/4);
-        wxPoint newViewStart; GetViewStart(&newViewStart.x, &newViewStart.y);
-        wxPoint ppu; GetScrollPixelsPerUnit(&ppu.x, &ppu.y);
-        cursorpos.x += ((newViewStart.x - ViewStart.x)*ppu.x);
-        cursorpos.y += ((newViewStart.y - ViewStart.y)*ppu.y);
-        this->Refresh();
+        if ( ! event.IsPageScroll() )
+        {
+            wxPoint ViewStart; GetViewStart(&ViewStart.x, &ViewStart.y);
+            if (event.GetWheelRotation() >= 0)
+                dy = -dy;
+            Scroll(ViewStart.x, ViewStart.y + dy/4);
+            wxPoint newViewStart; GetViewStart(&newViewStart.x, &newViewStart.y);
+            wxPoint ppu; GetScrollPixelsPerUnit(&ppu.x, &ppu.y);
+            cursorpos.x += ((newViewStart.x - ViewStart.x)*ppu.x);
+            cursorpos.y += ((newViewStart.y - ViewStart.y)*ppu.y);
+            this->Refresh();
+        }
+    }
+    else
+    {
+        if ( event.GetWheelRotation() >= 0 )
+            ZoomTicksOut();
+        else
+            ZoomTicksIn();
     }
 }
 
@@ -5223,12 +5054,14 @@ void TimingWindow::UpdateTimeCompressorPanel(void)
     if ( !doc ) return;
 
     if ( !DiscontSelected() ) return;
-    wxInt32 n = editingValA;
-    n = doc->discontlength[n];
 
-    TmeCmprssrPanel->SetTimeText(
-        wxString::Format( _("%d"), n )
-    );
+    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx )
+    if ( doc->compressors[indx].pos == editingValA )
+    {
+        TmeCmprssrPanel->SetTimeText(
+            wxString::Format( _("%d"), doc->compressors[indx].length )
+        );
+    }
 }
 
 void TimingWindow::SetTimeCompressor(wxInt32 time)
@@ -5237,10 +5070,13 @@ void TimingWindow::SetTimeCompressor(wxInt32 time)
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
     if ( !doc ) return;
     if ( !DiscontSelected() ) return;
+
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-    cmdproc->Submit(
-        new ChangeTimeCompressor(doc, editingValA, time, doc->discontEn[editingValA])
-    );
+    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+    if ( doc->compressors[indx].pos == editingValA )
+        cmdproc->Submit(
+            new ChangeTimeCompressor(doc, editingValA, time, doc->compressors[indx].enabled)
+        );
 
     UpdateTimeCompressorPanel();
 }

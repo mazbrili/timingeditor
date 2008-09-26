@@ -109,6 +109,15 @@ public:
     bool serialize(wxDataOutputStream &store);
     bool deserialize(wxDataInputStream &load);
 };
+
+class TimeCompressor
+{
+    public:
+        wxInt32 pos;
+        wxInt32 length;
+        wxInt32 enabled;
+};
+
 class TimingDocument: public wxDocument
 {
     public:
@@ -133,18 +142,21 @@ class TimingDocument: public wxDocument
         bool m_readOnly;
     public:
         //wxArrayString SignalNames;
+        //std::vector<SplArrow> splarrows;
         wxInt32 length;
         std::vector<Signal> signals;
         std::vector<VLine> vertlines;
         std::vector<HArrow> harrows;
-        //std::vector<SplArrow> splarrows;
-        std::set<wxInt32> discontinuities;
-        std::map<wxInt32, wxInt32> discontlength;
-        std::map<wxInt32, bool> discontEn;
+
+        //std::set<wxInt32> discontinuities;
+        //std::map<wxInt32, wxInt32> discontlength;
+        //std::map<wxInt32, bool> discontEn;
+        std::vector<TimeCompressor> compressors;
+
         wxInt32 SignalHeight;
         wxInt32 MinimumSignalDistance;
 
-        wxUint8 TransitWidth; // width in percent of the width of a tick
+        wxUint8 TransitWidth; // width in % of the width of a tick
         bool    en50;
         bool    en90;
 

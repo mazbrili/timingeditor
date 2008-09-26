@@ -106,9 +106,14 @@ TimingDocument::TimingDocument(void)
     signals.push_back(sig1);
     }
 
-    discontinuities.insert(3);
-    discontlength[3] = 7;
-    discontEn[3] = true;
+    TimeCompressor cmprssr;
+    cmprssr.pos = 3;
+    cmprssr.length = 7;
+    cmprssr.enabled = true;
+    compressors.push_back( cmprssr );
+    //discontinuities.insert(3);
+    //discontlength[3] = 7;
+    //discontEn[3] = true;
 
     Signal sig2;
     {
@@ -184,17 +189,26 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
             return false;
     }
 
-    ui = discontinuities.size();
+    ui = compressors.size(); //ui = discontinuities.size();
     store << ui;
-    std::set<wxInt32>::iterator it;
-    for ( it = discontinuities.begin() ; it != discontinuities.end() ; it++)
+    //std::set<wxInt32>::iterator it;
+    //for ( it = discontinuities.begin() ; it != discontinuities.end() ; it++)
+    for ( wxUint32 n = 0 ; n < ui ; ++n )
     {
-        i = *it;
-        store << i;
-        store << discontlength[i];
+        wxInt32 t;
+
+        //i = *it;
+        //store << i;
+        t = compressors[n].pos;
+        store << t;
+
+        //store << discontlength[i];
+        t = compressors[n].length;
+        store << t;
 
         wxUint8 en = 0;
-        if ( discontEn[i] ) en = 1;
+        //if ( discontEn[i] ) en = 1;
+        if ( compressors[n].enabled ) en = 1;
         store << en;
     }
 
@@ -271,34 +285,48 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
             harrows.push_back(har);
         }
 
-        discontinuities.clear();
-        discontlength.clear();
-        discontEn.clear();
+        //discontinuities.clear();
+        //discontlength.clear();
+        //discontEn.clear();
+        compressors.clear();
         load >> ui;
         for ( wxUint32 n = 0 ; n < ui ; ++n )
         {
-            wxInt32 dis;
-            load >> dis;
-            discontinuities.insert(dis);
+            TimeCompressor cmprssr;
+
+            //wxInt32 dis;
+            //load >> dis;
+            //discontinuities.insert(dis);
+            wxInt32 pos;
+            load >> pos;
+            cmprssr.pos = pos;
+
             if ( version >= 4 )
             {
                 wxInt32 l;
                 load >> l;
-                discontlength[dis] = l;
+                //discontlength[dis] = l;
+                cmprssr.length = l;
             }
             else
-                discontlength[dis] = 2;
+                //discontlength[dis] = 2;
+                cmprssr.length = 2;
             if ( version >= 5 )
             {
                 wxUint8 en;
                 load >> en;
                 if (en == 0)
-                    discontEn[dis] = false;
+                    //discontEn[dis] = false;
+                    cmprssr.enabled = false;
                 else
-                    discontEn[dis] = true;
+                    //discontEn[dis] = true;
+                    cmprssr.enabled = true;
             }
-            else discontEn[dis] = true;
+            else
+                //discontEn[dis] = true;
+                cmprssr.enabled = true;
 
+            compressors.push_back(cmprssr);
         }
     }
 
