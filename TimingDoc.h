@@ -44,6 +44,8 @@ enum vals
     zero,
     one,
     hz,
+    dc1,
+    dc2,
     u
 };
 class Signal
@@ -69,9 +71,6 @@ public:
 
     bool serialize(wxOutputStream &store);
     bool deserialize(wxInputStream &load);
-    //void Store(wxMemoryOutputStream &store);
-    //void Restore(wxMemoryInputStream & inp);
-
 };
 //class VLine;
 class HArrow
@@ -124,15 +123,7 @@ class TimingDocument: public wxDocument
         TimingDocument(void);
         ~TimingDocument(void);
 
-//        #if wxUSE_STD_IOSTREAM
-//        wxSTD ostream& SaveObject(wxSTD ostream& text_stream);
-//        wxSTD istream& LoadObject(wxSTD istream& text_stream);
-//        #else
-//        wxOutputStream& SaveObject(wxOutputStream& stream);
-//        wxInputStream& LoadObject(wxInputStream& stream);
-//        #endif
     public:
-
         bool IsReadOnly(void){return m_readOnly;}
 
         void SetText(wxInt32 number, wxString text);
@@ -141,16 +132,11 @@ class TimingDocument: public wxDocument
     private:
         bool m_readOnly;
     public:
-        //wxArrayString SignalNames;
         //std::vector<SplArrow> splarrows;
         wxInt32 length;
         std::vector<Signal> signals;
         std::vector<VLine> vertlines;
         std::vector<HArrow> harrows;
-
-        //std::set<wxInt32> discontinuities;
-        //std::map<wxInt32, wxInt32> discontlength;
-        //std::map<wxInt32, bool> discontEn;
         std::vector<TimeCompressor> compressors;
 
         wxInt32 SignalHeight;
@@ -160,28 +146,15 @@ class TimingDocument: public wxDocument
         bool    en50;
         bool    en90;
 
-
-        // 1: ks
-        // 0: s
-        // -1: ms
-        // -2: us
-        // -3: ns
-        // -4: ps
-        // -5: fs
-        wxInt8  TickLengthUnit;
+        wxInt8  TickLengthUnit;// 1: ks  // 0: s    // -1: ms    // -2: us    // -3: ns    // -4: ps    // -5: fs
         wxInt32 TickLength; // in TickLengthUnit
         wxInt32 TackLength; // in ticks
         wxInt32 timeOffset; // in ticks
-
 
     protected:
         bool DoSaveDocument(const wxString& file);
 	    bool DoOpenDocument(const wxString& file);
         virtual bool OnNewDocument();
-
-    //private:
-    //virtual TimingCommandProcessor* OnCreateCommandProcessor();
-    //virtual MyCommandProcessor* OnCreateCommandProcessor();
 
     protected:
         DECLARE_DYNAMIC_CLASS(TimingDocument)

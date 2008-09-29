@@ -400,16 +400,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     }
     dc.DestroyClippingRegion();
 
-    /// drawing a graphical partitionig of the signal names
-    if ( !exporting)
-    {
-        wxPen pen(wxColour(0xf0,0xf0,0xf0));
-        //dc.SetPen(pen);
-        dc.DrawLine(unscrolledPosition.x + signalNamesWidth-6, unscrolledPosition.y + DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis + DistanceFromAxis-5,
-                    unscrolledPosition.x + signalNamesWidth-6, heightOffsets[heightOffsets.size()-1]);
-        dc.SetPen(*wxBLACK_PEN);
-    }
-
     /// where to start the waves and how big will the virtual window be
     signalNamesWidth = offset.x + width + 25;
     axisStart = signalNamesWidth;
@@ -443,6 +433,16 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     if ( virtsize.x < clientsize.x ) virtsize.x = clientsize.x;
     if ( virtsize.y < clientsize.y ) virtsize.y = clientsize.y;
     SetVirtualSize(virtsize);// change the size of the scrollable window
+
+    /// drawing a graphical partitionig of the signal names
+    if ( !exporting)
+    {
+        //wxPen pen(wxColour(0xf0,0xf0,0xf0));
+        dc.SetPen(*wxGREY_PEN);
+        dc.DrawLine(unscrolledPosition.x + signalNamesWidth-6, unscrolledPosition.y + DistanceToTicksLine + DistanceFromTicksLine + DistanceToAxis + DistanceFromAxis-5,
+                    unscrolledPosition.x + signalNamesWidth-6, heightOffsets[heightOffsets.size()-1]);
+        dc.SetPen(*wxBLACK_PEN);
+    }
 
     /// drawing the time axis
     if ( WindowState != EditAxisLeft && !exporting )
@@ -831,6 +831,22 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                                 break;
                             default:
                             case u:
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[4];
+                                rec[0] = wxPoint(offset.x   , offset.y);
+                                rec[1] = wxPoint(offset.x+w1, offset.y + h[4]);
+                                rec[2] = wxPoint(offset.x+w1, offset.y + h0);
+                                rec[3] = wxPoint(offset.x   , offset.y + h0);
+                                dc.DrawPolygon(4, rec);}
+                                dc.SetPen(boldPen);
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h0);
+                                dc.DrawLine(offset.x   , offset.y,
+                                            offset.x+w1, offset.y+h[4]);
+                                break;
+                            case dc1:
+                            case dc2:
                                 dc.DrawLine(offset.x   , offset.y+h0,
                                             offset.x+w1, offset.y+h0);
                                 dc.DrawLine(offset.x   , offset.y,
@@ -854,7 +870,22 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                                             offset.x+w1, offset.y+h[0]);
                                 break;
                             default:
-                            case u:
+                            case u:{dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[4];
+                                rec[0] = wxPoint(offset.x   , offset.y+h0);
+                                rec[1] = wxPoint(offset.x+w1, offset.y+h[1]);
+                                rec[2] = wxPoint(offset.x+w1, offset.y);
+                                rec[3] = wxPoint(offset.x   , offset.y);
+                                dc.DrawPolygon(4, rec);}
+                                dc.SetPen(boldPen);
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h[1]);
+                                dc.DrawLine(offset.x   , offset.y,
+                                            offset.x+w1, offset.y);
+                                break;
+                            case dc1:
+                            case dc2:
                                 dc.DrawLine(offset.x   , offset.y+h0,
                                             offset.x+w1, offset.y+h[1]);
                                 dc.DrawLine(offset.x   , offset.y,
@@ -879,6 +910,22 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                                 break;
                             default:
                             case u:
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[4];
+                                rec[0] = wxPoint(offset.x   , offset.y);
+                                rec[1] = wxPoint(offset.x+w1, offset.y + h[2]);
+                                rec[2] = wxPoint(offset.x+w1, offset.y + h[3]);
+                                rec[3] = wxPoint(offset.x   , offset.y + h0);
+                                dc.DrawPolygon(4, rec);}
+                                dc.SetPen(boldPen);
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h[3]);
+                                dc.DrawLine(offset.x   , offset.y,
+                                            offset.x+w1, offset.y+h[2]);
+                                break;
+                            case dc1:
+                            case dc2:
                                 dc.DrawLine(offset.x   , offset.y+h0,
                                             offset.x+w1, offset.y+h[3]);
                                 dc.DrawLine(offset.x   , offset.y,
@@ -891,16 +938,96 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                         switch ( oldval )
                         {
                             case zero:
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[3];
+                                rec[0] = wxPoint(offset.x   , offset.y+h0);
+                                rec[1] = wxPoint(offset.x+w1, offset.y+h0);
+                                rec[2] = wxPoint(offset.x+w1, offset.y+h[1]);
+                                dc.DrawPolygon(3, rec);}
+                                dc.SetPen(boldPen);
                                 dc.DrawLine(offset.x   , offset.y+h0,
                                             offset.x+w1, offset.y+h0);
                                 dc.DrawLine(offset.x   , offset.y+h0,
                                             offset.x+w1, offset.y+h[1]);
                                 break;
                             case one:
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[3];
+                                rec[0] = wxPoint(offset.x   , offset.y);
+                                rec[1] = wxPoint(offset.x+w1, offset.y);
+                                rec[2] = wxPoint(offset.x+w1, offset.y+h[4]);
+                                dc.DrawPolygon(3, rec);}
+                                dc.SetPen(boldPen);
                                 dc.DrawLine(offset.x   , offset.y,
                                             offset.x+w1, offset.y+h[4]);
                                 dc.DrawLine(offset.x   , offset.y,
                                             offset.x+w1, offset.y);
+                                break;
+                            case hz:
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[3];
+                                rec[0] = wxPoint(offset.x   , offset.y+h0/2);
+                                rec[1] = wxPoint(offset.x+w1, offset.y+h[5]);
+                                rec[2] = wxPoint(offset.x+w1, offset.y+h[0]);
+                                dc.DrawPolygon(3, rec);}
+                                dc.SetPen(boldPen);
+                                dc.DrawLine(offset.x   , offset.y+h0/2,
+                                            offset.x+w1, offset.y+h[5]);
+                                dc.DrawLine(offset.x   , offset.y+h0/2,
+                                            offset.x+w1, offset.y+h[0]);
+                                break;
+                            default:
+                            case u:
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[4];
+                                rec[0] = wxPoint(offset.x   , offset.y);
+                                rec[1] = wxPoint(offset.x+w1, offset.y);
+                                rec[2] = wxPoint(offset.x+w1, offset.y + h0);
+                                rec[3] = wxPoint(offset.x   , offset.y + h0);
+                                dc.DrawPolygon(4, rec);}
+                                dc.SetPen(boldPen);
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h0);
+                                dc.DrawLine(offset.x   , offset.y,
+                                            offset.x+w1, offset.y);
+                                break;
+                            case dc1:
+                            case dc2:
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[3];
+                                rec[0] = wxPoint(offset.x+w1  , offset.y+h[1]);
+                                rec[1] = wxPoint(offset.x+wo/2, offset.y+h0/2);
+                                rec[2] = wxPoint(offset.x+w1  , offset.y+h[4]);
+                                dc.DrawPolygon(3, rec);}
+                                dc.SetPen(boldPen);
+                                dc.DrawLine(offset.x   , offset.y ,
+                                            offset.x+w1, offset.y+h[4]);
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h[1]);
+
+                                break;
+                        }
+                        break;
+                    case dc1:
+                    case dc2:
+                        switch( oldval )
+                        {
+                            case one:
+                                dc.DrawLine(offset.x   , offset.y,
+                                            offset.x+w1, offset.y);
+                                dc.DrawLine(offset.x   , offset.y,
+                                            offset.x+w1, offset.y+h[4]);
+                                break;
+                            case zero:
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h0);
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h[1]);
                                 break;
                             case hz:
                                 dc.DrawLine(offset.x   , offset.y+h0/2,
@@ -910,10 +1037,35 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                                 break;
                             default:
                             case u:
-                                dc.DrawLine(offset.x   , offset.y+h0,
-                                            offset.x+w1, offset.y+h0);
+                                {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                                dc.SetPen(*wxLIGHT_GREY_PEN);
+                                wxPoint rec[3];
+                                rec[0] = wxPoint(offset.x     , offset.y);
+                                rec[1] = wxPoint(offset.x+wo/2, offset.y+h0/2);
+                                rec[2] = wxPoint(offset.x     , offset.y+h0);
+                                dc.DrawPolygon(3, rec);}
+                                dc.SetPen(boldPen);
                                 dc.DrawLine(offset.x   , offset.y,
-                                            offset.x+w1, offset.y);
+                                            offset.x+w1, offset.y+h[4]);
+                                dc.DrawLine(offset.x   , offset.y+h0,
+                                            offset.x+w1, offset.y+h[1]);
+                                break;
+                            case dc1:
+                            case dc2:
+                                if ( val != oldval )
+                                {
+                                    dc.DrawLine(offset.x   , offset.y,
+                                                offset.x+w1, offset.y+h[4]);
+                                    dc.DrawLine(offset.x   , offset.y+h0,
+                                                offset.x+w1, offset.y+h[1]);
+                                }
+                                else
+                                {
+                                    dc.DrawLine(offset.x   , offset.y,
+                                                offset.x+w1, offset.y);
+                                    dc.DrawLine(offset.x   , offset.y+h0,
+                                                offset.x+w1, offset.y+h0);
+                                }
                                 break;
                         }
                         break;
@@ -939,6 +1091,22 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                         break;
                     default:
                     case u:
+                        {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                        dc.SetPen(*wxLIGHT_GREY_PEN);
+                        wxPoint rec[4];
+                        rec[0] = wxPoint(offset.x+w1, offset.y);
+                        rec[1] = wxPoint(offset.x+w2, offset.y);
+                        rec[2] = wxPoint(offset.x+w2, offset.y+h0);
+                        rec[3] = wxPoint(offset.x+w1, offset.y+h0);
+                        dc.DrawPolygon(4, rec);}
+                        dc.SetPen(boldPen);
+                        dc.DrawLine(offset.x+w1, offset.y,
+                                    offset.x+w2, offset.y);
+                        dc.DrawLine(offset.x+w1, offset.y+h0,
+                                    offset.x+w2, offset.y+h0);
+                        break;
+                    case dc1:
+                    case dc2:
                         dc.DrawLine(offset.x+w1, offset.y,
                                     offset.x+w2, offset.y);
                         dc.DrawLine(offset.x+w1, offset.y+h0,
@@ -967,6 +1135,22 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                             break;
                         default:
                         case u:
+                            {dc.SetBrush(*wxLIGHT_GREY_BRUSH);
+                            dc.SetPen(*wxLIGHT_GREY_PEN);
+                            wxPoint rec[4];
+                            rec[0] = wxPoint(offset.x+w1, offset.y);
+                            rec[1] = wxPoint(offset.x+w2, offset.y);
+                            rec[2] = wxPoint(offset.x+w2, offset.y+h0);
+                            rec[3] = wxPoint(offset.x+w1, offset.y+h0);
+                            dc.DrawPolygon(4, rec);}
+                            dc.SetPen(boldPen);
+                            dc.DrawLine(offset.x+w1, offset.y,
+                                        offset.x+w2, offset.y);
+                            dc.DrawLine(offset.x+w1, offset.y+h0,
+                                        offset.x+w2, offset.y+h0);
+                            break;
+                        case dc1:
+                        case dc2:
                             dc.DrawLine(offset.x+w1, offset.y,
                                         offset.x+w2, offset.y);
                             dc.DrawLine(offset.x+w1, offset.y+h0,
@@ -1112,9 +1296,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                                 dc.SetBrush(*wxLIGHT_GREY_BRUSH);
                                 dc.SetPen(*wxLIGHT_GREY_PEN);
                                 wxPoint rec[3];
-                                rec[0] = wxPoint(offset.x+w1  , offset.y);
+                                rec[0] = wxPoint(offset.x+w1  , offset.y+h[1]);
                                 rec[1] = wxPoint(offset.x+wo/2, offset.y+h0/2);
-                                rec[2] = wxPoint(offset.x+w1  , offset.y+h0);
+                                rec[2] = wxPoint(offset.x+w1  , offset.y+h[4]);
                                 dc.DrawPolygon(3, rec);}
                                 dc.SetPen(boldPen);
                                 dc.DrawLine(offset.x, offset.y   , offset.x+w1, offset.y+h[4]);
@@ -2224,24 +2408,37 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
 
                         vals val = editingSignal.values[editingValA];
                         vals nval;
-                        if (  !editingSignal.IsBus )
+                        vals valr = u, vall = u;
+                        if ( editingValA > 0 ) vall = editingSignal.values[editingValA - 1];
+                        if ( editingValA <= doc->length ) valr = editingSignal.values[editingValA + 1];
+                        if (  !editingSignal.IsBus ) //-- "normal" signal
                         {
-                            switch ( val )
-                            {
-                                case zero: nval = one; break;
-                                case one: nval = hz; break;
-                                case hz: nval = u; break;
-                                default:
-                                case u: nval = zero; break;
-                            }
+                            if ( (vall == dc1 || vall == dc2 ) || ( valr == dc1 || valr == dc2 ))
+                                switch ( val )
+                                {
+                                    case zero: nval = one; break;
+                                    case one: nval = hz; break;
+                                    case hz: nval = u; break;
+                                    default:
+                                    case u: nval = dc1; break;
+                                    case dc1: nval = dc2; break;
+                                    case dc2: nval = zero; break;
+                                }
+                            else
+                                switch ( val )
+                                {
+                                    case zero: nval = one; break;
+                                    case one: nval = hz; break;
+                                    case hz: nval = u; break;
+                                    default:
+                                    case u: nval = dc1; break;
+                                    case dc1:
+                                    case dc2: nval = zero; break;
+                                }
                             editingSignal.values[editingValA] = nval;
                         }
                         else // IsBus
                         {
-                            vals valr = u, vall = u;
-                            if ( editingValA > 0 ) vall = editingSignal.values[editingValA - 1];
-                            if ( editingValA <= doc->length ) valr = editingSignal.values[editingValA + 1];
-
                             if (( vall == one || vall == zero ) || ( valr == one || valr == zero ))
                                 switch ( val )
                                 {
@@ -3277,14 +3474,26 @@ void TimingWindow::OnMouseMove(wxMouseEvent &event)
                     editingSignalPosStop = VisibleTicks[p / (GridStepWidth)];
                     vals val = doc->signals[editingNumber].values[editingSignalPosStart];
                     vals nval;
-                    switch ( val )
-                    {
-                        case zero: nval = one; break;
-                        case one: nval = hz; break;
-                        case hz: nval = u; break;
-                        default:
-                        case u: nval = zero; break;
-                    }
+                    if ( doc->signals[editingNumber].IsBus )
+                        switch ( val )
+                        {
+                            case zero: nval = one; break;
+                            case one: nval = hz; break;
+                            case hz: nval = u; break;
+                            default:
+                            case u: nval = zero; break;
+                        }
+                    else
+                        switch ( val )
+                        {
+                            case zero: nval = one; break;
+                            case one: nval = hz; break;
+                            case hz: nval = u; break;
+                            default:
+                            case u: nval = dc1; break;
+                            case dc1: nval = dc2; break;
+                            case dc2: nval = zero; break;
+                        }
 
                     editingSignal.values = doc->signals[editingNumber].values;
                     if ( editingSignalPosStop >= editingSignalPosStart )

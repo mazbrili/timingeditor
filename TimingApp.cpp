@@ -112,6 +112,7 @@ bool TimingApp::OnInit()
     wxMenu *help_menu = new wxMenu;
     help_menu->Append(wxID_ABOUT, _T("&About\tF1"), _T("Show info about this application"));
     help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using TimingEditor") );
+    help_menu->Append(TIMING_ID_HELP, _T("Help"), _T("Open help pages"));
 
     wxMenuBar *menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, _T("&File"));
@@ -235,7 +236,8 @@ wxMDIChildFrame *TimingApp::CreateChildFrame(wxDocument *doc, wxView *view)
 
     wxMenu *help_menu = new wxMenu;
     help_menu->Append(wxID_ABOUT, _T("&About\tF1"), _T("Show info about this application"));
-    help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using wxDocViewMDISample") );
+    help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using TimingEditor") );
+    help_menu->Append(TIMING_ID_HELP, _T("Help"), _T("Open help pages"));
 
     wxMenuBar *menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, _T("&File"));

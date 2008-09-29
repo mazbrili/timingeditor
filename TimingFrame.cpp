@@ -32,6 +32,7 @@
 
 #include <wx/config.h>
 //#include <wx/tipdlg.h>
+#include <wx/aboutdlg.h>
 #include "myTipProvider.h"
 
 #include "TimingFrame.h"
@@ -72,6 +73,7 @@
 IMPLEMENT_CLASS(TimingFrame, wxDocMDIParentFrame)
 BEGIN_EVENT_TABLE(TimingFrame, wxDocMDIParentFrame )
     EVT_MENU(wxID_ABOUT,                     TimingFrame::OnAbout)
+    EVT_MENU(TIMING_ID_HELP,                 TimingFrame::OnHelp)
     EVT_MENU(TIMING_ID_TIP,                  TimingFrame::OnTip)
     EVT_UPDATE_UI(wxID_COPY,                 TimingFrame::OnUpdateCopy)
     EVT_UPDATE_UI(wxID_CUT,                  TimingFrame::OnUpdateCut)
@@ -140,7 +142,20 @@ TimingFrame::~TimingFrame()
 
 void TimingFrame::OnAbout(wxCommandEvent &event)
 {
-    wxMessageBox(_T("TimingEditor..."), _T("About TimingEditor"));
+
+    wxAboutDialogInfo info;
+    info.SetName(_("TimingEditor"));
+    info.SetVersion(_("0.1"));
+    info.SetDescription(_("Timing diagram editor."));
+    info.SetCopyright(_T("(C) 2008 Daniel Anselmi <danselmi@NOSPAM@gmx.ch>"));
+
+    wxAboutBox(info);
+
+}
+
+void TimingFrame::OnHelp(wxCommandEvent &event)
+{
+    wxLaunchDefaultBrowser(_T("http://timingeditor.wiki.sourceforge.net/"));
 }
 
 void TimingFrame::OnUpdateCopy(wxUpdateUIEvent& event)

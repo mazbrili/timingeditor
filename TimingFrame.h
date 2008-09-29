@@ -59,6 +59,7 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
         void OnQuit(wxCommandEvent& event);*/
         void OnAbout(wxCommandEvent& event);
         void OnTip(wxCommandEvent &event);
+        void OnHelp(wxCommandEvent &event);
 
         void OnUpdateCopy(wxUpdateUIEvent& event);
         void OnUpdateCut(wxUpdateUIEvent& event);

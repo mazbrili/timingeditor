@@ -48,7 +48,7 @@ IMPLEMENT_DYNAMIC_CLASS(TimingDocument, wxDocument)
 TimingDocument::TimingDocument(void)
     :m_readOnly( false )
 {
-    length = 24;
+    length = 25;
     SignalHeight = 20;
     TransitWidth = 30; // %
     MinimumSignalDistance = 10;
@@ -58,98 +58,23 @@ TimingDocument::TimingDocument(void)
     TickLengthUnit = -3;
     TickLength = 10; // in TickLengthUnit
     TackLength = 10; // in ticks
-    timeOffset = 5; // in ticks
-
-    VLine line;
-
-    line.StartPos = 0;
-    line.EndPos= 1;
-    line.vpos = 1;
-    vertlines.push_back(line);
-
-    line.StartPos = 0;
-    line.EndPos = 1;
-    line.vpos = 15;
-    vertlines.push_back(line);
-
-
-    HArrow ar;
-    ar.fromVLine = 0;
-    ar.toVLine = 1;
-    ar.text = _T("$t$");
-    ar.textoffset = wxPoint(0, -10);
-    ar.signalnmbr = 0;
-    ar.pos = 10;
-    ar.textgridoffset = 0;
-    harrows.push_back(ar);
-
-    /*std::vector<HArrow> horiarrows;*/
-
-    /*SplArrow sarr;
-    sarr.StartPoint = wxPoint(3,0); // not in pixel coords!!!!
-    sarr.EndPos = wxPoint(8,1);
-    sarr.text = _T("it belongs to the arrow");
-    sarr.textoffset = wxPoint(20,20);
-
-    splarrows.push_back(sarr);*/
+    timeOffset = -2; // in ticks
 
     Signal sig1;
     {
     sig1.IsClock = true;
     sig1.GenerateBackground = true;
     sig1.IsBus = false;
-    sig1.ticks = 3;
-    sig1.delay = 0;
-    sig1.space = 0;
+    sig1.ticks = 4;
+    sig1.delay = 6;
+    sig1.space = 10;
     sig1.prespace = 10;
     sig1.name = _T("Clk");
     signals.push_back(sig1);
     }
-
-    TimeCompressor cmprssr;
-    cmprssr.pos = 3;
-    cmprssr.length = 7;
-    cmprssr.enabled = true;
-    compressors.push_back( cmprssr );
-    //discontinuities.insert(3);
-    //discontlength[3] = 7;
-    //discontEn[3] = true;
-
-    Signal sig2;
-    {
-    sig2.IsClock = false;
-    sig2.GenerateBackground = false;
-    sig2.IsBus = false;
-    sig2.name = _T("Rst");
-    for ( wxInt32 n = 0 ; n < 4 ; ++n )
-        sig2.values.push_back(one);
-    for ( wxInt32 n = 0 ; n < 20 ; ++n )
-    sig2.values.push_back(zero);
-
-    sig2.space = 40;
-    sig2.prespace = 0;
-    signals.push_back(sig2);
-    }
-
-    //Modify(false);
-    //UpdateAllViews();
 }
 TimingDocument::~TimingDocument(void){}
 
-
-//wxOutputStream& TimingDocument::SaveObject(wxOutputStream& stream)
-//{
-//    wxDocument::SaveObject(stream);
-//    /// put your code to save here
-//    return stream;
-//}
-//
-//wxInputStream& TimingDocument::LoadObject(wxInputStream& stream)
-//{
-//    wxDocument::LoadObject(stream);
-//
-//    return stream;
-//}
 bool TimingDocument::DoSaveDocument(const wxString& file)
 {
     wxFileOutputStream outp( file );
@@ -392,24 +317,12 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
             _T("File format is unknown.\nUpdate to a newer version of TimingEditor please."),
             _T("Format unknown"),
             wxOK);
-
             dlg.ShowModal();
-
 
         return false;
     }
-
-
-
     return true;
 }
-
-//class TimingCommandProcessor;
-//TimingCommandProcessor* TimingDocument::OnCreateCommandProcessor()
-//{
-//    return new TimingCommandProcessor();
-//}
-
 
 bool Signal::serialize(wxOutputStream &outp)
 {
@@ -418,7 +331,7 @@ bool Signal::serialize(wxOutputStream &outp)
     wxInt32 i;
 
     /// version
-    i = 3;
+    i = 4;
     store << i;
     store << name;
     store << prespace;
@@ -455,6 +368,8 @@ bool Signal::serialize(wxOutputStream &outp)
                 case zero: v = 0; break;
                 case one: v = 1; break;
                 case hz: v = 2; break;
+                case dc1 : v = 4; break;
+                case dc2 : v = 5; break;
                 default:
                 case u: v = 3; break;
             }
@@ -540,6 +455,8 @@ bool Signal::deserialize(wxInputStream &inp)
                     case 0: values.push_back(zero); break;
                     case 1: values.push_back(one); break;
                     case 2: values.push_back(hz); break;
+                    case 4: values.push_back(dc1); break;
+                    case 5: values.push_back(dc2); break;
                     default:
                     case 3: values.push_back(u); break;
                 }
@@ -564,14 +481,16 @@ bool Signal::deserialize(wxInputStream &inp)
             }
         }
     }
-    if ( ver == 3 )
+    if ( ver >= 3 )
     {
         wxUint8 ui8;
         load >> ui8;
         if ( ui8 != 0 )
             GenerateBackground = true;
     }
-    if ( ver > 3)
+    if (ver >= 4 )
+    {} //-- signals with dc1 and dc 2 state
+    if ( ver > 4)
         return false; // wrong format version
 
     return true;
