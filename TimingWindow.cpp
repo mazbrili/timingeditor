@@ -650,7 +650,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     /// indicate "removal" of time
     if ( !exporting &&WindowState == RemoveTime && editingValC != -1 )
     {
-        dc.DrawText(wxString::Format(_T("B:%d C:%d"),editingValB,editingValC),200,200);
         dc.SetBrush(*wxMEDIUM_GREY_BRUSH);
         dc.SetPen(*wxTRANSPARENT_PEN);
         wxInt32 a, b; //a left ,  b right
@@ -2114,7 +2113,60 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
 
         /// show current(cursors) position in ticks and time
         wxString str;
-        if ( WindowState != AddTime )
+        if ( WindowState == AddTime )
+        {
+            double t = editingValC*doc->TickLength;
+            wxInt8 u = doc->TickLengthUnit;
+            str = wxString::Format(_T("Adding %d ticks = "), editingValC);
+            while ( u < 3 && (t >= 1000.0 || t <= -1000.0) )
+            {
+                u++;
+                t /= 1000.0;
+            }
+            str += wxString::Format(_("%.1f "), t);
+            switch (u)
+            {
+                case -5: str += _("fs"); break;
+                case -4: str += _("ps"); break;
+                case -3: str += _("ns"); break;
+                case -2: str += _("us"); break;
+                case -1: str += _("ms"); break;
+                case  0: str += _("s"); break;
+                case  1: str += _("ks"); break;
+                case  2: str += _("Ms"); break;
+                default:
+                case  3: str += _("Gs"); break;
+            }
+        }
+        else if ( WindowState == RemoveTime)
+        {
+            dc.DrawText(wxString::Format(_T("B:%d C:%d"),editingValB,editingValC),200,200);
+            wxInt32 r = editingValC - editingValB;
+            if ( r < 0 ) r *= -1.0;
+            double t = r*doc->TickLength;
+            wxInt8 u = doc->TickLengthUnit;
+            str = wxString::Format(_T("Removing %d ticks = "), r);
+            while ( u < 3 && (t >= 1000.0 || t <= -1000.0) )
+            {
+                u++;
+                t /= 1000.0;
+            }
+            str += wxString::Format(_("%.1f "), t);
+            switch (u)
+            {
+                case -5: str += _("fs"); break;
+                case -4: str += _("ps"); break;
+                case -3: str += _("ns"); break;
+                case -2: str += _("us"); break;
+                case -1: str += _("ms"); break;
+                case  0: str += _("s"); break;
+                case  1: str += _("ks"); break;
+                case  2: str += _("Ms"); break;
+                default:
+                case  3: str += _("Gs"); break;
+            }
+        }
+        else
         {
             wxInt32 p = (cursorpos.x - axisStart)/GridStepWidth;
             double r  = 100.0*(cursorpos.x - axisStart -p*GridStepWidth)/GridStepWidth;
@@ -2153,31 +2205,8 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 }
             }
         }
-        else
-        {
-            double t = editingValC*doc->TickLength;
-            wxInt8 u = doc->TickLengthUnit;
-            str = wxString::Format(_T("Adding  %d ticks = "), editingValC);
-            while ( u < 3 && (t >= 1000.0 || t <= -1000.0) )
-            {
-                u++;
-                t /= 1000.0;
-            }
-            str += wxString::Format(_("%.1f "), t);
-            switch (u)
-            {
-                case -5: str += _("fs"); break;
-                case -4: str += _("ps"); break;
-                case -3: str += _("ns"); break;
-                case -2: str += _("us"); break;
-                case -1: str += _("ms"); break;
-                case  0: str += _("s"); break;
-                case  1: str += _("ks"); break;
-                case  2: str += _("Ms"); break;
-                default:
-                case  3: str += _("Gs"); break;
-            }
-        }
+
+
         dc.DrawText(str, cursorpos.x+5,  unscrolledPosition.y + 5);
     }
 
