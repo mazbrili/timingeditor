@@ -2140,7 +2140,6 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         }
         else if ( WindowState == RemoveTime)
         {
-            dc.DrawText(wxString::Format(_T("B:%d C:%d"),editingValB,editingValC),200,200);
             wxInt32 r = editingValC - editingValB;
             if ( r < 0 ) r *= -1.0;
             double t = r*doc->TickLength;
