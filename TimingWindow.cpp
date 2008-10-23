@@ -1677,9 +1677,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             /// calc offset based on vline to start from
             wxPoint offset(signalNamesWidth + fromvpos * GridStepWidth,
                     ha.pos + heightOffsets[ha.signalnmbr]);
-            if ( fromvposoffset == 1 )
+            if ( doc->en50 && fromvposoffset == 1 )
                 offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-            else if ( fromvposoffset == 2 )
+            else if ( doc->en90 && fromvposoffset == 2 )
                 offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
             if ( editingNumber >= 0 && (wxUint32)editingNumber == n && WindowState == MovingHArrow )
@@ -1688,9 +1688,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             /// calc offset based on vline where harrow will end
             wxPoint tooffset(signalNamesWidth + tovpos * GridStepWidth,
                 offset.y);
-            if ( tovposoffset == 1 )
+            if ( doc->en50 && tovposoffset == 1 )
                 tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-            else if ( tovposoffset == 2 )
+            else if ( doc->en90 && tovposoffset == 2 )
                 tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
 
