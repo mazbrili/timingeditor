@@ -590,8 +590,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         {
             // drawing the background if needed
             wxInt32 n = 0;
-            for (wxInt32 k = -((4*sig.ticks)- (sig.delay % (4*sig.ticks)))
-             ; k < 0 ; ++k ) if ( ++n == 4*sig.ticks ) n = 0;
+            for (wxInt32 k = -((4*sig.ticks)- (sig.delay % (4*sig.ticks))) ; k < 0 ; ++k )
+                if ( ++n == 4*sig.ticks )
+                    n = 0;
             for (wxUint32 k = 0; k < VisibleTicks.size()-1 ; )
             {
                 bool hascompressor = false;
@@ -618,12 +619,17 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 }
                 if ( !hascompressor );
                 {
-                    if ( n < 2*sig.ticks )// drawing a bar over the whole tick
+                    if ( n < 2*sig.ticks ){// drawing a bar over the whole tick
                         dc.DrawRectangle(
                             offset.x, heightOffsets[0],
                             GridStepWidth+1, heightOffsets[heightOffsets.size()-1] - heightOffsets[0]
                         );
-
+                    }
+                    if ( n == sig.ticks || n == 3*sig.ticks)
+                    {
+                        wxUint32 per = VisibleTicks[k]/2/sig.ticks+1;
+                        dc.DrawText( wxString::Format(_T("%d"),per), offset.x, heightOffsets[0]);
+                    }
                     ++n;
                 }
                 n %= (4*sig.ticks);
