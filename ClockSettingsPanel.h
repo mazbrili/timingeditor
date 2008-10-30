@@ -46,6 +46,7 @@ class ClockSettingsPanel : public wxPanel
 {
 	private:
         void OnUpdatePanelClkApply(wxUpdateUIEvent& event);
+        void OnUpdateClockPeriod(wxUpdateUIEvent& event);
         void OnUpdateTextFields(wxUpdateUIEvent& event);
         void OnApply(wxCommandEvent &event);
 
@@ -57,11 +58,14 @@ class ClockSettingsPanel : public wxPanel
 		wxTextCtrl *m_textDelay;
 		wxButton *m_buttonApply;
 		wxCheckBox *m_checkShadow;
+		wxCheckBox *m_checkPeriodCount;
 		bool Shadowed;
+		bool DrawPeriod;
     public:
         void SetDelayText(const wxString &str){m_textDelay->SetValue(str);}
         void SetTicksText(const wxString &str){m_textPeriod->SetValue(str);}
         void SetShadowed(bool sha);
+        void SetShowPeriod(bool en);
         void SetUnmodified();
 
 	public:

@@ -103,7 +103,7 @@ protected:
 class ChangeClockParamCommand : public wxCommand
 {
 public:
-    ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay, bool shadow);
+    ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay, bool shadow, bool DrawPeriod);
     ~ChangeClockParamCommand();
     bool Do(void);
     bool Undo(void);
@@ -113,6 +113,7 @@ protected:
     wxInt32 m_newPer;
     wxInt32 m_newDelay;
     bool    m_shadow;
+    bool    m_DrawPeriod;
 };
 class MoveSignalPosCommand : public wxCommand
 {

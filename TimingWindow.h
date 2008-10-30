@@ -228,7 +228,7 @@ private:
 public:
     wxInt8 GetTransitionWidth();
     //bool GetEn5090();
-    void SetClock(wxInt32 delay, wxInt32 ticks, bool shadow);
+    void SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPeriod);
     void SetNeutralState(void);
     wxInt32 GetSelectedSignalNr();
     void SetTransition(wxInt8 width, bool en50, bool en90);

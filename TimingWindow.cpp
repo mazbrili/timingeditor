@@ -582,8 +582,12 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     /// drawing background of clock signal
     dc.SetPen(*wxTRANSPARENT_PEN);
     dc.SetBrush(wxColour(0xf0,0xf0,0xf0));
+    std::vector<wxUint32> positions;
+    std::vector<wxString> texts;
     for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n )
     {
+        positions.clear();
+        texts.clear();
         offset.x = signalNamesWidth;
         Signal sig = doc->signals[n];
         if ( sig.IsClock && sig.GenerateBackground ) // is clock with background generation on?
@@ -625,10 +629,13 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                             GridStepWidth+1, heightOffsets[heightOffsets.size()-1] - heightOffsets[0]
                         );
                     }
-                    if ( n == sig.ticks || n == 3*sig.ticks)
+                    if ( sig.ShowPeriodCount &&
+                        (n == sig.ticks || n == 3*sig.ticks))
                     {
                         wxUint32 per = VisibleTicks[k]/2/sig.ticks+1;
-                        dc.DrawText( wxString::Format(_T("%d"),per), offset.x, heightOffsets[0]);
+                        positions.push_back(offset.x);
+                        texts.push_back( wxString::Format(_T("%d"),per) );
+                        //dc.DrawText( , , heightOffsets[0]);
                     }
                     ++n;
                 }
@@ -638,6 +645,8 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             }
         }
     }
+    for ( wxUint32 n = 0; n < positions.size() ; ++n )
+        dc.DrawText( texts[n] , positions[n], heightOffsets[0]);
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
 
@@ -5217,10 +5226,11 @@ void TimingWindow::UpdateClockPanel()
         ClkSetPanel->SetTicksText(str);
 
         ClkSetPanel->SetShadowed(doc->signals[editingNumber].GenerateBackground);
+        ClkSetPanel->SetShowPeriod(doc->signals[editingNumber].ShowPeriodCount);
     }
 }
 
-void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks, bool shadow)
+void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPeriod)
 {
     SetFocus();
     TimingDocument *doc = (TimingDocument *)view->GetDocument();
@@ -5230,7 +5240,7 @@ void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks, bool shadow)
     if ( IsSelectedSignalClock() )
     {
         cmdproc->Submit(
-            new ChangeClockParamCommand(doc, editingNumber , ticks, delay, shadow)
+            new ChangeClockParamCommand(doc, editingNumber , ticks, delay, shadow, DrawPeriod)
         );
     }
 }

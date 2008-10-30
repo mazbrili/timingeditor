@@ -40,6 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(ClockSettingsPanel, wxPanel)
     EVT_UPDATE_UI(TIMING_ID_PANEL_CLK_APPLY,  ClockSettingsPanel::OnUpdatePanelClkApply)
+    EVT_UPDATE_UI(TIMING_ID_PANEL_CLK_PERIOD, ClockSettingsPanel::OnUpdateClockPeriod)
     EVT_UPDATE_UI_RANGE(TIMING_ID_PANEL_CLK_TXTPERIOD, TIMING_ID_PANEL_CLK_SHADOW,
         ClockSettingsPanel::OnUpdateTextFields)
     EVT_BUTTON(TIMING_ID_PANEL_CLK_APPLY, ClockSettingsPanel::OnApply)
@@ -51,10 +52,21 @@ void ClockSettingsPanel::SetUnmodified()
     m_textDelay->SetModified(false);
     m_textPeriod->SetModified(false);
     Shadowed = m_checkShadow->GetValue();
+    DrawPeriod = m_checkPeriodCount->GetValue();
 }
 void ClockSettingsPanel::OnUpdateTextFields(wxUpdateUIEvent& event)
 {
     if ( wnd && wnd->IsSignalSelected() && wnd->IsSelectedSignalClock() )
+    {
+        event.Enable(true);
+        return;
+    }
+    event.Enable(false);
+}
+void ClockSettingsPanel::OnUpdateClockPeriod(wxUpdateUIEvent& event)
+{
+    if ( wnd && wnd->IsSignalSelected() &&
+        wnd->IsSelectedSignalClock() && m_checkShadow->IsChecked())
     {
         event.Enable(true);
         return;
@@ -70,13 +82,23 @@ void ClockSettingsPanel::OnApply(wxCommandEvent &event)
     if ( valp <= 0 ) return;
     m_textDelay->GetValue().ToLong(&vald);
     if ( vald < 0 ) return;
-    if ( wnd ) wnd->SetClock(vald, valp, Shadowed);
+    if ( wnd )
+        wnd->SetClock(vald, valp, Shadowed, DrawPeriod);
 }
 void ClockSettingsPanel::SetShadowed(bool sha)
 {
     m_checkShadow->SetValue(sha);
     Shadowed = sha;
+
+    m_checkPeriodCount->Enable(sha);
 }
+void ClockSettingsPanel::SetShowPeriod(bool en)
+{
+    m_checkPeriodCount->SetValue(en);
+    DrawPeriod = en;
+}
+
+
 void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
 {
     if ( wnd && wnd->IsSignalSelected() && wnd->IsSelectedSignalClock() )
@@ -94,7 +116,10 @@ void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
             event.Enable(false);
             return;
         }
-        if ( ! ( m_textDelay->IsModified() || m_textPeriod->IsModified() || Shadowed != m_checkShadow->GetValue()) )
+        if ( ! ( m_textDelay->IsModified() ||
+                 m_textPeriod->IsModified() ||
+                 Shadowed != m_checkShadow->GetValue() ||
+                 DrawPeriod != m_checkPeriodCount->GetValue() ) )
         {
             event.Enable(false);
             return;
@@ -130,11 +155,21 @@ ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, w
 	bSizer1->Add( gSizer1, 1, wxEXPAND, 5 );
 
 
+    wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxVERTICAL );
+
     wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
 	m_checkShadow = new wxCheckBox(this, TIMING_ID_PANEL_CLK_SHADOW, _T("generate vertical shadow"));
-	bSizer2->Add(m_checkShadow, wxEXPAND|wxALL, 5);
+	m_checkPeriodCount = new wxCheckBox(this, TIMING_ID_PANEL_CLK_PERIOD, _T("show numbering clock periods"));
+
+    bSizer5->Add(m_checkShadow,  0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+    bSizer5->Add(m_checkPeriodCount,  0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+
+    bSizer2->Add(bSizer5, wxEXPAND|wxALL, 5);
 	bSizer1->Add( bSizer2, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
 
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxHORIZONTAL );

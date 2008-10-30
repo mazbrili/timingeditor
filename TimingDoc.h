@@ -55,6 +55,7 @@ public:
     bool IsClock;
     bool IsBus;
     bool GenerateBackground;
+    bool ShowPeriodCount;
     // infos about the clock (if it is a clock)
     wxInt32 ticks; // of a half clock period
     wxInt32 delay; // of the clock in ticks

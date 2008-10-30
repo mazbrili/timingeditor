@@ -64,6 +64,7 @@ TimingDocument::TimingDocument(void)
     {
     sig1.IsClock = true;
     sig1.GenerateBackground = true;
+    sig1.ShowPeriodCount = true;
     sig1.IsBus = false;
     sig1.ticks = 4;
     sig1.delay = 6;
@@ -331,7 +332,7 @@ bool Signal::serialize(wxOutputStream &outp)
     wxInt32 i;
 
     /// version
-    i = 4;
+    i = 5;
     store << i;
     store << name;
     store << prespace;
@@ -408,6 +409,13 @@ bool Signal::serialize(wxOutputStream &outp)
     store << ui8;
 
 
+    // version 5:
+    ui8 = 0;
+    if ( ShowPeriodCount )
+        ui8 = 1;
+    store << ui8;
+
+
     return true;
 }
 
@@ -416,6 +424,7 @@ bool Signal::deserialize(wxInputStream &inp)
     wxDataInputStream load( inp );
     wxInt32 i, ver;
     GenerateBackground = false;
+    ShowPeriodCount = true;
 
     load >> ver;
     if ( ver >= 1 )
@@ -490,7 +499,17 @@ bool Signal::deserialize(wxInputStream &inp)
     }
     if (ver >= 4 )
     {} //-- signals with dc1 and dc 2 state
-    if ( ver > 4)
+    if ( ver >= 5 )
+    {
+        wxUint8 ui8;
+        load >> ui8;
+        if ( ui8 != 0 )
+            ShowPeriodCount = true;
+        else
+            ShowPeriodCount = false;
+
+    }
+    if ( ver > 5)
         return false; // wrong format version
 
     return true;

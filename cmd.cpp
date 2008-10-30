@@ -291,13 +291,14 @@ bool DeleteSignalCommand::Undo(void)
 
 
 
-ChangeClockParamCommand::ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay, bool shadow)
+ChangeClockParamCommand::ChangeClockParamCommand(TimingDocument *doc, wxInt32 changingSigNr, wxInt32 per, wxInt32 delay, bool shadow, bool DrawPeriod)
     :wxCommand(true, _T("change clock")),
     m_doc(doc),
     m_changingSigNr(changingSigNr),
     m_newPer(per),
     m_newDelay(delay),
-    m_shadow(shadow)
+    m_shadow(shadow),
+    m_DrawPeriod(DrawPeriod)
 {}
 ChangeClockParamCommand::~ChangeClockParamCommand(){}
 bool ChangeClockParamCommand::Do(void)
@@ -316,6 +317,10 @@ bool ChangeClockParamCommand::Do(void)
     btmp = m_doc->signals[m_changingSigNr].GenerateBackground;
     m_doc->signals[m_changingSigNr].GenerateBackground = m_shadow;
     m_shadow = btmp;
+
+    btmp = m_doc->signals[m_changingSigNr].ShowPeriodCount;
+    m_doc->signals[m_changingSigNr].ShowPeriodCount = m_DrawPeriod;
+    m_DrawPeriod = btmp;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
