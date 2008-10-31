@@ -435,7 +435,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     SetVirtualSize(virtsize);// change the size of the scrollable window
 
     /// drawing a graphical partitionig of the signal names
-    if ( !exporting)
+    if ( !exporting )
     {
         //wxPen pen(wxColour(0xf0,0xf0,0xf0));
         dc.SetPen(*wxGREY_PEN);
@@ -586,12 +586,15 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     std::vector<wxString> texts;
     for ( wxUint32 n = 0 ; n < doc->signals.size() ; ++n )
     {
-        positions.clear();
-        texts.clear();
         offset.x = signalNamesWidth;
         Signal sig = doc->signals[n];
         if ( sig.IsClock && sig.GenerateBackground ) // is clock with background generation on?
         {
+            if ( sig.ShowPeriodCount )
+            {
+                positions.clear();
+                texts.clear();
+            }
             // drawing the background if needed
             wxInt32 n = 0;
             for (wxInt32 k = -((4*sig.ticks)- (sig.delay % (4*sig.ticks))) ; k < 0 ; ++k )
