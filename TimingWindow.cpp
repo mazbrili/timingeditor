@@ -613,7 +613,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                         );
 
                     wxInt32 len = (doc->compressors[indx].length) % (4*sig.ticks);
-                    n += len -1;
+                    n += len - 2;
                     if ( n < 0 ) n += (4*sig.ticks);
                     n %= (4*sig.ticks);
                     if ( n < 2*sig.ticks )// drawing a bar over the second half of the tick
