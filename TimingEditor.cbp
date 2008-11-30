@@ -139,7 +139,6 @@
 		<Unit filename="TimingWindow.h" />
 		<Unit filename="TransitionSettingsPanel.cpp" />
 		<Unit filename="TransitionSettingsPanel.h" />
-		<Unit filename="WxWizFrame.fbp" />
 		<Unit filename="cmd.cpp" />
 		<Unit filename="cmd.h" />
 		<Unit filename="dndfile.cpp" />

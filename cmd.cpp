@@ -105,7 +105,7 @@ bool ChangeLength::Do(void)
                 DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
                 delVlineCom.push_back(cmd);
                 cmd->Do();
-                k=-1;
+                break;
             }
         }
     }
@@ -866,7 +866,7 @@ bool ChangeLengthLeft::Do(void)
             DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
             delVlineCom.push_back(cmd);
             cmd->Do();
-            k=-1;
+            break;
         }
     }
     for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
@@ -1502,7 +1502,7 @@ bool RemoveTimeCommand::Do(void)
             DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
             delVlineCom.push_back(cmd);
             cmd->Do();
-            k=-1;
+            break;
         }
     }
     for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
