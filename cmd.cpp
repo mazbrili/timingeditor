@@ -209,7 +209,7 @@ bool DeleteSignalCommand::Do(void)
             DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
             delVlineCom.push_back(cmd);
             cmd->Do();
-            k = -1;
+            break;
         }
     }
 
