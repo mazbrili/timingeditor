@@ -170,6 +170,8 @@ const int manipRadius           = 4;
 const int DistanceToAxis        = 25;
 const int DistanceFromAxis      = 20;
 
+const wxString FloatFormatStr = _("%.2f ");
+
 
 wxPoint TimingWindow::GetBitmapSize()
 {
@@ -455,7 +457,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             axispos += DistanceToTicksLine + DistanceFromTicksLine;
 
         dc.DrawLine(start , axispos, stop, axispos);
-        wxInt32 tacklen = doc->TackLength;
+        wxInt32 markerlen = doc->MarkerLength;
         wxInt32 adding = 0;
         for ( wxUint32 n = 0 ; n < VisibleTicks.size() ; ++n )
         {
@@ -467,7 +469,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 ticks += adding;
                 adding++;
             }
-            if ( ((ticks + doc->timeOffset) % tacklen) == 0 )
+            if ( ((ticks + doc->timeOffset) % markerlen) == 0 )
             {
                 dc.DrawLine(signalNamesWidth + n*GridStepWidth, axispos - 2,
                     signalNamesWidth + n*GridStepWidth, axispos + 3);
@@ -479,7 +481,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                     u++;
                     t /= 1000.0;
                 }
-                wxString str(wxString::Format(_("%.1f "), t));
+                wxString str(wxString::Format(FloatFormatStr, t));
                 switch (u)
                 {
                     case -5: str += _("fs"); break;
@@ -1806,7 +1808,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                     u++;
                     t /= 1000.0;
                 }
-                str = wxString::Format(_("%.1f "), t);
+                str = wxString::Format(FloatFormatStr, t);
                 switch (u)
                 {
                     case -5: str += _("fs"); break;
@@ -2141,7 +2143,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 u++;
                 t /= 1000.0;
             }
-            str += wxString::Format(_("%.1f "), t);
+            str += wxString::Format(FloatFormatStr, t);
             switch (u)
             {
                 case -5: str += _("fs"); break;
@@ -2168,7 +2170,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 u++;
                 t /= 1000.0;
             }
-            str += wxString::Format(_("%.1f "), t);
+            str += wxString::Format(FloatFormatStr, t);
             switch (u)
             {
                 case -5: str += _("fs"); break;
@@ -2206,7 +2208,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                     u++;
                     t /= 1000.0;
                 }
-                str += wxString::Format(_("%.1f "), t);
+                str += wxString::Format(FloatFormatStr, t);
                 switch (u)
                 {
                     case -5: str += _("fs"); break;
@@ -2228,7 +2230,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     }
 
     /// show where to "insert"/"remove" some time
-    if ( !exporting & WindowState == Neutral )
+    if ( !exporting && WindowState == Neutral )
     {
         if ( (cursorpos.x - axisStart ) > 0 && (cursorpos.x - axisStart ) < axisStop )
         {
@@ -3294,10 +3296,8 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
             if (editingValC  != -1 )
             {
                 wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-                if ( editingValC > editingValA )
+                if ( editingValC != editingValA )
                     cmdproc->Submit(new RemoveTimeCommand(doc, editingValA, editingValC));
-                else if ( editingValC < editingValA )
-                    cmdproc->Submit(new RemoveTimeCommand(doc, editingValC, editingValA));
             }
             newstate = Neutral;
             break;
@@ -4918,10 +4918,10 @@ void TimingWindow::OnTimer(wxTimerEvent& event)
                             if ( cursorpos.y < (heightOffsets[k] + heightOffsets[k+1])/2 )
                                 break;
                         bool AllowedMove = true;
-                        if ( WindowState == ChangingVLineLengthUpper )
-                            if ( k > kmax ) AllowedMove = false;
-                        else
-                            if ( k < kmin ) AllowedMove = false;
+                        if ( WindowState == ChangingVLineLengthUpper ){
+                            if ( k > kmax ) AllowedMove = false;}
+                        else{
+                            if ( k < kmin ) AllowedMove = false;}
                         if ( editingValA != k && AllowedMove )
                             editingValA = k;
                     }
@@ -5255,11 +5255,12 @@ void TimingWindow::UpdateAxisPanel()
 
     AxisSetPanel->SetTickLength(doc->TickLength);
     AxisSetPanel->SetLengthUnit(doc->TickLengthUnit + 5);
-    AxisSetPanel->SetTackLength(doc->TackLength);
+    AxisSetPanel->SetMarkerLength(doc->MarkerLength);
     AxisSetPanel->SetOffset(doc->timeOffset);
+    AxisSetPanel->SetTotalLengt(doc->length);
 }
 
-void TimingWindow::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset)
+void TimingWindow::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength)
 {
     SetFocus();
 
@@ -5267,7 +5268,7 @@ void TimingWindow::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, 
     if ( !doc ) return;
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
     cmdproc->Submit(
-        new ChangeAxisSettings(doc, unit-5, ticklength, tacklength, offset)
+        new ChangeAxisSettings(doc, unit-5, ticklength, markerlength, offset, totallength )
     );
     UpdateAxisPanel();
 }

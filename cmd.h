@@ -290,16 +290,19 @@ protected:
 class ChangeAxisSettings : public wxCommand
 {
 public:
-    ChangeAxisSettings(TimingDocument *doc, wxInt8 unit, wxInt32 ticklenth, wxInt32 tacklength, wxInt32 offset);
+    ChangeAxisSettings(TimingDocument *doc, wxInt8 unit, wxInt32 ticklenth, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength);
     ~ChangeAxisSettings();
     bool Do(void);
     bool Undo(void);
+private:
+    void Change();
 protected:
     TimingDocument *m_doc;
     wxInt8 m_unit;
     wxInt32 m_ticklength;
-    wxInt32 m_tacklength;
+    wxInt32 m_markerlength;
     wxInt32 m_offset;
+    wxCommand *AddRemoveTimeCommand;
 };
 class ChangeTimeCompressor : public wxCommand
 {

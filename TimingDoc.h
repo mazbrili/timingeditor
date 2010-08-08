@@ -149,7 +149,7 @@ class TimingDocument: public wxDocument
 
         wxInt8  TickLengthUnit;// 1: ks  // 0: s    // -1: ms    // -2: us    // -3: ns    // -4: ps    // -5: fs
         wxInt32 TickLength; // in TickLengthUnit
-        wxInt32 TackLength; // in ticks
+        wxInt32 MarkerLength; // in ticks
         wxInt32 timeOffset; // in ticks
 
     protected:

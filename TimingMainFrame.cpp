@@ -35,7 +35,7 @@
 #include <wx/aboutdlg.h>
 #include "myTipProvider.h"
 
-#include "TimingFrame.h"
+#include "TimingMainFrame.h"
 #include "TimingApp.h"//GetApp
 #include "enumers.h"
 
@@ -70,31 +70,47 @@
 
 
 ///////////////////////////////////////////////////////////////////////////
-IMPLEMENT_CLASS(TimingFrame, wxDocMDIParentFrame)
-BEGIN_EVENT_TABLE(TimingFrame, wxDocMDIParentFrame )
-    EVT_MENU(wxID_ABOUT,                     TimingFrame::OnAbout)
-    EVT_MENU(TIMING_ID_HELP,                 TimingFrame::OnHelp)
-    EVT_MENU(TIMING_ID_TIP,                  TimingFrame::OnTip)
-    EVT_UPDATE_UI(wxID_COPY,                 TimingFrame::OnUpdateCopy)
-    EVT_UPDATE_UI(wxID_CUT,                  TimingFrame::OnUpdateCut)
-    EVT_UPDATE_UI(wxID_PASTE,                TimingFrame::OnUpdatePaste)
-    EVT_UPDATE_UI(TIMING_ID_DELETE,          TimingFrame::OnUpdateDelete)
-    EVT_UPDATE_UI(TIMING_ID_GLASS_N,         TimingFrame::OnUpdateGlassN)
-    EVT_UPDATE_UI(TIMING_ID_GLASS_P,         TimingFrame::OnUpdateGlassP)
-    EVT_UPDATE_UI(TIMING_ID_DISCONTINUATION, TimingFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_RULER,           TimingFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_HARROW,          TimingFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_EDITTEXT,        TimingFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_NEUTRAL,         TimingFrame::OnUpdateDiscont)
+IMPLEMENT_CLASS(TimingMainFrame, wxDocMDIParentFrame)
+BEGIN_EVENT_TABLE(TimingMainFrame, wxDocMDIParentFrame )
+    EVT_MENU(wxID_ABOUT,                     TimingMainFrame::OnAbout)
+    EVT_MENU(TIMING_ID_HELP,                 TimingMainFrame::OnHelp)
+    EVT_MENU(TIMING_ID_TIP,                  TimingMainFrame::OnTip)
+    EVT_UPDATE_UI(wxID_COPY,                 TimingMainFrame::OnUpdateCopy)
+    EVT_UPDATE_UI(wxID_CUT,                  TimingMainFrame::OnUpdateCut)
+    EVT_UPDATE_UI(wxID_PASTE,                TimingMainFrame::OnUpdatePaste)
+    EVT_UPDATE_UI(TIMING_ID_DELETE,          TimingMainFrame::OnUpdateDelete)
+    EVT_UPDATE_UI(TIMING_ID_GLASS_N,         TimingMainFrame::OnUpdateGlassN)
+    EVT_UPDATE_UI(TIMING_ID_GLASS_P,         TimingMainFrame::OnUpdateGlassP)
+    EVT_UPDATE_UI(TIMING_ID_DISCONTINUATION, TimingMainFrame::OnUpdateDiscont)
+    EVT_UPDATE_UI(TIMING_ID_RULER,           TimingMainFrame::OnUpdateDiscont)
+    EVT_UPDATE_UI(TIMING_ID_HARROW,          TimingMainFrame::OnUpdateDiscont)
+    EVT_UPDATE_UI(TIMING_ID_EDITTEXT,        TimingMainFrame::OnUpdateDiscont)
+    EVT_UPDATE_UI(TIMING_ID_NEUTRAL,         TimingMainFrame::OnUpdateDiscont)
     EVT_UPDATE_UI_RANGE(TIMING_ID_ADD_CLOCK,
-                TIMING_ID_ADD_BUS,           TimingFrame::OnUpdateDiscont)
+                TIMING_ID_ADD_BUS,           TimingMainFrame::OnUpdateDiscont)
 END_EVENT_TABLE()
 
 
-TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wxString& title, wxPoint pos, wxSize size, int style )
-  : wxDocMDIParentFrame(manager, frame, id, title, pos, size, style)
+TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, const wxString& title, wxPoint pos, wxSize size, int style )
+  : wxDocMDIParentFrame(manager, frame, id, title, pos, size, style),
+  editMenu(NULL)
 {
-    editMenu = (wxMenu *) NULL;
+
+    //// Give it an icon
+#ifdef __WXMSW__
+    //SetIcon(wxIcon(_T("nassi")));
+    SetIcon(wxICON(aaaa)); // To Set App Icon
+#endif
+#ifdef __X__
+    SetIcon(wxIcon(_T("nassi.xpm")));
+#endif
+
+
+    InitStatusBar();
+    InitMenuBar();
+
+
+    ////
 
     CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
     InitToolBar(GetToolBar());
@@ -122,11 +138,66 @@ TimingFrame::TimingFrame(wxDocManager *manager, wxFrame *frame, int id, const wx
     m_manager->AddPane(axissetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("AxisPanel")).Caption(wxT("Axis/Time Settings")).CloseButton(false));
     m_manager->AddPane(tcsetpanel  , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TimeCompressorPanel")).Caption(wxT("Time compressor Settings")).CloseButton(false));
 
+
+    //Centre(wxBOTH);
+    wxConfig *cfg = wxGetApp().GetConfig();
+    cfg->SetPath( _T("/FileHistory") );
+    m_docManager->FileHistoryLoad(*cfg);
+    cfg->SetPath(_T("/"));
+
+
+    LoadFramePositions(cfg);
+    LoadAuiPerspective(cfg);
+
     // tell the manager to "commit" all the changes just made
     m_manager->Update();
 }
 
-TimingFrame::~TimingFrame()
+void TimingMainFrame::InitMenuBar()
+{
+    /// Make a menubar
+    wxMenu *file_menu = new wxMenu;
+    wxMenu *edit_menu = (wxMenu *) NULL;
+
+    file_menu->Append(wxID_NEW, _T("&New...\tCtrl-N"), _T("Create a new file"));
+    file_menu->Append(wxID_OPEN, _T("&Open...\tCtrl-O"), _T("Open a existing file"));
+    //file_menu->Append(NASSI_ID_IMPORT_SOURCE, _T("&Import...\tCtrl-I"), _T("Import from C source file"));
+    file_menu->AppendSeparator();
+    file_menu->Append(wxID_EXIT, _T("&Quit\tAlt-F4"), _T("Quit the application") );
+    // A nice touch: a history of files visited. Use this menu.
+    m_docManager->FileHistoryUseMenu(file_menu);
+    //m_docManager->FileHistoryAddFilesToMenu();
+
+    wxMenu *help_menu = new wxMenu;
+    help_menu->Append(wxID_ABOUT, _T("&About\tF1"), _T("Show info about this application"));
+    help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using TimingEditor") );
+    help_menu->Append(TIMING_ID_HELP, _T("Help"), _T("Open help pages"));
+
+    wxMenuBar *menu_bar = new wxMenuBar;
+    menu_bar->Append(file_menu, _T("&File"));
+    if (edit_menu)
+        menu_bar->Append(edit_menu, _T("&Edit"));
+    menu_bar->Append(help_menu, _T("&Help"));
+
+#ifdef __WXMAC__
+
+    wxMenuBar::MacSetCommonMenuBar(menu_bar);
+#endif //def __WXMAC__
+    /// Associate the menu bar with the frame
+    SetMenuBar(menu_bar);
+
+}
+
+void TimingMainFrame::InitStatusBar()
+{
+    CreateStatusBar(3);
+    wxInt32 widths[3] = { 200, -1, 40 };
+    SetStatusWidths(3, &widths[0]);
+    SetStatusBarPane(0);
+    SetStatusText(_T("Welcome to TimingEditor!"), 0);
+}
+
+TimingMainFrame::~TimingMainFrame()
 {
     wxConfig *cfg = wxGetApp().GetConfig();
     SaveFramePositions(cfg);
@@ -140,7 +211,7 @@ TimingFrame::~TimingFrame()
     delete tcsetpanel;
 }
 
-void TimingFrame::OnAbout(wxCommandEvent &event)
+void TimingMainFrame::OnAbout(wxCommandEvent &event)
 {
 
     wxAboutDialogInfo info;
@@ -153,52 +224,52 @@ void TimingFrame::OnAbout(wxCommandEvent &event)
 
 }
 
-void TimingFrame::OnHelp(wxCommandEvent &event)
+void TimingMainFrame::OnHelp(wxCommandEvent &event)
 {
     wxLaunchDefaultBrowser(_T("http://timingeditor.wiki.sourceforge.net/"));
 }
 
-void TimingFrame::OnUpdateCopy(wxUpdateUIEvent& event)
+void TimingMainFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 {
     event.Enable(IsTextSelected() || IsSignalSelected());
 }
-void TimingFrame::OnUpdateCut(wxUpdateUIEvent& event)
+void TimingMainFrame::OnUpdateCut(wxUpdateUIEvent& event)
 {
     event.Enable(IsTextSelected() || IsSignalSelected());
 }
-void TimingFrame::OnUpdateDelete(wxUpdateUIEvent& event)
+void TimingMainFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 {
     event.Enable(CanDelete());
 }
-bool TimingFrame::CanDelete(void)
+bool TimingMainFrame::CanDelete(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanDelete() )
         return true;
     return false;
 }
-bool TimingFrame::IsSomethingSelected(void)
+bool TimingMainFrame::IsSomethingSelected(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->IsSomethingSelected() )
         return true;
     return false;
 }
-bool TimingFrame::IsTextSelected(void)
+bool TimingMainFrame::IsTextSelected(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->IsTextSelected() )
         return true;
     return false;
 }
-bool TimingFrame::IsSignalSelected(void)
+bool TimingMainFrame::IsSignalSelected(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->IsSignalSelected() )
         return true;
     return false;
 }
-void TimingFrame::OnUpdatePaste(wxUpdateUIEvent& event)
+void TimingMainFrame::OnUpdatePaste(wxUpdateUIEvent& event)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view  && view->CanPaste() )
@@ -208,7 +279,7 @@ void TimingFrame::OnUpdatePaste(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-void TimingFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
+void TimingMainFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view )
@@ -218,12 +289,12 @@ void TimingFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-TimingWindow *TimingFrame::CreateWindow(wxView *view, wxMDIChildFrame *parent)
+TimingWindow *TimingMainFrame::CreateWindow(wxView *view, wxMDIChildFrame *parent)
 {
     return new TimingWindow(view, parent, clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
 }
 
-void TimingFrame::InitToolBar(wxToolBar* toolBar)
+void TimingMainFrame::InitToolBar(wxToolBar* toolBar)
 {
     toolBar->AddTool(wxID_NEW, _T("New file"), wxBitmap( new_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("New file"), _T("Create a new file"));
     toolBar->AddTool(wxID_OPEN, _T("Open file"), wxBitmap( open_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Open file"), _T(""));
@@ -257,11 +328,11 @@ void TimingFrame::InitToolBar(wxToolBar* toolBar)
 }
 
 
-void TimingFrame::OnTip(wxCommandEvent &event)
+void TimingMainFrame::OnTip(wxCommandEvent &event)
 {
     ShowTip(true);
 }
-void TimingFrame::ShowTip(bool force)
+void TimingMainFrame::ShowTip(bool force)
 {
     wxConfig *config = wxGetApp().GetConfig();
 
@@ -283,7 +354,7 @@ void TimingFrame::ShowTip(bool force)
     }
 }
 
-void TimingFrame::OnUpdateGlassN(wxUpdateUIEvent &event)
+void TimingMainFrame::OnUpdateGlassN(wxUpdateUIEvent &event)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanZoomOut() )
@@ -293,7 +364,7 @@ void TimingFrame::OnUpdateGlassN(wxUpdateUIEvent &event)
     }
     event.Enable(false);
 }
-void TimingFrame::OnUpdateGlassP(wxUpdateUIEvent &event)
+void TimingMainFrame::OnUpdateGlassP(wxUpdateUIEvent &event)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanZoomIn() )
@@ -303,7 +374,7 @@ void TimingFrame::OnUpdateGlassP(wxUpdateUIEvent &event)
     }
     event.Enable(false);
 }
-void TimingFrame::SaveFramePositions(wxConfig *config)
+void TimingMainFrame::SaveFramePositions(wxConfig *config)
 {
     // save the frame position
     wxInt32 x, y, w, h, s;
@@ -323,14 +394,14 @@ void TimingFrame::SaveFramePositions(wxConfig *config)
     }
     config->Write(_T("/MainFrame/s"), (long) s);
 }
-void TimingFrame::SaveAuiPerspective(wxConfig *config)
+void TimingMainFrame::SaveAuiPerspective(wxConfig *config)
 {
     wxString str = m_manager->SavePerspective();
     config->Write( _T( "/MainFrame/AuiPerspective" ), str );
     /// store version to let newer versions of gui a cahnce to build a new valid perspective
     config->Write( _T( "/MainFrame/AuiPerspectiveVersion" ), 2);
 }
-void TimingFrame::LoadAuiPerspective(wxConfig *config)
+void TimingMainFrame::LoadAuiPerspective(wxConfig *config)
 {
     wxString str;
     long v;
@@ -343,7 +414,7 @@ void TimingFrame::LoadAuiPerspective(wxConfig *config)
         m_manager->LoadPerspective(str);
     }
 }
-void TimingFrame::LoadFramePositions(wxConfig *config)
+void TimingMainFrame::LoadFramePositions(wxConfig *config)
 {
     /// restore frame position and size
         wxInt32 x, y, w, h, s;

@@ -52,30 +52,34 @@ void AxisSettingsPanel::OnApply(wxCommandEvent &event)
     SetUnmodified();
 
     long valticks;
-    long valtacks;
+    long valmarker;
     long valoffset;
+    long valtotallength;
 
     wxInt8 unit;
     wxInt32 ticklength;
-    wxInt32 tacklength;
+    wxInt32 markerlength;
     wxInt32 offset;
+    wxInt32 totallength;
 
     m_textTickLenght->GetValue().ToLong(&valticks);
-    m_textTackLength->GetValue().ToLong(&valtacks);
+    m_textMarkerLength->GetValue().ToLong(&valmarker);
     m_textOffset->GetValue().ToLong(&valoffset);
+    m_textTotalLength->GetValue().ToLong(&valtotallength);
 
     unit = m_choice1->GetSelection();
     ticklength = (wxInt32)valticks;
-    tacklength = (wxInt32)valtacks;
+    markerlength = (wxInt32)valmarker;
     offset = (wxInt32)valoffset;
+    totallength =(wxInt32)valtotallength;
 
-    if ( wnd ) wnd->SetAxis(unit, ticklength, tacklength, offset);
+    if ( wnd ) wnd->SetAxis(unit, ticklength, markerlength, offset, totallength);
 
 }
 void AxisSettingsPanel::SetUnmodified()
 {
     m_textTickLenght->SetModified(false);
-    m_textTackLength->SetModified(false);
+    m_textMarkerLength->SetModified(false);
     m_textOffset->SetModified(false);
 
     TickUnit = m_choice1->GetSelection();
@@ -98,20 +102,25 @@ void AxisSettingsPanel::SetLengthUnit(wxInt8 unit)
     m_choice1->Select(unit);
     TickUnit = unit;
 }
-void AxisSettingsPanel::SetTackLength(wxInt32 tacklength)
+void AxisSettingsPanel::SetMarkerLength(wxInt32 markerlength)
 {
-    m_textTackLength->SetValue(wxString::Format(_T("%d"),tacklength));
+    m_textMarkerLength->SetValue(wxString::Format(_T("%d"),markerlength));
 }
 void AxisSettingsPanel::SetOffset(wxInt32 offset)
 {
     m_textOffset->SetValue(wxString::Format(_T("%d"),offset));
+}
+void AxisSettingsPanel::SetTotalLengt(wxInt32 totallength)
+{
+    m_textTotalLength->SetValue(wxString::Format(_T("%d"), totallength));
 }
 void AxisSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 {
     if ( wnd )
     {
         long valticks;
-        long valtacks;
+        long valmarker;
+        long valtotallength;
 //        long valoffset;
 
         m_textTickLenght->GetValue().ToLong(&valticks);
@@ -120,22 +129,23 @@ void AxisSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
             event.Enable(false);
             return;
         }
-        m_textTackLength->GetValue().ToLong(&valtacks);
-        if ( valtacks <= 0 )
+        m_textMarkerLength->GetValue().ToLong(&valmarker);
+        if ( valmarker <= 0 )
         {
             event.Enable(false);
             return;
         }
-//        m_textTackLength->GetValue().ToLong(&valoffset);
-//        if ( valoffset <= 0 )
-//        {
-//            event.Enable(false);
-//            return;
-//        }
+        m_textTotalLength->GetValue().ToLong(&valtotallength);
+        if ( valtotallength <= 0)
+        {
+            event.Enable(false);
+            return;
+        }
 
         if ( ! ( m_textTickLenght->IsModified() ||
                 m_textOffset->IsModified() ||
-                m_textTackLength->IsModified() ||
+                m_textMarkerLength->IsModified() ||
+                m_textTotalLength->IsModified() ||
                 TickUnit != m_choice1->GetSelection()   ) )
         {
             event.Enable(false);
@@ -150,14 +160,15 @@ AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxS
     wxPanel( parent, id, pos, size, style ),
     wnd(NULL)
 {
+    wxStaticText* staticText;
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxVERTICAL );
 
 	wxGridSizer* gSizer2;
 	gSizer2 = new wxFlexGridSizer( 2, 2, 0, 0 );
 
-	m_staticText3 = new wxStaticText( this, ID_DEFAULT, wxT("Length of a Tick"), wxDefaultPosition, wxDefaultSize, 0 );
-	gSizer2->Add( m_staticText3, 0, wxALL, 5 );
+	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Length of a Tick"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer2->Add( staticText, 0, wxALL, 5 );
 
 	wxBoxSizer* bSizer5;
 	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
@@ -173,14 +184,20 @@ AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxS
 
 	gSizer2->Add( bSizer5, 1, wxEXPAND, 5 );
 
-	m_staticText5 = new wxStaticText( this, ID_DEFAULT, wxT("Ticks between markers"), wxDefaultPosition, wxDefaultSize, 0 );
-	gSizer2->Add( m_staticText5, 0, wxALL, 5 );
+	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Ticks between markers"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer2->Add( staticText, 0, wxALL, 5 );
 
-	m_textTackLength = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_TACKLENGTH, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
-	gSizer2->Add( m_textTackLength, 0, wxALL, 5 );
+	m_textMarkerLength = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_MARKERLENGTH, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
+	gSizer2->Add( m_textMarkerLength, 0, wxALL, 5 );
 
-	m_staticText6 = new wxStaticText( this, ID_DEFAULT, wxT("Offset at start [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
-	gSizer2->Add( m_staticText6, 0, wxALL, 5 );
+	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Total Ticks of diagram"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer2->Add( staticText, 0, wxALL, 5 );
+
+	m_textTotalLength = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_TOTALLENGTH, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
+	gSizer2->Add( m_textTotalLength, 0, wxALL, 5 );
+
+	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Offset at start [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
+	gSizer2->Add( staticText, 0, wxALL, 5 );
 
 	m_textOffset = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_OFFSET, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ));
 	gSizer2->Add( m_textOffset, 0, wxALL, 5 );

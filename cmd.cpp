@@ -1264,16 +1264,42 @@ bool ChangeTransitionWidth::Undo(void)
     return Do();
 }
 
-ChangeAxisSettings::ChangeAxisSettings(TimingDocument *doc, wxInt8 unit, wxInt32 ticklenth, wxInt32 tacklength, wxInt32 offset):
+ChangeAxisSettings::ChangeAxisSettings(TimingDocument *doc, wxInt8 unit, wxInt32 ticklenth, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength):
     wxCommand(true, _("Change time-axis settings") ),
     m_doc(doc),
     m_unit(unit),
     m_ticklength(ticklenth),
-    m_tacklength(tacklength),
-    m_offset(offset)
-{}
+    m_markerlength(markerlength),
+    m_offset(offset),
+    AddRemoveTimeCommand(NULL)
+{
+    if ( doc->length != totallength )
+    {
+        if ( doc->length < totallength )
+        {
+            AddRemoveTimeCommand = new AddTimeCommand(doc, doc->length, totallength - doc->length);
+        }
+        else
+        {
+            AddRemoveTimeCommand = new RemoveTimeCommand(doc, totallength, doc->length);
+        }
+    }
+}
 ChangeAxisSettings::~ChangeAxisSettings(){}
 bool ChangeAxisSettings::Do(void)
+{
+    Change();
+
+    if( AddRemoveTimeCommand )
+        return AddRemoveTimeCommand->Do();
+    else
+    {
+        m_doc->Modify(true);
+        m_doc->UpdateAllViews();
+        return true;
+    }
+}
+void ChangeAxisSettings::Change()
 {
     wxInt8 tmp8 = m_doc->TickLengthUnit;
     m_doc->TickLengthUnit = m_unit;
@@ -1283,21 +1309,29 @@ bool ChangeAxisSettings::Do(void)
     m_doc->TickLength = m_ticklength;
     m_ticklength = tmp;
 
-    tmp = m_doc->TackLength;
-    m_doc->TackLength = m_tacklength;
-    m_tacklength = tmp;
+    tmp = m_doc->MarkerLength;
+    m_doc->MarkerLength = m_markerlength;
+    m_markerlength = tmp;
 
     tmp = m_doc->timeOffset;
     m_doc->timeOffset = m_offset;
     m_offset = tmp;
-
-    m_doc->Modify(true);
-    m_doc->UpdateAllViews();
-    return true;
 }
 bool ChangeAxisSettings::Undo(void)
 {
-    return Do();
+    if (AddRemoveTimeCommand )
+    {
+        bool ret = AddRemoveTimeCommand->Undo();
+        Change();
+        return ret;
+    }
+    else
+    {
+        Change();
+        m_doc->Modify(true);
+        m_doc->UpdateAllViews();
+        return true;
+    }
 }
 
 ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time, bool en)
@@ -1443,7 +1477,13 @@ RemoveTimeCommand::RemoveTimeCommand(TimingDocument *doc, wxInt32 beg, wxInt32 e
     m_doc(doc),
     m_beg(beg),
     m_end(end)
-{}
+{
+    if ( beg > end)
+    {
+        m_beg = end;
+        m_end = beg;
+    }
+}
 
 RemoveTimeCommand::~RemoveTimeCommand()
 {

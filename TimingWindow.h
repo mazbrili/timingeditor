@@ -232,7 +232,7 @@ public:
     void SetNeutralState(void);
     wxInt32 GetSelectedSignalNr();
     void SetTransition(wxInt8 width, bool en50, bool en90);
-    void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset);
+    void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset, wxInt32 totallength);
     void SetTimeCompressor(wxInt32 time);
     void UpdateTimeCompressorPanel(void);
 

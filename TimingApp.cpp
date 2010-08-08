@@ -35,10 +35,10 @@
 #include <wx/tipdlg.h>
 
 #include "TimingApp.h"
-#include "TimingFrame.h"
+#include "TimingMainFrame.h"
+#include "TimingSubFrame.h"
 #include "TimingView.h"
 #include "TimingDoc.h"
-#include "enumers.h"
 
 
 
@@ -83,65 +83,8 @@ bool TimingApp::OnInit()
             CLASSINFO(TimingDocument), CLASSINFO(TimingView));
 
     /// Create the main frame window
-    mainframe = new TimingFrame(m_docManager,(wxFrame *) NULL);
+    mainframe = new TimingMainFrame(m_docManager,(wxFrame *) NULL);
 
-
-
-    //// Give it an icon
-#ifdef __WXMSW__
-    //mainframe->SetIcon(wxIcon(_T("nassi")));
-    mainframe->SetIcon(wxICON(aaaa)); // To Set App Icon
-#endif
-#ifdef __X__
-    mainframe->SetIcon(wxIcon(_T("nassi.xpm")));
-#endif
-
-    /// Make a menubar
-    wxMenu *file_menu = new wxMenu;
-    wxMenu *edit_menu = (wxMenu *) NULL;
-
-    file_menu->Append(wxID_NEW, _T("&New...\tCtrl-N"), _T("Create a new file"));
-    file_menu->Append(wxID_OPEN, _T("&Open...\tCtrl-O"), _T("Open a existing file"));
-    //file_menu->Append(NASSI_ID_IMPORT_SOURCE, _T("&Import...\tCtrl-I"), _T("Import from C source file"));
-    file_menu->AppendSeparator();
-    file_menu->Append(wxID_EXIT, _T("&Quit\tAlt-F4"), _T("Quit the application") );
-    // A nice touch: a history of files visited. Use this menu.
-    m_docManager->FileHistoryUseMenu(file_menu);
-    //m_docManager->FileHistoryAddFilesToMenu();
-
-    wxMenu *help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, _T("&About\tF1"), _T("Show info about this application"));
-    help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using TimingEditor") );
-    help_menu->Append(TIMING_ID_HELP, _T("Help"), _T("Open help pages"));
-
-    wxMenuBar *menu_bar = new wxMenuBar;
-    menu_bar->Append(file_menu, _T("&File"));
-    if (edit_menu)
-        menu_bar->Append(edit_menu, _T("&Edit"));
-    menu_bar->Append(help_menu, _T("&Help"));
-
-#ifdef __WXMAC__
-
-    wxMenuBar::MacSetCommonMenuBar(menu_bar);
-#endif //def __WXMAC__
-    /// Associate the menu bar with the frame
-    mainframe->SetMenuBar(menu_bar);
-    mainframe->Centre(wxBOTH);
-
-    //// statusbar
-    mainframe->CreateStatusBar(3);
-    wxInt32 widths[3] = { 200, -1, 40 };
-    mainframe->SetStatusWidths(3, &widths[0]);
-    mainframe->SetStatusBarPane(0);
-    //mainframe->SetStatusText(_T("Welcome to NassiEdit!"), 0);
-
-    m_config->SetPath(_T("/FileHistory"));
-    m_docManager->FileHistoryLoad(*m_config);
-    m_config->SetPath(_T("/"));
-
-
-    mainframe->LoadFramePositions(m_config);
-    mainframe->LoadAuiPerspective(m_config);
 
     SetTopWindow(mainframe);
 
@@ -179,74 +122,11 @@ int TimingApp::OnExit(void)
 TimingApp::TimingApp(void){}
 
 
-wxMDIChildFrame *TimingApp::CreateChildFrame(wxDocument *doc, wxView *view)
+wxDocMDIChildFrame *TimingApp::CreateChildFrame(wxDocument *doc, wxView *view)
 {
     /// Make a child frame
     wxDocMDIChildFrame *subframe =
-        new wxDocMDIChildFrame(doc, view, GetMainFrame(), wxID_ANY, _T("Child Frame"));
-
-    #ifdef __WXMSW__
-        subframe->SetIcon(wxIcon(_T("wxwinicon")));
-    #else
-        subframe->SetIcon(wxIcon(_T("wxwinicon.xpm")));
-    #endif
-
-    /// Make a menubar
-    wxMenu *file_menu = new wxMenu;
-    file_menu->Append(wxID_NEW, _T("&New...\tCtrl-N"), _T("Create a new file"));
-    file_menu->Append(wxID_OPEN, _T("&Open...\tCtrl-O"), _T("Open a existing file"));
-    file_menu->Append(wxID_CLOSE, _T("&Close\tCtrl-W"), _T("Close the active file"));
-    file_menu->Append(wxID_SAVE, _T("&Save\tCtrl-S"), _T("Save the active file"));
-    file_menu->Append(wxID_SAVEAS, _T("Save &As..."), _T("Save the active file under a different name"));
-    file_menu->AppendSeparator();
-    //file_menu->Append(wxID_PRINT, _T("&Print...\tCtrl-P"), _T("Print the active file"));
-    //file_menu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."), _T("Prepare the printer"));
-    //file_menu->Append(wxID_PREVIEW, _T("Print Pre&view"), _T("Preview the print of the active file"));
-    //file_menu->AppendSeparator();
-    file_menu->Append(TIMING_ID_EXPORT_BITMAP, _T("Export to PNG"), _T("export diagramm to a bitmap in PNG format"));
-    file_menu->Append(TIMING_ID_EXPORT_SVG, _T("Export to SVG"), _T("export diagram to a scalable vector graphic"));
-    file_menu->Append(TIMING_ID_EXPORT_PS, _T("Export to PS"), _T("export diagram to postscript format"));
-    file_menu->AppendSeparator();
-    file_menu->Append(wxID_EXIT, _T("&Quit\tAlt-F4"), _T("Quit the application"));
-    //file history
-    m_docManager->FileHistoryUseMenu(file_menu);
-    m_docManager->FileHistoryAddFilesToMenu(file_menu);
-    ///  don't forget to remove the FileHistoryMeni from the file menu while closing the view: FileHistoryRemoveMenu(fileMenu);
-
-
-
-    wxMenu *edit_menu = new wxMenu;
-    edit_menu->Append(wxID_UNDO, _T("&Undo\tCtrl-Z"), _T("Undo the last operation"));
-    edit_menu->Append(wxID_REDO, _T("&Redo\tCtrl-Shift-Z"), _T("Redo the last operation"));
-    edit_menu->AppendSeparator();
-    edit_menu->Append(wxID_CUT, _T("Cu&t\tCtrl-X"), _T("Cut"));
-    edit_menu->Append(wxID_COPY, _T("&Copy\tCtrl-C"), _T("Copy"));
-    edit_menu->Append(wxID_PASTE, _T("&Paste\tCtrl-V"), _T("Paste"));
-    edit_menu->Append(TIMING_ID_DELETE, _T("&Delete"), _T("Delete"));
-    edit_menu->AppendSeparator();
-    edit_menu->Append(TIMING_ID_ADD_CLOCK, _T("&Add Clock"), _T("&Add Clock") );
-    edit_menu->Append(TIMING_ID_ADD_SIGNAL, _T("Add &Signal"), _T("Add &Signal"));
-    edit_menu->Append(TIMING_ID_ADD_BUS, _T("Add &Bus"), _T("Add &Bus"));
-    //edit_menu->AppendSeparator();
-    doc->GetCommandProcessor()->SetEditMenu(edit_menu);
-
-    wxMenu *viewMenu = new wxMenu;
-    viewMenu->Append(TIMING_ID_GLASS_P, _T("Zoom in\tF7"), _T("Zoom in the Document"));
-    viewMenu->Append(TIMING_ID_GLASS_N, _T("Zoom out\tF6"), _T("Zoom out the Document"));
-
-    wxMenu *help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, _T("&About\tF1"), _T("Show info about this application"));
-    help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using TimingEditor") );
-    help_menu->Append(TIMING_ID_HELP, _T("Help"), _T("Open help pages"));
-
-    wxMenuBar *menu_bar = new wxMenuBar;
-    menu_bar->Append(file_menu, _T("&File"));
-    menu_bar->Append(edit_menu, _T("&Edit"));
-    menu_bar->Append(viewMenu, _T("&View"));
-    menu_bar->Append(help_menu, _T("&Help"));
-
-    /// Associate the menu bar with the frame
-    subframe->SetMenuBar(menu_bar);
+        new TimingSubFrame(doc, view, GetMainFrame());
 
     return subframe;
 }

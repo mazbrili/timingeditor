@@ -31,7 +31,7 @@
 
 class wxDocManager;
 class wxConfig;
-class TimingFrame;
+class TimingMainFrame;
 
 class TimingApp : public wxApp
 {
@@ -39,16 +39,16 @@ class TimingApp : public wxApp
         TimingApp(void);
         virtual bool OnInit();
 
-        TimingFrame *GetMainFrame(void){ return mainframe;}
+        TimingMainFrame *GetMainFrame(void){ return mainframe;}
         wxConfig *GetConfig(void){return m_config;}
         wxDocManager *GetDocManager(void){return m_docManager;}
         wxInt32 OnExit(void);
 
-        wxMDIChildFrame *CreateChildFrame(wxDocument *doc, wxView *view);
+        wxDocMDIChildFrame *CreateChildFrame(wxDocument *doc, wxView *view);
 
 
     protected:
-        TimingFrame *mainframe;
+        TimingMainFrame *mainframe;
     private:
         wxDocManager *m_docManager;
         wxConfig *m_config;

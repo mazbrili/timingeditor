@@ -53,8 +53,10 @@
 		<Unit filename="TimingApp.h" />
 		<Unit filename="TimingDoc.cpp" />
 		<Unit filename="TimingDoc.h" />
-		<Unit filename="TimingFrame.cpp" />
-		<Unit filename="TimingFrame.h" />
+		<Unit filename="TimingMainFrame.cpp" />
+		<Unit filename="TimingMainFrame.h" />
+		<Unit filename="TimingSubFrame.cpp" />
+		<Unit filename="TimingSubFrame.h" />
 		<Unit filename="TimingView.cpp" />
 		<Unit filename="TimingView.h" />
 		<Unit filename="TimingWindow.cpp" />

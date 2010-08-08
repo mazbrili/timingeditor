@@ -23,7 +23,7 @@
 #ifndef __VIEW_H__
 #define __VIEW_H__
 
-#include <wx/docview.h>
+#include <wx/docmdi.h>
 
 class TimingWindow;
 class ClockSettingsPanel;
@@ -33,7 +33,7 @@ class Signal;
 class TimingView: public wxView
 {
     public:
-        wxMDIChildFrame *frame;
+        wxDocMDIChildFrame *frame;
         TimingWindow *window;
         ClockSettingsPanel *ClkSetPanel;
         TransitionSettingsPanel *TranSetPanel;

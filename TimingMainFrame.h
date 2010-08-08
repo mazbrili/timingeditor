@@ -21,8 +21,8 @@
 //
 
 
-#ifndef TIMINGFRAME_H
-#define TIMINGFRAME_H
+#ifndef TIMINGMAINFRAME_H
+#define TIMINGMAINFRAME_H
 
 #include <wx/docmdi.h>
 #include <wx/aui/aui.h>
@@ -33,12 +33,12 @@ class ClockSettingsPanel;
 class TransitionSettingsPanel;
 class AxisSettingsPanel;
 class TimeCompressorSettingsPanel;
-class TimingFrame: public wxDocMDIParentFrame//wxFrame
+class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
 {
     public:
-        //TimingFrame( wxWindow* parent, wxString title = wxT("Timing"), wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 481,466 ), int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-        TimingFrame(wxDocManager *manager , wxFrame *frame, int id = wxID_ANY, const wxString& title = _T("TimingEditor"), wxPoint pos = wxDefaultPosition, wxSize size = wxDefaultSize, int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-        ~TimingFrame();
+        //TimingMainFrame( wxWindow* parent, wxString title = wxT("Timing"), wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 481,466 ), int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+        TimingMainFrame(wxDocManager *manager , wxFrame *frame, int id = wxID_ANY, const wxString& title = _T("TimingEditor"), wxPoint pos = wxDefaultPosition, wxSize size = wxDefaultSize, int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+        ~TimingMainFrame();
     ///member vars
     private:
         wxMenu *editMenu;
@@ -81,6 +81,8 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
         //TimingWindow *CreateCanvas(wxView *view, wxMDIChildFrame *parent);
         TimingWindow *CreateWindow(wxView *view, wxMDIChildFrame *parent);
         void InitToolBar(wxToolBar* toolBar);
+        void InitStatusBar();
+        void InitMenuBar();
 
         void ShowTip(bool force = false);
         void SaveFramePositions(wxConfig *config);
@@ -91,11 +93,11 @@ class TimingFrame: public wxDocMDIParentFrame//wxFrame
     private:
         wxAuiManager *m_manager;
 
-    DECLARE_CLASS(TimingFrame)
+    DECLARE_CLASS(TimingMainFrame)
     DECLARE_EVENT_TABLE()
 };
 
 
 
-#endif //__GUIFrame__
+#endif //TIMINGMAINFRAME_H
 

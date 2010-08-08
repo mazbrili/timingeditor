@@ -57,7 +57,7 @@ TimingDocument::TimingDocument(void)
 
     TickLengthUnit = -3;
     TickLength = 10; // in TickLengthUnit
-    TackLength = 10; // in ticks
+    MarkerLength = 10; // in ticks
     timeOffset = -2; // in ticks
 
     Signal sig1;
@@ -148,7 +148,7 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
     // new with version 4:
     store << TickLengthUnit;
     store << TickLength; // in TickLengthUnit
-    store << TackLength; // in ticks
+    store << MarkerLength; // in ticks
     store << timeOffset; // in ticks
 
     // version 5
@@ -285,14 +285,14 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
     {
         load >> TickLengthUnit;
         load >> TickLength;
-        load >> TackLength;
+        load >> MarkerLength;
         load >> timeOffset;
     }
     else
     {
         TickLengthUnit = -3;
         TickLength = 10; // in TickLengthUnit
-        TackLength = 10; // in ticks
+        MarkerLength = 10; // in ticks
         timeOffset = 5; // in ticks
     }
 

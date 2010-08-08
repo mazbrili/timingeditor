@@ -45,21 +45,20 @@ class AxisSettingsPanel : public wxPanel
         TimingWindow *wnd;
         void SetTickLength(wxInt32 ticklength);
         void SetLengthUnit(wxInt8 unit);
-        void SetTackLength(wxInt32 tacklength);
+        void SetMarkerLength(wxInt32 markerlength);
         void SetOffset(wxInt32 offset);
+        void SetTotalLengt(wxInt32 totallength);
     private:
         wxInt8 TickUnit;
         void SetUnmodified();
 
 	protected:
-		wxStaticText* m_staticText3;
-		wxTextCtrl* m_textTickLenght;
-		wxChoice* m_choice1;
-		wxStaticText* m_staticText5;
-		wxTextCtrl* m_textTackLength;
-		wxStaticText* m_staticText6;
-		wxTextCtrl* m_textOffset;
-		wxButton* m_applyButton;
+		wxTextCtrl *m_textTickLenght;
+		wxChoice   *m_choice1;
+		wxTextCtrl *m_textTotalLength;
+		wxTextCtrl *m_textMarkerLength;
+		wxTextCtrl *m_textOffset;
+		wxButton   *m_applyButton;
 
     private:
         void OnUpdateFields(wxUpdateUIEvent& event);

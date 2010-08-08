@@ -42,7 +42,7 @@
 
 #include "TimingView.h"
 #include "TimingWindow.h"
-#include "TimingFrame.h"
+#include "TimingMainFrame.h"
 #include "TimingApp.h"
 #include "cmd.h"
 #include "enumers.h"
@@ -81,7 +81,7 @@ void TimingView::OnActivateView(bool activate, wxView *activeView, wxView *deact
 TimingView::TimingView()
 {
     window = (TimingWindow *)NULL;
-    frame = (wxMDIChildFrame *)NULL;
+    frame = (wxDocMDIChildFrame *)NULL;
 }
 bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 {
