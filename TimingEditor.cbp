@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="TimingEditor" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin\Debug\TimingEditor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D__WXDEBUG__" />
+					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
+				</ResourceCompiler>
+				<Linker>
+					<Add library="libwxmsw28ud_svg" />
+					<Add library="libwxmsw28ud_richtext.a" />
+					<Add library="libwxmsw28ud_xrc.a" />
+					<Add library="libwxmsw28ud_aui.a" />
+					<Add library="libwxmsw28ud_dbgrid.a" />
+					<Add library="libwxbase28ud_odbc.a" />
+					<Add library="libwxmsw28ud_media.a" />
+					<Add library="libwxbase28ud_net.a" />
+					<Add library="libwxmsw28ud_gl.a" />
+					<Add library="libwxbase28ud_xml.a" />
+					<Add library="libwxmsw28ud_adv.a" />
+					<Add library="libwxmsw28ud_html.a" />
+					<Add library="libwxmsw28ud_core.a" />
+					<Add library="libwxbase28ud.a" />
+					<Add library="libwxpngd.a" />
+					<Add library="libwxjpegd.a" />
+					<Add library="libwxtiffd.a" />
+					<Add library="libwxzlibd.a" />
+					<Add library="libwxregexud.a" />
+					<Add library="libwxexpatd.a" />
+					<Add directory="$(#wx)\lib\gcc_lib" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin\Release\TimingEditor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Release\" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-Os" />
+					<Add option="-O3" />
+					<Add option="-O2" />
+					<Add option="-O1" />
+					<Add option="-O" />
+					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="libwxmsw28u_svg" />
+					<Add library="libwxmsw28u_richtext.a" />
+					<Add library="libwxmsw28u_xrc.a" />
+					<Add library="libwxmsw28u_aui.a" />
+					<Add library="libwxmsw28u_dbgrid.a" />
+					<Add library="libwxbase28u_odbc.a" />
+					<Add library="libwxmsw28u_media.a" />
+					<Add library="libwxbase28u_net.a" />
+					<Add library="libwxmsw28u_gl.a" />
+					<Add library="libwxbase28u_xml.a" />
+					<Add library="libwxmsw28u_adv.a" />
+					<Add library="libwxmsw28u_html.a" />
+					<Add library="libwxmsw28u_core.a" />
+					<Add library="libwxbase28u.a" />
+					<Add library="libwxpng.a" />
+					<Add library="libwxjpeg.a" />
+					<Add library="libwxtiff.a" />
+					<Add library="libwxzlib.a" />
+					<Add library="libwxregexu.a" />
+					<Add library="libwxexpat.a" />
+					<Add directory="$(#wx)\lib\gcc_lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-pipe" />
+			<Add option="-mthreads" />
+			<Add option="-Winvalid-pch" />
+			<Add option="-include wx_pch.h" />
+			<Add option="-D__GNUWIN32__" />
+			<Add option="-D__WXMSW__" />
+			<Add option="-DwxUSE_UNICODE" />
+			<Add option="-DWX_PRECOMP" />
+			<Add directory="$(#wx)\include" />
+			<Add directory="$(#wx)\contrib\include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="$(#wx)\include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add library="libkernel32.a" />
+			<Add library="libuser32.a" />
+			<Add library="libgdi32.a" />
+			<Add library="libwinspool.a" />
+			<Add library="libcomdlg32.a" />
+			<Add library="libadvapi32.a" />
+			<Add library="libshell32.a" />
+			<Add library="libole32.a" />
+			<Add library="liboleaut32.a" />
+			<Add library="libuuid.a" />
+			<Add library="libcomctl32.a" />
+			<Add library="libwsock32.a" />
+			<Add library="libodbc32.a" />
+		</Linker>
+		<Unit filename="AxisSettingsPanel.cpp" />
+		<Unit filename="AxisSettingsPanel.h" />
+		<Unit filename="ClockSettingsPanel.cpp" />
+		<Unit filename="ClockSettingsPanel.h" />
+		<Unit filename="DataObject.cpp" />
+		<Unit filename="DataObject.h" />
+		<Unit filename="TimeCompressorSettingsPanel.cpp" />
+		<Unit filename="TimeCompressorSettingsPanel.h" />
+		<Unit filename="TimingApp.cpp" />
+		<Unit filename="TimingApp.h" />
+		<Unit filename="TimingDoc.cpp" />
+		<Unit filename="TimingDoc.h" />
+		<Unit filename="TimingMainFrame.cpp" />
+		<Unit filename="TimingMainFrame.h" />
+		<Unit filename="TimingSubFrame.cpp" />
+		<Unit filename="TimingSubFrame.h" />
+		<Unit filename="TimingView.cpp" />
+		<Unit filename="TimingView.h" />
+		<Unit filename="TimingWindow.cpp" />
+		<Unit filename="TimingWindow.h" />
+		<Unit filename="TransitionSettingsPanel.cpp" />
+		<Unit filename="TransitionSettingsPanel.h" />
+		<Unit filename="cmd.cpp" />
+		<Unit filename="cmd.h" />
+		<Unit filename="dndfile.cpp" />
+		<Unit filename="dndfile.h" />
+		<Unit filename="dndtarget.cpp" />
+		<Unit filename="dndtarget.h" />
+		<Unit filename="enumers.h" />
+		<Unit filename="myTipProvider.cpp" />
+		<Unit filename="myTipProvider.h" />
+		<Unit filename="resource.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="wx_pch.h">
+			<Option compile="1" />
+			<Option weight="0" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<SVNInside Login="d_anselmi" ConnectStatus="1" NeedsPassword="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
