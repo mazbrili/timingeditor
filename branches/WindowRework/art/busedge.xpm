@@ -1,0 +1,21 @@
+/* XPM */
+static const char *busedge_xpm[] = {
+"16 16 2 1",
+" 	c None",
+"x  c black",
+"                ",
+"xxxxxx    xxxxxx",
+"     x    x     ",
+"     x    x     ",
+"      x  x      ",
+"      x  x      ",
+"       xx       ",
+"       xx       ",
+"       xx       ",
+"       xx       ",
+"      x  x      ",
+"      x  x      ",
+"     x    x     ",
+"     x    x     ",
+"xxxxxx    xxxxxx",
+"                "};
