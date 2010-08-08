@@ -80,7 +80,7 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
     public:
         //TimingWindow *CreateCanvas(wxView *view, wxMDIChildFrame *parent);
         TimingWindow *CreateWindow(wxView *view, wxMDIChildFrame *parent);
-        void InitToolBar(wxToolBar* toolBar);
+        void InitToolBar();
         void InitStatusBar();
         void InitMenuBar();
 

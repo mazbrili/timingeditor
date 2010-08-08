@@ -109,12 +109,6 @@ TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, 
     InitStatusBar();
     InitMenuBar();
 
-
-    ////
-
-    CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
-    InitToolBar(GetToolBar());
-
 	/// Accelerators
     wxAcceleratorEntry entries[1];
     entries[0].Set(wxACCEL_CTRL | wxACCEL_SHIFT , (int) 'Z', wxID_REDO);
@@ -126,6 +120,8 @@ TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, 
     /// wxAui
     /// notify wxAUI which frame to use
     m_manager = new wxAuiManager(this);
+
+    InitToolBar();
 
     clksetpanel = new ClockSettingsPanel(this);
     trnssetpanel = new TransitionSettingsPanel(this);
@@ -294,37 +290,49 @@ TimingWindow *TimingMainFrame::CreateWindow(wxView *view, wxMDIChildFrame *paren
     return new TimingWindow(view, parent, clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
 }
 
-void TimingMainFrame::InitToolBar(wxToolBar* toolBar)
+void TimingMainFrame::InitToolBar()
 {
-    toolBar->AddTool(wxID_NEW, _T("New file"), wxBitmap( new_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("New file"), _T("Create a new file"));
-    toolBar->AddTool(wxID_OPEN, _T("Open file"), wxBitmap( open_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Open file"), _T(""));
-    toolBar->AddTool(wxID_SAVE, _T("Save file"), wxBitmap( save_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Save file"), _T(""));
+    wxAuiToolBar *toolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                         wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
+    toolBar->AddTool(wxID_NEW, _T("New file"), wxBitmap( new_xpm ), _T("Create a new file"), wxITEM_NORMAL);
+    toolBar->AddTool(wxID_OPEN, _T("Open file"), wxBitmap( open_xpm ));
+    toolBar->AddTool(wxID_SAVE, _T("Save file"), wxBitmap( save_xpm ));
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_CUT, _T("Cut"), wxBitmap( cut_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Cut"), _T("Cut"));
-    toolBar->AddTool(wxID_COPY, _T("Copy"), wxBitmap( copy_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Copy"), _T("Copy"));
-    toolBar->AddTool(wxID_PASTE, _T("Paste"), wxBitmap( paste_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Paste"), _T("Paste"));
+    toolBar->AddTool(wxID_CUT, _T("Cut"), wxBitmap( cut_xpm ));
+    toolBar->AddTool(wxID_COPY, _T("Copy"), wxBitmap( copy_xpm ));
+    toolBar->AddTool(wxID_PASTE, _T("Paste"), wxBitmap( paste_xpm ));
     toolBar->AddSeparator();
     //toolBar->AddTool(wxID_PRINT, _T("Print"), wxBitmap( print_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Print"), _T("Print the active file"));
     //toolBar->AddSeparator();
-    toolBar->AddTool(wxID_UNDO, _T("Undo"), wxBitmap( undo_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Undo"), _T("Undo last operation"));
-    toolBar->AddTool(wxID_REDO, _T("Redo"), wxBitmap( redo_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Redo"), _T("Redo last operation"));
+    toolBar->AddTool(wxID_UNDO, _T("Undo"), wxBitmap( undo_xpm ), _T("Undo last operation"), wxITEM_NORMAL);
+    toolBar->AddTool(wxID_REDO, _T("Redo"), wxBitmap( redo_xpm ), _T("Redo last operation"), wxITEM_NORMAL);
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_GLASS_N, _T("Zoom out"), wxBitmap(glassntool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom out"), _T("Zoom out the Document"));
-    toolBar->AddTool(TIMING_ID_GLASS_P, _T("Zoom in"), wxBitmap(glassptool_xpm) , wxNullBitmap, wxITEM_NORMAL, _T("Zoom in"), _T("Zoom in the Document"));
+    toolBar->AddTool(TIMING_ID_GLASS_N, _T("Zoom out"), wxBitmap(glassntool_xpm), _T("Zoom out the Document"), wxITEM_NORMAL);
+    toolBar->AddTool(TIMING_ID_GLASS_P, _T("Zoom in"), wxBitmap(glassptool_xpm), _T("Zoom in the Document"), wxITEM_NORMAL);
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_ADD_CLOCK, _T("Add Clock"), wxBitmap(clockedge_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Add Clock"), _T("Add a clock to the Document"));
-    toolBar->AddTool(TIMING_ID_ADD_SIGNAL, _T("Add Signal"), wxBitmap(risingedge_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Add Signal"), _T("Add a signal to the Document"));
-    toolBar->AddTool(TIMING_ID_ADD_BUS, _T("Add Bus"), wxBitmap(busedge_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Add Bus"), _T("Add a bus to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_CLOCK, _T("Add Clock"), wxBitmap(clockedge_xpm), _T("Add a clock to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_SIGNAL, _T("Add Signal"), wxBitmap(risingedge_xpm), _T("Add a signal to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_BUS, _T("Add Bus"), wxBitmap(busedge_xpm), _T("Add a bus to the Document"));
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_NEUTRAL, _T("Select"), wxBitmap(cross_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Select"), _T(" Select something or change signal/bus"));
-    toolBar->AddTool(TIMING_ID_DISCONTINUATION, _T("Edit time compressors"), wxBitmap(tri_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Edit time compressors"), _T("Edit time compressors by clicking on the bottom axis"));
-    toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Draw vertical line"), _T("Draw vertical line"));
-    toolBar->AddTool(TIMING_ID_HARROW, _T("Draw hotizontal arrow"),  wxBitmap(harrow_cur_xpm), wxNullBitmap, wxITEM_NORMAL, _T("Draw a hotizontal arrow"),_T("Draw a hotizontal arrow") );
-    toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm),  wxNullBitmap, wxITEM_NORMAL, _T("Edit text labels"),_T("Edit text labels") );
+    toolBar->AddTool(TIMING_ID_NEUTRAL, _T("Select"), wxBitmap(cross_xpm), _T(" Select something or change signal/bus"));
+    toolBar->AddTool(TIMING_ID_DISCONTINUATION, _T("Edit time compressors"), wxBitmap(tri_xpm), _T("Edit time compressors by clicking on the bottom axis"));
+    toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), _T("Draw vertical line"));
+    toolBar->AddTool(TIMING_ID_HARROW, _T("Draw hotizontal arrow"),  wxBitmap(harrow_cur_xpm), _T("Draw a hotizontal arrow") );
+    toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm), _T("Edit text labels") );
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_ABOUT, _T("Help"), wxBitmap( help_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Help"), _T("Show info about this application"));
+    toolBar->AddTool(wxID_ABOUT, _T("Help"), wxBitmap( help_xpm ), _T("Show info about this application"));
     toolBar->Realize();
-    SetToolBar(toolBar);
+
+    toolBar->Realize();
+    //SetToolBar(toolBar);
+
+
+
+    m_manager->AddPane(toolBar, wxAuiPaneInfo().
+                  Name(wxT("tb1")).Caption(wxT("Big Toolbar")).
+                  ToolbarPane().Top().
+                  LeftDockable(false).RightDockable(false));
+
 }
 
 
@@ -399,7 +407,7 @@ void TimingMainFrame::SaveAuiPerspective(wxConfig *config)
     wxString str = m_manager->SavePerspective();
     config->Write( _T( "/MainFrame/AuiPerspective" ), str );
     /// store version to let newer versions of gui a cahnce to build a new valid perspective
-    config->Write( _T( "/MainFrame/AuiPerspectiveVersion" ), 2);
+    config->Write( _T( "/MainFrame/AuiPerspectiveVersion" ), 3);
 }
 void TimingMainFrame::LoadAuiPerspective(wxConfig *config)
 {
@@ -408,7 +416,7 @@ void TimingMainFrame::LoadAuiPerspective(wxConfig *config)
 
     /// if version stored is older than current do not load old perspective
     config->Read(_T( "/MainFrame/AuiPerspectiveVersion" ), &v, 0);
-    if ( v == 2 )
+    if ( v == 3 )
     {
         config->Read(_T( "/MainFrame/AuiPerspective" ), &str);
         m_manager->LoadPerspective(str);
