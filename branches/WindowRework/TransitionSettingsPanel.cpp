@@ -39,7 +39,6 @@
 #include "TimingApp.h"//GetApp
 #include "enumers.h"
 #include "TimingView.h"
-#include "TimingWindow.h"
 
 #include "TransitionSettingsPanel.h"
 #include "enumers.h"
@@ -56,7 +55,7 @@ void TransitionSettingsPanel::OnApply(wxCommandEvent &event)
 {
     SetUnmodified();
 
-    if ( wnd ) wnd->SetTransition(
+    if ( view ) view->SetTransition(
         (wxInt8)m_spinCtrl1->GetValue(),
         m_check50->GetValue(),
         m_check90->GetValue()
@@ -81,7 +80,7 @@ void TransitionSettingsPanel::SetTransitionWidth(wxInt8 tw)
 
 void TransitionSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 {
-    if ( wnd )
+    if ( view )
     {
         if ( transwidth != m_spinCtrl1->GetValue() )
         {
@@ -109,7 +108,7 @@ void TransitionSettingsPanel::SetUnmodified()
 }
 void TransitionSettingsPanel::OnUpdateControls(wxUpdateUIEvent& event)
 {
-    if ( wnd )
+    if ( view )
     {
         event.Enable(true);
         return;
@@ -118,7 +117,7 @@ void TransitionSettingsPanel::OnUpdateControls(wxUpdateUIEvent& event)
 }
 TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxSize size, int style ) :
     wxPanel( parent, id, pos, size, style ),
-    wnd(NULL)
+    view(NULL)
 {
 	wxBoxSizer* bSizer1;
 	bSizer1 = new wxBoxSizer( wxVERTICAL );

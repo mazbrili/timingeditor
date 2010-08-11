@@ -35,7 +35,7 @@
 #include "TimingApp.h"//GetApp
 #include "TimeCompressorSettingsPanel.h"
 #include "enumers.h"
-#include "TimingWindow.h"
+#include "TimingView.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ END_EVENT_TABLE()
 TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
     ( wxWindow* parent, int id, wxPoint pos, wxSize size, int style )
     : wxPanel( parent, id, pos, size, style ),
-    wnd(NULL)
+    view(NULL)
 {
     wxStaticText* staticText;
 
@@ -79,7 +79,7 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
 }
 void TimeCompressorSettingsPanel::OnUpdateTextField(wxUpdateUIEvent& event)
 {
-    if ( wnd && wnd->DiscontSelected() )
+    if ( view && view->DiscontSelected() )
     {
         event.Enable(true);
         return;
@@ -93,11 +93,11 @@ void TimeCompressorSettingsPanel::OnApply(wxCommandEvent &event)
     long val;
     m_textTime->GetValue().ToLong(&val);
 
-    if ( wnd ) wnd->SetTimeCompressor(val);
+    if ( view ) view->SetTimeCompressor(val);
 }
 void TimeCompressorSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 {
-    if ( wnd && wnd->DiscontSelected() )
+    if ( view && view->DiscontSelected() )
     {
         long val;
         m_textTime->GetValue().ToLong(&val);

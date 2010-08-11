@@ -41,7 +41,8 @@
 
 #include "TimingView.h"
 #include "dndfile.h"
-#include "TimingWindow.h"
+//#include "TimingWindow.h"
+#include "DiagramSplitterWindow.h"
 #include "ClockSettingsPanel.h"
 #include "TransitionSettingsPanel.h"
 #include "AxisSettingsPanel.h"
@@ -285,9 +286,12 @@ void TimingMainFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-TimingWindow *TimingMainFrame::CreateWindow(wxView *view, wxMDIChildFrame *parent)
+//TimingWindow *TimingMainFrame::CreateWindow(wxView *view, wxMDIChildFrame *parent)
+DiagramSplitterWindow *TimingMainFrame::CreateWindow(TimingView *view, wxMDIChildFrame *parent)
 {
-    return new TimingWindow(view, parent, clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
+    view->SetPanels(clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
+    return new DiagramSplitterWindow(view, parent, wxID_ANY);
+        //, clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
 }
 
 void TimingMainFrame::InitToolBar()

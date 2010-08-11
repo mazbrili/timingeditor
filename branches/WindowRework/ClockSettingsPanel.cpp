@@ -35,7 +35,7 @@
 #include "TimingApp.h"//GetApp
 #include "ClockSettingsPanel.h"
 #include "enumers.h"
-#include "TimingWindow.h"
+#include "TimingView.h"
 
 ///////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(ClockSettingsPanel, wxPanel)
@@ -56,7 +56,7 @@ void ClockSettingsPanel::SetUnmodified()
 }
 void ClockSettingsPanel::OnUpdateTextFields(wxUpdateUIEvent& event)
 {
-    if ( wnd && wnd->IsSignalSelected() && wnd->IsSelectedSignalClock() )
+    if ( view && view->IsSignalSelected() && view->IsSelectedSignalClock() )
     {
         event.Enable(true);
         return;
@@ -65,8 +65,8 @@ void ClockSettingsPanel::OnUpdateTextFields(wxUpdateUIEvent& event)
 }
 void ClockSettingsPanel::OnUpdateClockPeriod(wxUpdateUIEvent& event)
 {
-    if ( wnd && wnd->IsSignalSelected() &&
-        wnd->IsSelectedSignalClock() && m_checkShadow->IsChecked())
+    if ( view && view->IsSignalSelected() &&
+        view->IsSelectedSignalClock() && m_checkShadow->IsChecked())
     {
         event.Enable(true);
         return;
@@ -82,8 +82,8 @@ void ClockSettingsPanel::OnApply(wxCommandEvent &event)
     if ( valp <= 0 ) return;
     m_textDelay->GetValue().ToLong(&vald);
     if ( vald < 0 ) return;
-    if ( wnd )
-        wnd->SetClock(vald, valp, Shadowed, DrawPeriod);
+    if ( view )
+        view->SetClock(vald, valp, Shadowed, DrawPeriod);
 }
 void ClockSettingsPanel::SetShadowed(bool sha)
 {
@@ -101,7 +101,7 @@ void ClockSettingsPanel::SetShowPeriod(bool en)
 
 void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
 {
-    if ( wnd && wnd->IsSignalSelected() && wnd->IsSelectedSignalClock() )
+    if ( view && view->IsSignalSelected() && view->IsSelectedSignalClock() )
     {
         long valp, vald;
         m_textPeriod->GetValue().ToLong(&valp);
@@ -131,7 +131,7 @@ void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
 }
 ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxSize size, int style ) :
     wxPanel( parent, id, pos, size, style ),
-    wnd(NULL)
+    view(NULL)
 {
     wxStaticText *staticText;
 	wxBoxSizer* bSizer1;
