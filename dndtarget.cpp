@@ -37,12 +37,7 @@
 
 #include "dndtarget.h"
 #include "TimingWindow.h"
-
-/*bool DnDText::OnDropText(wxCoord x, wxCoord y, const wxString& text)
-{
-    m_owner->DropText(text);
-    return true;
-}*/
+//#include "DiagramSplitterWindow.h"
 
 DragnDropTextTarget::DragnDropTextTarget(TimingWindow *owner):
     wxDropTarget(new wxTextDataObject()),

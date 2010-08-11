@@ -40,7 +40,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #define ID_DEFAULT wxID_ANY // Default
-class TimingWindow;
+class TimingView;
 class TimeCompressorSettingsPanel : public wxPanel
 {
 	private:
@@ -50,7 +50,7 @@ class TimeCompressorSettingsPanel : public wxPanel
         //void OnDelete(wxCommandEvent &event);
 
     public:
-        TimingWindow *wnd;
+        TimingView *view;
 
 
 	protected:

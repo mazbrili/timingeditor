@@ -28,11 +28,12 @@
 #include <wx/aui/aui.h>
 #include "TimingApp.h"
 
-class TimingWindow;
+class DiagramSplitterWindow;
 class ClockSettingsPanel;
 class TransitionSettingsPanel;
 class AxisSettingsPanel;
 class TimeCompressorSettingsPanel;
+class TimingView;
 class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
 {
     public:
@@ -78,8 +79,9 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
         bool CanDelete(void);
 
     public:
-        //TimingWindow *CreateCanvas(wxView *view, wxMDIChildFrame *parent);
-        TimingWindow *CreateWindow(wxView *view, wxMDIChildFrame *parent);
+
+        //TimingWindow *CreateWindow(wxView *view, wxMDIChildFrame *parent);
+        DiagramSplitterWindow *CreateWindow(TimingView *view, wxMDIChildFrame *parent);
         void InitToolBar();
         void InitStatusBar();
         void InitMenuBar();

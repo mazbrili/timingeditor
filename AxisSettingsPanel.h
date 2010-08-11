@@ -36,13 +36,13 @@
 
 
 
-class TimingWindow;
+class TimingView;
 class AxisSettingsPanel : public wxPanel
 {
 	private:
 
     public:
-        TimingWindow *wnd;
+        TimingView *view;
         void SetTickLength(wxInt32 ticklength);
         void SetLengthUnit(wxInt8 unit);
         void SetMarkerLength(wxInt32 markerlength);

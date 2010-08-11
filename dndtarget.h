@@ -36,6 +36,7 @@
 #include "wx/dnd.h"
 
 class TimingWindow;
+//class DiagramSplitterWindow;
 /*class DnDText : public wxTextDropTarget
 {
 public:

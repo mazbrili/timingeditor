@@ -217,7 +217,7 @@ wxPoint TimingWindow::DrawEditableText(wxDC &dc, wxString str, wxPoint &offset, 
     wxPoint size(w, h);
     textSizes.push_back( size );
 
-    /// chang position of caret
+    /// change position of caret
     if ( WindowState == TextFieldSelected && editingNumber == textNumber )
     {
         if ( visible )
@@ -436,7 +436,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
     if ( virtsize.y < clientsize.y ) virtsize.y = clientsize.y;
     SetVirtualSize(virtsize);// change the size of the scrollable window
 
-    /// drawing a graphical partitionig of the signal names
+    /// drawing a graphical partitioning of the signal names
     if ( !exporting )
     {
         //wxPen pen(wxColour(0xf0,0xf0,0xf0));
@@ -752,36 +752,36 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             {
                 bool hascompressor = false;
                 for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
-                if ( doc->compressors[indx].pos == VisibleTicks[k] && doc->compressors[indx].enabled )
-                {
-                    if ( n < sig.ticks )// drawing a one
-                        dc.DrawLine(
-                            offset.x                  , offset.y,
-                            offset.x + GridStepWidth/2, offset.y
-                        );
-                    else// drawing a zero
-                        dc.DrawLine(
-                            offset.x                  , offset.y + doc->SignalHeight,
-                            offset.x + GridStepWidth/2, offset.y + doc->SignalHeight
-                        );
+                    if ( doc->compressors[indx].pos == VisibleTicks[k] && doc->compressors[indx].enabled )
+                    {
+                        if ( n < sig.ticks )// drawing a one
+                            dc.DrawLine(
+                                offset.x                  , offset.y,
+                                offset.x + GridStepWidth/2, offset.y
+                            );
+                        else// drawing a zero
+                            dc.DrawLine(
+                                offset.x                  , offset.y + doc->SignalHeight,
+                                offset.x + GridStepWidth/2, offset.y + doc->SignalHeight
+                            );
 
-                    wxInt32 len = (doc->compressors[indx].length) % (2*sig.ticks);
-                    n += len -1;
-                    if ( n < 0 ) n += (2*sig.ticks);
-                    n %= (2*sig.ticks);
-                    if ( n < sig.ticks )// drawing a one
-                        dc.DrawLine(
-                            offset.x + GridStepWidth/2, offset.y,
-                            offset.x + GridStepWidth  , offset.y
-                        );
-                    else// drawing a zero
-                        dc.DrawLine(
-                            offset.x + GridStepWidth/2, offset.y + doc->SignalHeight,
-                            offset.x + GridStepWidth  , offset.y + doc->SignalHeight
-                        );
-                    ++n;
-                    hascompressor = true;
-                }
+                        wxInt32 len = (doc->compressors[indx].length) % (2*sig.ticks);
+                        n += len -1;
+                        if ( n < 0 ) n += (2*sig.ticks);
+                        n %= (2*sig.ticks);
+                        if ( n < sig.ticks )// drawing a one
+                            dc.DrawLine(
+                                offset.x + GridStepWidth/2, offset.y,
+                                offset.x + GridStepWidth  , offset.y
+                            );
+                        else// drawing a zero
+                            dc.DrawLine(
+                                offset.x + GridStepWidth/2, offset.y + doc->SignalHeight,
+                                offset.x + GridStepWidth  , offset.y + doc->SignalHeight
+                            );
+                        ++n;
+                        hascompressor = true;
+                    }
                 if ( !hascompressor )
                 {
                     if ( n < sig.ticks )// drawing a one
@@ -2995,10 +2995,10 @@ void TimingWindow::OnMouseLeftDown(wxMouseEvent &event)
             break;
     }
     WindowState = newstate;
-    if ( newstate == SignalIsSelected && doc->signals[editingNumber].IsClock )
-        UpdateClockPanel();
-    if ( newstate == DisconSelected )
-        UpdateTimeCompressorPanel();
+//    if ( newstate == SignalIsSelected && doc->signals[editingNumber].IsClock )
+//        UpdateClockPanel();
+//    if ( newstate == DisconSelected )
+//        UpdateTimeCompressorPanel();
 
     if ( dorefresh ) this->Refresh(true);
     return;
@@ -3376,7 +3376,7 @@ void TimingWindow::OnMouseRightDown(wxMouseEvent& event)
         {
             editingNumber = n;
             WindowState = SignalIsSelected;
-            if ( doc->signals[n].IsClock ) UpdateClockPanel();
+//            if ( doc->signals[n].IsClock ) UpdateClockPanel();
 
             wxMenu menu;
             menu.Append(TIMING_ID_DELETE, _T("Delet signal"));
@@ -4026,7 +4026,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if (editingNumber != 0 )
                         {
                             editingNumber = 0;
-                            UpdateClockPanel();
+                            //UpdateClockPanel();
                             this->Refresh(true);
                         }
                         break;
@@ -4034,7 +4034,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if ( editingNumber != n-1 )
                         {
                             editingNumber = n-1;
-                            UpdateClockPanel();
+                            //UpdateClockPanel();
                             this->Refresh(true);
                         }
                         break;
@@ -4042,7 +4042,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if ( editingNumber != 0)
                         {
                             --editingNumber;
-                            UpdateClockPanel();
+                            //UpdateClockPanel();
                             this->Refresh(true);
                         }
                         break;
@@ -4050,7 +4050,7 @@ void TimingWindow::OnChar(wxKeyEvent &event)
                         if ( editingNumber < n-1 )
                         {
                             ++editingNumber;
-                            UpdateClockPanel();
+                            //UpdateClockPanel();
                             this->Refresh(true);
                         }
                         break;
@@ -5183,106 +5183,106 @@ bool TimingWindow::IsSelectedSignalClock(void)
     return doc->signals[editingNumber].IsClock;
 }
 
-void TimingWindow::DetachPanels()
-{
-    ClkSetPanel->wnd = (TimingWindow *)NULL;
-    TranSetPanel->wnd = (TimingWindow *)NULL;
-    AxisSetPanel->wnd = (TimingWindow *)NULL;
-    TmeCmprssrPanel->wnd = (TimingWindow *)NULL;
-}
+//void TimingWindow::DetachPanels()
+//{
+//    ClkSetPanel->wnd = (TimingWindow *)NULL;
+//    TranSetPanel->wnd = (TimingWindow *)NULL;
+//    AxisSetPanel->wnd = (TimingWindow *)NULL;
+//    TmeCmprssrPanel->wnd = (TimingWindow *)NULL;
+//}
 
-void TimingWindow::AttachPanels()
-{
-    ClkSetPanel->wnd = this;
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
+//void TimingWindow::AttachPanels()
+//{
+//    ClkSetPanel->wnd = this;
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//
+//    if ( IsSelectedSignalClock() )
+//        UpdateClockPanel();
+//
+//    TranSetPanel->wnd = this;
+//    UpdateTransitionPanel();
+//
+//    AxisSetPanel->wnd = this;
+//    UpdateAxisPanel();
+//
+//    TmeCmprssrPanel->wnd = this;
+//    UpdateTimeCompressorPanel();
+//}
 
-    if ( IsSelectedSignalClock() )
-        UpdateClockPanel();
+//void TimingWindow::UpdateClockPanel()
+//{
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//
+//    if ( IsSelectedSignalClock() )
+//    {
+//        wxInt32 n;
+//        wxString str;
+//
+//        n = doc->signals[editingNumber].delay;
+//        str = wxString::Format ( _( "%d" ) , n);
+//        ClkSetPanel->SetDelayText(str);
+//
+//        n = doc->signals[editingNumber].ticks;
+//        str = wxString::Format ( _( "%d" ) , n);
+//        ClkSetPanel->SetTicksText(str);
+//
+//        ClkSetPanel->SetShadowed(doc->signals[editingNumber].GenerateBackground);
+//        ClkSetPanel->SetShowPeriod(doc->signals[editingNumber].ShowPeriodCount);
+//    }
+//}
 
-    TranSetPanel->wnd = this;
-    UpdateTransitionPanel();
+//void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPeriod)
+//{
+//    SetFocus();
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+//
+//    if ( IsSelectedSignalClock() )
+//    {
+//        cmdproc->Submit(
+//            new ChangeClockParamCommand(doc, editingNumber , ticks, delay, shadow, DrawPeriod)
+//        );
+//    }
+//}
+//
+//void TimingWindow::UpdateAxisPanel()
+//{
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//
+//    AxisSetPanel->SetTickLength(doc->TickLength);
+//    AxisSetPanel->SetLengthUnit(doc->TickLengthUnit + 5);
+//    AxisSetPanel->SetMarkerLength(doc->MarkerLength);
+//    AxisSetPanel->SetOffset(doc->timeOffset);
+//    AxisSetPanel->SetTotalLengt(doc->length);
+//}
 
-    AxisSetPanel->wnd = this;
-    UpdateAxisPanel();
+//void TimingWindow::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength)
+//{
+//    SetFocus();
+//
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+//    cmdproc->Submit(
+//        new ChangeAxisSettings(doc, unit-5, ticklength, markerlength, offset, totallength )
+//    );
+//    UpdateAxisPanel();
+//}
 
-    TmeCmprssrPanel->wnd = this;
-    UpdateTimeCompressorPanel();
-}
-
-void TimingWindow::UpdateClockPanel()
-{
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-
-    if ( IsSelectedSignalClock() )
-    {
-        wxInt32 n;
-        wxString str;
-
-        n = doc->signals[editingNumber].delay;
-        str = wxString::Format ( _( "%d" ) , n);
-        ClkSetPanel->SetDelayText(str);
-
-        n = doc->signals[editingNumber].ticks;
-        str = wxString::Format ( _( "%d" ) , n);
-        ClkSetPanel->SetTicksText(str);
-
-        ClkSetPanel->SetShadowed(doc->signals[editingNumber].GenerateBackground);
-        ClkSetPanel->SetShowPeriod(doc->signals[editingNumber].ShowPeriodCount);
-    }
-}
-
-void TimingWindow::SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPeriod)
-{
-    SetFocus();
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-
-    if ( IsSelectedSignalClock() )
-    {
-        cmdproc->Submit(
-            new ChangeClockParamCommand(doc, editingNumber , ticks, delay, shadow, DrawPeriod)
-        );
-    }
-}
-
-void TimingWindow::UpdateAxisPanel()
-{
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-
-    AxisSetPanel->SetTickLength(doc->TickLength);
-    AxisSetPanel->SetLengthUnit(doc->TickLengthUnit + 5);
-    AxisSetPanel->SetMarkerLength(doc->MarkerLength);
-    AxisSetPanel->SetOffset(doc->timeOffset);
-    AxisSetPanel->SetTotalLengt(doc->length);
-}
-
-void TimingWindow::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength)
-{
-    SetFocus();
-
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-    cmdproc->Submit(
-        new ChangeAxisSettings(doc, unit-5, ticklength, markerlength, offset, totallength )
-    );
-    UpdateAxisPanel();
-}
-
-void TimingWindow::UpdateTransitionPanel()
-{
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-
-    TranSetPanel->SetTransitionWidth(doc->TransitWidth);
-    TranSetPanel->Set50(doc->en50);
-    TranSetPanel->Set90(doc->en90);
-
-}
+//void TimingWindow::UpdateTransitionPanel()
+//{
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//
+//    TranSetPanel->SetTransitionWidth(doc->TransitWidth);
+//    TranSetPanel->Set50(doc->en50);
+//    TranSetPanel->Set90(doc->en90);
+//
+//}
 
 wxInt8 TimingWindow::GetTransitionWidth()
 {
@@ -5292,51 +5292,51 @@ wxInt8 TimingWindow::GetTransitionWidth()
     return doc->TransitWidth;
 }
 
-void TimingWindow::SetTransition(wxInt8 width, bool en50, bool en90)
-{
-    SetFocus();
+//void TimingWindow::SetTransition(wxInt8 width, bool en50, bool en90)
+//{
+//    SetFocus();
+//
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+//    cmdproc->Submit(
+//        new ChangeTransitionWidth(doc, width, en50, en90)
+//    );
+//    UpdateTransitionPanel();
+//}
+//
+//void TimingWindow::UpdateTimeCompressorPanel(void)
+//{
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//
+//    if ( !DiscontSelected() ) return;
+//
+//    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx )
+//    if ( doc->compressors[indx].pos == editingValA )
+//    {
+//        TmeCmprssrPanel->SetTimeText(
+//            wxString::Format( _("%d"), doc->compressors[indx].length )
+//        );
+//    }
+//}
 
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-    cmdproc->Submit(
-        new ChangeTransitionWidth(doc, width, en50, en90)
-    );
-    UpdateTransitionPanel();
-}
-
-void TimingWindow::UpdateTimeCompressorPanel(void)
-{
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-
-    if ( !DiscontSelected() ) return;
-
-    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx )
-    if ( doc->compressors[indx].pos == editingValA )
-    {
-        TmeCmprssrPanel->SetTimeText(
-            wxString::Format( _("%d"), doc->compressors[indx].length )
-        );
-    }
-}
-
-void TimingWindow::SetTimeCompressor(wxInt32 time)
-{
-    SetFocus();
-    TimingDocument *doc = (TimingDocument *)view->GetDocument();
-    if ( !doc ) return;
-    if ( !DiscontSelected() ) return;
-
-    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
-    if ( doc->compressors[indx].pos == editingValA )
-        cmdproc->Submit(
-            new ChangeTimeCompressor(doc, editingValA, time, doc->compressors[indx].enabled)
-        );
-
-    UpdateTimeCompressorPanel();
-}
+//void TimingWindow::SetTimeCompressor(wxInt32 time)
+//{
+//    SetFocus();
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc ) return;
+//    if ( !DiscontSelected() ) return;
+//
+//    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+//    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+//    if ( doc->compressors[indx].pos == editingValA )
+//        cmdproc->Submit(
+//            new ChangeTimeCompressor(doc, editingValA, time, doc->compressors[indx].enabled)
+//        );
+//
+//    UpdateTimeCompressorPanel();
+//}
 
 void TimingWindow::OnScroll(wxScrollWinEvent &event)
 {

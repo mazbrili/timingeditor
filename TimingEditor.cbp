@@ -125,6 +125,16 @@
 		<Unit filename="ClockSettingsPanel.h" />
 		<Unit filename="DataObject.cpp" />
 		<Unit filename="DataObject.h" />
+		<Unit filename="DiagramAxisWindow.cpp" />
+		<Unit filename="DiagramAxisWindow.h" />
+		<Unit filename="DiagramLabelsWindow.cpp" />
+		<Unit filename="DiagramLabelsWindow.h" />
+		<Unit filename="DiagramRightWindow.cpp" />
+		<Unit filename="DiagramRightWindow.h" />
+		<Unit filename="DiagramSplitterWindow.cpp" />
+		<Unit filename="DiagramSplitterWindow.h" />
+		<Unit filename="DiagramWaveWindow.cpp" />
+		<Unit filename="DiagramWaveWindow.h" />
 		<Unit filename="TimeCompressorSettingsPanel.cpp" />
 		<Unit filename="TimeCompressorSettingsPanel.h" />
 		<Unit filename="TimingApp.cpp" />

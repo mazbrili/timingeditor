@@ -45,12 +45,8 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define ID_DEFAULT wxID_ANY // Default
 
-/**
- * Class MyPanel1
- */
-class TimingWindow;
+class TimingView;
 class TransitionSettingsPanel : public wxPanel
 {
     public:
@@ -61,7 +57,7 @@ class TransitionSettingsPanel : public wxPanel
         //bool Get5090(){return m_checkBox1->GetValue();}
 
     public:
-        TimingWindow *wnd;
+        TimingView *view;
 
 	private:
         void OnUpdatePanelApply(wxUpdateUIEvent &event);

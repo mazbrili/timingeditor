@@ -34,7 +34,7 @@
 
 #include "TimingApp.h"//GetApp
 #include "enumers.h"
-#include "TimingWindow.h"
+#include "TimingView.h"
 
 ///////////////////////////////////////////////////////////////////////////
 BEGIN_EVENT_TABLE(AxisSettingsPanel, wxPanel)
@@ -73,7 +73,7 @@ void AxisSettingsPanel::OnApply(wxCommandEvent &event)
     offset = (wxInt32)valoffset;
     totallength =(wxInt32)valtotallength;
 
-    if ( wnd ) wnd->SetAxis(unit, ticklength, markerlength, offset, totallength);
+    if ( view ) view->SetAxis(unit, ticklength, markerlength, offset, totallength);
 
 }
 void AxisSettingsPanel::SetUnmodified()
@@ -86,7 +86,7 @@ void AxisSettingsPanel::SetUnmodified()
 }
 void AxisSettingsPanel::OnUpdateFields(wxUpdateUIEvent& event)
 {
-    if ( wnd )
+    if ( view )
     {
         event.Enable(true);
         return;
@@ -116,7 +116,7 @@ void AxisSettingsPanel::SetTotalLengt(wxInt32 totallength)
 }
 void AxisSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 {
-    if ( wnd )
+    if ( view )
     {
         long valticks;
         long valmarker;
@@ -158,7 +158,7 @@ void AxisSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 }
 AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxSize size, int style ) :
     wxPanel( parent, id, pos, size, style ),
-    wnd(NULL)
+    view(NULL)
 {
     wxStaticText* staticText;
 	wxBoxSizer* bSizer3;

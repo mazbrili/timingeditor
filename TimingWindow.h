@@ -86,8 +86,8 @@ public:
     wxString GetText(void);
     void SelectAll(void);
 
-    void AttachPanels();
-    void DetachPanels();
+    //void AttachPanels();
+    //void DetachPanels();
 
 
 
@@ -95,9 +95,9 @@ public:
     wxPoint GetBitmapSize();
     //void SendEvent(const wxString& str);
 private:
-    void UpdateClockPanel();
-    void UpdateTransitionPanel();
-    void UpdateAxisPanel();
+    //void UpdateClockPanel();
+    //void UpdateTransitionPanel();
+    //void UpdateAxisPanel();
 private: /// event methods
     void OnPaint(wxPaintEvent &event);
     void OnEraseBackground(wxEraseEvent &event);
@@ -228,13 +228,13 @@ private:
 public:
     wxInt8 GetTransitionWidth();
     //bool GetEn5090();
-    void SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPeriod);
+    //void SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPeriod);
     void SetNeutralState(void);
     wxInt32 GetSelectedSignalNr();
-    void SetTransition(wxInt8 width, bool en50, bool en90);
-    void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset, wxInt32 totallength);
-    void SetTimeCompressor(wxInt32 time);
-    void UpdateTimeCompressorPanel(void);
+    //void SetTransition(wxInt8 width, bool en50, bool en90);
+    //void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 tacklength, wxInt32 offset, wxInt32 totallength);
+    //void SetTimeCompressor(wxInt32 time);
+    //void UpdateTimeCompressorPanel(void);
 
     void OnDragEnter(void);
     void OnDragLeave(void);
