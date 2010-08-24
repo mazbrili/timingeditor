@@ -722,18 +722,19 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         offset.x = signalNamesWidth;
         offset.y = heightOffsets[n]+doc->MinimumSignalDistance/2+ doc->signals[n].prespace;
 
-        wxCoord transwidth = GridStepWidth/(100.0/doc->TransitWidth);
+        wxCoord transwidth = GridStepWidth*doc->TransitWidth/100.0;
         //{
         wxCoord wo = transwidth;
         wxCoord wt = GridStepWidth/2;
-        wxCoord ho[6] = {0,0,doc->SignalHeight/2,doc->SignalHeight/2,doc->SignalHeight,doc->SignalHeight};
-        wxCoord ht[6];
-        ht[4] = ho[5]*50/doc->TransitWidth;
-        ht[1] = ho[5]-ht[4];
-        ht[2] = ht[4]/2;
-        ht[3] = ho[5]-ht[2];
-        ht[5] = ht[2]+ho[5]/2;
-        ht[0] = ho[5]-ht[5];//}
+        wxCoord ho[6] = {0, 0, doc->SignalHeight/2, doc->SignalHeight/2, doc->SignalHeight, doc->SignalHeight};
+        wxCoord transitionheights[6];
+        if ( doc->TransitWidth != 0 )
+            transitionheights[4] = ho[5]*50/doc->TransitWidth;
+        transitionheights[1] = ho[5]-transitionheights[4];
+        transitionheights[2] = transitionheights[4]/2;
+        transitionheights[3] = ho[5]-transitionheights[2];
+        transitionheights[5] = transitionheights[2]+ho[5]/2;
+        transitionheights[0] = ho[5]-transitionheights[5];//}
 
         Signal sig;
         if ( WindowState == EditSignal && editingNumber>=0 && (wxUint32)editingNumber == n && editingValB != -1 ) sig = editingSignal;
@@ -829,7 +830,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 if ( len > 1 && doc->TransitWidth >= 50 ) // time compressor and transition "breiter" than the half tick
                 {
                     w1 = wt;
-                    for ( int i = 0 ; i < 6 ; i++) h[i] = ht[i];
+                    for ( int i = 0 ; i < 6 ; i++) h[i] = transitionheights[i];
                 }
                 switch(val)
                 {
@@ -1202,7 +1203,7 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 if ( len > 1 && doc->TransitWidth >= 50 ) // time compressor and transition "breiter" than the half tick
                 {
                     w1 = wt;
-                    for ( int i = 0 ; i < 6 ; i++) h[i] = ht[i];
+                    for ( int i = 0 ; i < 6 ; i++) h[i] = transitionheights[i];
                 }
                 switch(val)
                 {
@@ -1523,9 +1524,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                        heightOffsets[doc->vertlines[k].StartPos]);
 
         if ( doc->en50 && doc->vertlines[k].vposoffset == 1 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+            offset.x += GridStepWidth*(doc->TransitWidth/2.0)/100.0;
         if ( doc->en90 && doc->vertlines[k].vposoffset == 2 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+            offset.x += GridStepWidth*(doc->TransitWidth)/100.0;
 
         wxInt32 tolen = heightOffsets[doc->vertlines[k].EndPos + 1];
         if ( !exporting && editingNumber>=0 && (wxUint32)editingNumber == k )
@@ -1584,9 +1585,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
                 {
                     offset.x = signalNamesWidth + vpos * GridStepWidth;
                     if ( doc->en50 &&  editingValB == 1 )
-                        offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                        offset.x += GridStepWidth*(doc->TransitWidth/2.0)/100.0;
                     if ( doc->en90 && editingValB == 2 )
-                        offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                        offset.x += GridStepWidth*(doc->TransitWidth)/100.0;
 
                     dc.DrawLine(
                         offset.x, offset.y,
@@ -1627,9 +1628,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
         offset.y = heightOffsets[editingPoint[0].y]);
 
         if ( doc->en50 && editingValB == 1 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+            offset.x += GridStepWidth*(doc->TransitWidth/2.0)/100.0;
         if ( doc->en90 && editingValB == 2 )
-            offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+            offset.x += GridStepWidth*(doc->TransitWidth)/100.0;
 
         dc.DrawLine(
             offset.x, offset.y,
@@ -1698,9 +1699,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             wxPoint offset(signalNamesWidth + fromvpos * GridStepWidth,
                     ha.pos + heightOffsets[ha.signalnmbr]);
             if ( doc->en50 && fromvposoffset == 1 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                offset.x += GridStepWidth*(doc->TransitWidth/2.0)/100.0;
             else if ( doc->en90 && fromvposoffset == 2 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                offset.x += GridStepWidth*(doc->TransitWidth)/100.0;
 
             if ( editingNumber >= 0 && (wxUint32)editingNumber == n && WindowState == MovingHArrow )
                 offset.y = editingValA + heightOffsets[editingValB];
@@ -1709,9 +1710,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             wxPoint tooffset(signalNamesWidth + tovpos * GridStepWidth,
                 offset.y);
             if ( doc->en50 && tovposoffset == 1 )
-                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                tooffset.x += GridStepWidth*(doc->TransitWidth/2.0)/100.0;
             else if ( doc->en90 && tovposoffset == 2 )
-                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                tooffset.x += GridStepWidth*(doc->TransitWidth)/100.0;
 
 
             if ( !exporting && editingNumber >= 0 && (wxUint32)editingNumber == n &&
@@ -1901,9 +1902,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             wxPoint offset(signalNamesWidth + fromvpos * GridStepWidth,
                     editingValA + heightOffsets[editingValC]);
             if ( doc->vertlines[editingNumber].vposoffset == 1 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                offset.x += GridStepWidth*(doc->TransitWidth/2.0)/100.0;
             else if ( doc->vertlines[editingNumber].vposoffset == 2 )
-                offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                offset.x += GridStepWidth*(doc->TransitWidth)/100.0;
             wxPoint tooffset;
             tooffset.y = offset.y;
             if ( editingValB == -1 )
@@ -1912,9 +1913,9 @@ void TimingWindow::Draw( wxDC& dc, bool exporting )
             {
                 tooffset.x = signalNamesWidth + tovpos * GridStepWidth;
                 if ( doc->vertlines[editingValB].vposoffset == 1 )
-                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+                    tooffset.x += GridStepWidth*(doc->TransitWidth/2.0)/100.0;
                 else if ( doc->vertlines[editingValB].vposoffset == 2 )
-                    tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+                    tooffset.x += GridStepWidth*(doc->TransitWidth)/100.0;
             }
             if ( offset.x > tooffset.x ) // swap
             {
