@@ -56,9 +56,17 @@ TimingSubFrame::TimingSubFrame(wxDocument *doc, wxView* view, wxMDIParentFrame *
     //edit_menu->AppendSeparator();
     doc->GetCommandProcessor()->SetEditMenu(edit_menu);
 
+    wxMenu *panel_menu = new wxMenu;
+    panel_menu->Append(TIMING_ID_MENUITEM_CLOCK_TYPE, _T("Clock-type"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_TIME_COMPRESSOR, _T("Time compressor"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_AXIS_TIME, _T("Axis/Time"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_TRANSITION, _T("Transition"), wxEmptyString, wxITEM_CHECK);
+
     wxMenu *viewMenu = new wxMenu;
     viewMenu->Append(TIMING_ID_GLASS_P, _T("Zoom in\tF7"), _T("Zoom in the Document"));
     viewMenu->Append(TIMING_ID_GLASS_N, _T("Zoom out\tF6"), _T("Zoom out the Document"));
+    viewMenu->AppendSeparator();
+    viewMenu->Append(TIMING_ID_MENUITEM_PANELS, _T("Panel"),panel_menu, _T("Show or Hide Panel"));
 
     wxMenu *help_menu = new wxMenu;
     help_menu->Append(wxID_ABOUT, _T("&About\tF1"), _T("Show info about this application"));

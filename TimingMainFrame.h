@@ -70,6 +70,9 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
         void OnUpdateGlassP(wxUpdateUIEvent &event);
         void OnUpdateDiscont(wxUpdateUIEvent& event);
 
+        void UpdateMenuItems(wxUpdateUIEvent &event);
+        wxString DetectSourceOfEvent(const long EventId);
+        void HandlePanel(wxCommandEvent& event);
 
 
         bool IsSomethingSelected();
