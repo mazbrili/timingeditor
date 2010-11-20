@@ -61,6 +61,8 @@ TimingSubFrame::TimingSubFrame(wxDocument *doc, wxView* view, wxMDIParentFrame *
     panel_menu->Append(TIMING_ID_MENUITEM_TIME_COMPRESSOR, _T("Time compressor"), wxEmptyString, wxITEM_CHECK);
     panel_menu->Append(TIMING_ID_MENUITEM_AXIS_TIME, _T("Axis/Time"), wxEmptyString, wxITEM_CHECK);
     panel_menu->Append(TIMING_ID_MENUITEM_TRANSITION, _T("Transition"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->AppendSeparator();
+    panel_menu->Append(TIMING_ID_MENUITEM_DEFAULT,_T("Default"));
 
     wxMenu *viewMenu = new wxMenu;
     viewMenu->Append(TIMING_ID_GLASS_P, _T("Zoom in\tF7"), _T("Zoom in the Document"));

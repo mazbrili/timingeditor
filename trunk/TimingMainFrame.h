@@ -73,7 +73,7 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
         void UpdateMenuItems(wxUpdateUIEvent &event);
         wxString DetectSourceOfEvent(const long EventId);
         void HandlePanel(wxCommandEvent& event);
-
+        void LoadDefaultLayout(wxCommandEvent& event);
 
         bool IsSomethingSelected();
         bool IsTextSelected(void);
@@ -95,6 +95,7 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
 
     private:
         wxAuiManager *m_manager;
+        wxString DefalutLayout;
 
     DECLARE_CLASS(TimingMainFrame)
     DECLARE_EVENT_TABLE()
