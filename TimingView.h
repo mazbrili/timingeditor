@@ -31,18 +31,26 @@
 #include "TransitionSettingsPanel.h"
 #include "AxisSettingsPanel.h"
 #include "TimeCompressorSettingsPanel.h"
+#include "GraphVerticalLine.h"
+#include "GraphHorizontalArrow.h"
+
 
 class DiagramSplitterWindow;
 class ClockSettingsPanel;
 class TransitionSettingsPanel;
 class Signal;
+class GraphSignal;
+class Task;
+
+typedef std::vector<GraphVerticalLine> VerticalLines;
+typedef std::vector<GraphHorizontalArrow> HorizontalArrows;
+typedef std::vector<GraphSignal*> GraphSignals;
 
 class TimingView: public wxView
 {
 public:
     wxDocMDIChildFrame *frame;
-    //TimingWindow *window;
-    DiagramSplitterWindow *window;
+    DiagramSplitterWindow *splitterwindow;
 
     TimingView();
     ~TimingView() {}
@@ -53,14 +61,37 @@ public:
     bool OnClose(bool deleteWindow = true);
 
     std::vector<wxInt32> VisibleTicks;
-    wxInt32 GridStepWidth;
+    //wxInt32 GridStepWidth;
+    double GridStepWidth;
     std::vector<wxCoord> heightOffsets;
 
     wxString GetFloatFormatStr() const;
     wxFont GetFont() const;
+    unsigned int GetWavesLeftSpace()const;
+
+    const VerticalLines &GetVerticalLines()const;
+    const HorizontalArrows &GetHorizontalArrows()const;
+    const GraphSignals &GetGraphSignals()const;
+
+    wxColour GetShadowColour()const;
+    wxColour GetWaveSeparatorColour()const;
+    wxColour GetBackgroundColour()const;
+    wxColour GetLineColour()const;
+    wxColour GetTextColour()const;
+    wxColour GetUndefinedSignalColour()const;
+    wxColour GetAxisBackgroundColour()const;
+    wxColour GetAxisLineColour()const;
+    wxColour GetLabelsBackgroundColour()const;
+    wxColour GetLabelsTextColour()const;
+    wxColour GetLabelsLineColour()const;
+    wxCoord GetHeightOfAxisWindow()const;
+
+    const unsigned int GetScrollPixelsPerUnit()const{return 10;}
 private:
     void UpdateVisibelTicksContainer();
     void UpdateHeightsContainer();
+    void UpdateVerticalLines();
+    void UpdateHorizontalArrows();
 
     ClockSettingsPanel *ClkSetPanel;
     TransitionSettingsPanel *TranSetPanel;
@@ -73,26 +104,46 @@ private:
     void UpdateClockPanel();
     void UpdateTransitionPanel();
     void UpdateAxisPanel();
+    void UpdateSignals();
+
+    VerticalLines m_vertlines;
+    HorizontalArrows m_horizontalarrows;
+    GraphSignals m_graphsignals;
+
+
 public:
     void SetPanels(ClockSettingsPanel *csp, TransitionSettingsPanel *tsp, AxisSettingsPanel *asp, TimeCompressorSettingsPanel *tcsp);
+
 public:
     void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength);
     void SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPeriod);
     void SetTransition(wxInt8 width, bool en50, bool en90);
     void SetTimeCompressor(wxInt32 time);
+
+
+
+/// ///////////////////////////////////////////////////////////////////////////
 public:
     bool CanZoomIn(void);
     bool CanZoomOut(void);
     bool CanPaste(void);
-    bool IsSomethingSelected(void);
-    bool IsTextSelected(void);
-    bool IsSignalSelected(void);
-    wxInt32 GetSelectedSignalNumber();
-    wxInt32 GetSelectedCompressorsIndex();
-    bool DiscontSelected(void);
-    bool IsSelectedSignalClock(void);
+    bool HasActiveSelection(void);
     bool CanDelete(void);
-    void AddSignal(Signal sig);
+    //bool IsTextSelected(void);
+    bool IsSignalSelected(void);
+    bool IsSelectedSignalClock(void);
+    bool IsDiscontinuitySelected(void);
+
+    void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
+    void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
+    void AxisMouse(const wxMouseEvent &event, const wxPoint &pos);
+
+    void SetTask(Task *task = NULL);
+private:
+    Task *task;
+private:
+    wxInt32 GetSelectedSignalNumber();
+    wxInt32 GetSelectedDiscontinuity();
 
 private:
     virtual void OnActivateView(bool activate, wxView *activeView, wxView *deactiveView);
@@ -103,14 +154,14 @@ private:
     void OnCut(wxCommandEvent& event);
     void OnPaste(wxCommandEvent& event);
 
-    void OnZoomTicksOut(wxCommandEvent& WXUNUSED(event) );
-    void OnZoomTicksIn(wxCommandEvent& WXUNUSED(event) );
+    void OnZoomOut(wxCommandEvent& WXUNUSED(event) );
+    void OnZoomIn(wxCommandEvent& WXUNUSED(event) );
     //void OnEditClock(wxCommandEvent& event);
-    void OnInsertDiscontTool(wxCommandEvent& event);
-    void OnSelectRuler(wxCommandEvent& event);
-    void OnSelectHArrow(wxCommandEvent& event);
-    void OnSelectTextTool(wxCommandEvent& event);
-    void OnSelectNeutral(wxCommandEvent& event);
+    void OnDiscontinuityTool(wxCommandEvent& event);
+    void OnRulerTool(wxCommandEvent& event);
+    void OnHArrowTool(wxCommandEvent& event);
+    //void OnTextTool(wxCommandEvent& event);
+    void OnEditTool(wxCommandEvent& event);
 
     void OnAddClock(wxCommandEvent& event);
     void OnAddSignal(wxCommandEvent& event);
@@ -121,7 +172,7 @@ private:
     void OnExportPS(wxCommandEvent& event);
 
     void OnClockApply(wxCommandEvent& event);
-    void OnTrnansitionPanelApply(wxCommandEvent& event);
+    void OnTransitionPanelApply(wxCommandEvent& event);
 private:
     DECLARE_DYNAMIC_CLASS(TimingView)
     DECLARE_EVENT_TABLE()

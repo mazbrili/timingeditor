@@ -1,7 +1,8 @@
 #include "DiagramRightWindow.h"
 
 #include "DiagramAxisWindow.h"
-#include "DiagramWaveWindow.h"
+#include "DiagramWavesWindow.h"
+#include "TimingView.h"
 
 IMPLEMENT_DYNAMIC_CLASS(DiagramRightWindow, wxScrolledWindow)
 
@@ -16,7 +17,7 @@ bool DiagramRightWindow::Create(TimingView *view, wxWindow *parent, DiagramLabel
     wxScrolledWindow::Create(parent, id, pos, size, wxSUNKEN_BORDER);
     m_axis = new DiagramAxisWindow(view, this, this, wxID_ANY, wxDefaultPosition, wxSize(wxDefaultCoord,60) );
 
-    m_waves = new DiagramWaveWindow(view, this, this, m_axis, labels, wxID_ANY, wxDefaultPosition, wxDefaultSize );
+    m_waves = new DiagramWavesWindow(view, this, this, m_axis, labels, wxID_ANY, wxDefaultPosition, wxDefaultSize );
 
     SetTargetWindow( m_waves );
 
@@ -32,7 +33,7 @@ bool DiagramRightWindow::Create(TimingView *view, wxWindow *parent, DiagramLabel
 
     //SetScrollbars( 10, 10, 500, 500 );
     //SetVirtualSize(1000, 1000);
-    SetScrollRate(10, 10);
+    SetScrollRate(m_view->GetScrollPixelsPerUnit(), m_view->GetScrollPixelsPerUnit());
 
     return true;
 }
@@ -55,10 +56,27 @@ void DiagramRightWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
 void DiagramRightWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 {
     wxPaintDC dc( this );
+/*
+    wxSize size( GetClientSize() );
+
+    long w,h;
+    dc.GetTextExtent( wxT("Headline"), &w, &h );
+
+    dc.DrawText( wxT("Headline"), long (size.x / 2 - w / 2), 10 );
+*/
 }
 
 void DiagramRightWindow::Update()
 {
     m_axis->Update();
     m_waves->Update();
+}
+
+DiagramAxisWindow *DiagramRightWindow::GetAxisWindow()
+{
+    return m_axis;
+}
+DiagramWavesWindow *DiagramRightWindow::GetWavesWindow()
+{
+    return m_waves;
 }

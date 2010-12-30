@@ -6,8 +6,9 @@
 #include <wx/scrolwin.h>
 
 class TimingView;
-class TimingTextCtrl;
-class wxStaticLine;
+//class TimingTextCtrl;
+//class wxStaticLine;
+class HoverDrawlet;
 
 class DiagramLabelsWindow : public wxScrolledWindow
 {
@@ -18,8 +19,15 @@ private:
     DiagramLabelsWindow();
     void OnPaint( wxPaintEvent &event );
     void OnEraseBackground(wxEraseEvent &WXUNUSED(event) );
-    void OnSize( wxSizeEvent &WXUNUSED(event) );
-//    void OnMousewheel(wxMouseEvent &event);
+    //void OnSize( wxSizeEvent &WXUNUSED(event) );
+
+private:
+    //void OnChildFocus(wxChildFocusEvent &event);
+
+    void OnMouseLeave(wxMouseEvent &event);
+    void OnMouseEnter(wxMouseEvent &event);
+    void OnMouse(wxMouseEvent &event);
+    //void OnMouseWheel(wxMouseEvent &event);
 
     void Draw(wxDC &dc);
 
@@ -29,18 +37,29 @@ private:
     virtual wxColour GetBackgroundColour() const;
     wxColour GetLineColour() const;
     wxColour GetTextColour() const;
-public:
+    const unsigned int GetOffsetToLabelTextCtrl()const;
 
+public:
     void Update();
+    void SetDrawlet(HoverDrawlet *drawlet);
+    void RemoveDrawlet();
 //    void UpdateSizeToMatchLabels();
 //    void UpdateSizeOfLines();
+
+public:
+    virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL);
+
 private:
+    std::vector<wxTextCtrl*> textctrls;
 
 private:
     wxScrolledWindow   *m_owner;
     TimingView         *m_view;
 
+    HoverDrawlet           *m_drawlet;
 
+private:
+    void ScaleDC(wxDC &dc);
 //    std::vector<TimingTextCtrl *> SignalLabels;
 //    std::vector<wxStaticLine *> Divisors;
 

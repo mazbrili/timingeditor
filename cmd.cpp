@@ -59,10 +59,10 @@ bool ChangeLength::Do(void)
 {
     compressors.clear();
     compressors = m_doc->compressors;
-    for ( std::vector<TimeCompressor>::iterator idx = m_doc->compressors.begin() ; idx != m_doc->compressors.end() ; idx++ )
+    for ( std::map<wxInt32, TimeCompressor>::iterator it = m_doc->compressors.begin() ; it != m_doc->compressors.end() ; it++ )
     {
-        if ( idx->pos > m_newLength )
-            m_doc->compressors.erase(idx);
+        if ( it->first > m_newLength )
+            m_doc->compressors.erase(it);
     }
 
     signals.clear();
@@ -407,11 +407,10 @@ AddDiscontCommand::~AddDiscontCommand(){}
 bool AddDiscontCommand::Do(void)
 {
     TimeCompressor cmprssr;
-    cmprssr.pos = m_discont;
     cmprssr.length = 2;
     cmprssr.enabled = true;
 
-    m_doc->compressors.push_back(cmprssr);
+    m_doc->compressors[m_discont] = cmprssr;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -420,7 +419,7 @@ bool AddDiscontCommand::Do(void)
 }
 bool AddDiscontCommand::Undo(void)
 {
-    m_doc->compressors.pop_back();
+    m_doc->compressors.erase(m_discont);
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -437,11 +436,11 @@ RemoveDiscontCommand::~RemoveDiscontCommand(){}
 bool RemoveDiscontCommand::Do(void)
 {
     bool hadcomp = false;
-    for ( std::vector<TimeCompressor>::iterator idx = m_doc->compressors.begin() ;
+    for ( std::map<wxInt32, TimeCompressor>::iterator idx = m_doc->compressors.begin() ;
         idx != m_doc->compressors.end() ; idx++ )
-    if ( idx->pos == m_pos )
+    if ( idx->first == m_pos )
     {
-        m_cmprssr = *idx;
+        m_cmprssr = (idx->second);
         m_doc->compressors.erase(idx);
         hadcomp = true;
         break;
@@ -458,7 +457,7 @@ bool RemoveDiscontCommand::Do(void)
 }
 bool RemoveDiscontCommand::Undo(void)
 {
-    m_doc->compressors.push_back(m_cmprssr);
+    m_doc->compressors[m_pos] = m_cmprssr;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -843,16 +842,15 @@ bool ChangeLengthLeft::Do(void)
     }
 
     /// calc new position of dicontinuities (do not add them if outside the graph)
-    for ( std::vector<TimeCompressor>::iterator it = compressors.begin(); it != compressors.end();it++ )
+    for ( std::map<wxInt32, TimeCompressor>::iterator it = compressors.begin(); it != compressors.end();it++ )
     {
-        wxInt32 n = it->pos - (m_doc->length - m_newLength);
+        wxInt32 n = it->first - (m_doc->length - m_newLength);
         if ( n >= 0 )
         {
             TimeCompressor cmprssr;
-            cmprssr.pos = n;
-            cmprssr.length = it->length;
-            cmprssr.enabled = it->enabled;
-            m_doc->compressors.push_back(cmprssr);
+            cmprssr.length = it->second.length;
+            cmprssr.enabled = it->second.enabled;
+            m_doc->compressors[n] = cmprssr;
         }
     }
 
@@ -1343,15 +1341,14 @@ ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, w
 {}
 bool ChangeTimeCompressor::Do(void)
 {
-    for ( wxUint32 indx = 0 ; indx < m_doc->compressors.size() ; ++indx)
-    if ( m_doc->compressors[indx].pos == m_index )
+    if ( m_doc->compressors.find(m_index) != m_doc->compressors.end())
     {
-        wxInt32 tmp = m_doc->compressors[indx].length;
-        m_doc->compressors[indx].length = m_time;
+        wxInt32 tmp = m_doc->compressors[m_index].length;
+        m_doc->compressors[m_index].length = m_time;
         m_time = tmp;
 
-        bool btmp = m_doc->compressors[indx].enabled;
-        m_doc->compressors[indx].enabled = m_en;
+        bool btmp = m_doc->compressors[m_index].enabled;
+        m_doc->compressors[m_index].enabled = m_en;
         m_en = btmp;
     }
 
@@ -1383,11 +1380,16 @@ bool AddTimeCommand::Do(void)
     }
 
     // move time compressors
-    for ( wxUint32 indx = 0 ; indx < m_doc->compressors.size() ; ++indx )
+    std::map<wxInt32, TimeCompressor> cmprs;
+    std::map<wxInt32, TimeCompressor>::iterator it;
+    for (it = m_doc->compressors.begin(); it != m_doc->compressors.end() ; it++ )
     {
-        if ( m_doc->compressors[indx].pos >= m_pos )
-            m_doc->compressors[indx].pos += m_len;
+        if ( it->first >= m_pos )
+            cmprs[it->first + m_len] = it->second;
+        else
+            cmprs[it->first] = it->second;
     }
+    m_doc->compressors = cmprs;
 
     // insert signal states
     for ( wxInt32 n = 0 ; n < (wxInt32)m_doc->signals.size() ; ++n)
@@ -1432,10 +1434,14 @@ bool AddTimeCommand::Undo(void)
     }
 
     // move time compressors back
-    for ( wxUint32 indx = 0 ; indx < m_doc->compressors.size() ; ++indx )
+    std::map<wxInt32, TimeCompressor> cmprs;
+    std::map<wxInt32, TimeCompressor>::iterator it;
+    for (it = m_doc->compressors.begin(); it != m_doc->compressors.end() ; it++ )
     {
-        if ( m_doc->compressors[indx].pos > m_pos )
-            m_doc->compressors[indx].pos -=m_len;
+        if ( it->first > m_pos)
+            cmprs[it->first - m_len] = it->second;
+        else
+            cmprs[it->first] = it->second;
     }
 
     // remove signal states
@@ -1520,16 +1526,12 @@ bool RemoveTimeCommand::Do(void)
     //time compressors
     m_compressors = m_doc->compressors;
     m_doc->compressors.clear();
-    for ( std::vector<TimeCompressor>::iterator it = m_compressors.begin(); it != m_compressors.end() ; it++ )
+    for ( std::map<wxInt32, TimeCompressor>::iterator it = m_compressors.begin(); it != m_compressors.end() ; it++ )
     {
-        if ( it->pos < m_beg )
-            m_doc->compressors.push_back(*it);
-        else if ( it->pos >= m_end )
-        {
-            TimeCompressor cmprssr = *it;
-            cmprssr.pos -= ( m_end - m_beg );
-            m_doc->compressors.push_back(cmprssr);
-        }
+        if ( it->first < m_beg )
+            m_doc->compressors[it->first] = it->second;
+        else if ( it->first >= m_end )
+            m_doc->compressors[it->first - m_end + m_beg ] = it->second;
     }
 
     //vertical lines

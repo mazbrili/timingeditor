@@ -117,24 +117,23 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
 
     ui = compressors.size(); //ui = discontinuities.size();
     store << ui;
-    //std::set<wxInt32>::iterator it;
-    //for ( it = discontinuities.begin() ; it != discontinuities.end() ; it++)
-    for ( wxUint32 n = 0 ; n < ui ; ++n )
+    std::map<wxInt32, TimeCompressor>::iterator it;
+    for ( it =  compressors.begin() ; it != compressors.end(); it++ )
     {
         wxInt32 t;
 
         //i = *it;
         //store << i;
-        t = compressors[n].pos;
+        t = it->first;
         store << t;
 
         //store << discontlength[i];
-        t = compressors[n].length;
+        t = it->second.length;
         store << t;
 
         wxUint8 en = 0;
         //if ( discontEn[i] ) en = 1;
-        if ( compressors[n].enabled ) en = 1;
+        if ( it->second.enabled ) en = 1;
         store << en;
     }
 
@@ -225,7 +224,7 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
             //discontinuities.insert(dis);
             wxInt32 pos;
             load >> pos;
-            cmprssr.pos = pos;
+
 
             if ( version >= 4 )
             {
@@ -252,7 +251,7 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
                 //discontEn[dis] = true;
                 cmprssr.enabled = true;
 
-            compressors.push_back(cmprssr);
+            compressors[pos] = cmprssr;
         }
     }
 

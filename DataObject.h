@@ -10,13 +10,13 @@
 #include "TimingDoc.h"
 
 
-static const wxChar *TimingEditorSignalFormatId = _T("TimingEditorSignaDataFormat");
+static const wxChar *TimingEditorSignalFormatId = _T("TimingEditorSignalDataFormat");
 
-class TimingEditorSignaDataObject : public wxDataObjectSimple
+class TimingEditorSignalDataObject : public wxDataObjectSimple
 {
 public:
-    TimingEditorSignaDataObject( Signal *sig );
-    virtual ~TimingEditorSignaDataObject();
+    TimingEditorSignalDataObject( Signal *sig );
+    virtual ~TimingEditorSignalDataObject();
 
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;

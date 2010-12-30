@@ -54,7 +54,7 @@ protected:
     bool m_shorten;
     wxInt32 m_newLength;
     std::vector< Signal > signals;
-    std::vector< TimeCompressor > compressors;
+    std::map<wxInt32, TimeCompressor > compressors;
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
 class ChangeLengthLeft : public wxCommand
@@ -69,7 +69,7 @@ protected:
     bool m_shorten;
     wxInt32 m_newLength;
     std::vector< Signal > signals;
-    std::vector< TimeCompressor > compressors;
+    std::map<wxInt32, TimeCompressor > compressors;
 
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
@@ -342,7 +342,7 @@ protected:
     wxInt32 m_beg;
     wxInt32 m_end;
     std::vector<Signal> m_signals;
-    std::vector<TimeCompressor> m_compressors;
+    std::map<wxInt32, TimeCompressor> m_compressors;
 
     std::vector<DeleteVLineCommand*> delVlineCom;
 };

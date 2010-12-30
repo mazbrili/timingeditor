@@ -36,10 +36,10 @@
 #endif
 
 #include "dndtarget.h"
-#include "TimingWindow.h"
-//#include "DiagramSplitterWindow.h"
+//#include "TimingWindow.h"
+#include "DiagramSplitterWindow.h"
 
-DragnDropTextTarget::DragnDropTextTarget(TimingWindow *owner):
+DragnDropTextTarget::DragnDropTextTarget(DiagramSplitterWindow *owner):
     wxDropTarget(new wxTextDataObject()),
     m_owner(owner)
 {

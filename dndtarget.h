@@ -35,8 +35,7 @@
 
 #include "wx/dnd.h"
 
-class TimingWindow;
-//class DiagramSplitterWindow;
+class DiagramSplitterWindow;
 /*class DnDText : public wxTextDropTarget
 {
 public:
@@ -52,14 +51,14 @@ private:
 class DragnDropTextTarget : public wxDropTarget
 {
 public:
-    DragnDropTextTarget(TimingWindow *owner);
+    DragnDropTextTarget(DiagramSplitterWindow *owner);
     ~DragnDropTextTarget(){}
     virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
     virtual void         OnLeave();
     virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
     virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
 private:
-    TimingWindow *m_owner;
+    DiagramSplitterWindow *m_owner;
 };
 
 #endif

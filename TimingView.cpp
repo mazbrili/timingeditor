@@ -35,7 +35,6 @@
     #include <wx/wx.h>
 #endif
 
-#include <wx/clipbrd.h>
 #include <wx/svg/dcsvg.h>
 #include <wx/dcps.h>
 #include <wx/filename.h>
@@ -46,9 +45,17 @@
 #include "TimingApp.h"
 #include "cmd.h"
 #include "enumers.h"
-#include "DataObject.h"
+
 
 #include "DiagramSplitterWindow.h"
+#include "DiagramRightWindow.h"
+
+
+#include "GraphBusSignal.h"
+#include "GraphClockSignal.h"
+#include "GraphNormalSignal.h"
+
+#include "Task.h"
 
 
 IMPLEMENT_DYNAMIC_CLASS(TimingView, wxView)
@@ -58,42 +65,42 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
     EVT_MENU(wxID_COPY,                 TimingView::OnCopy)
     EVT_MENU(wxID_CUT,                  TimingView::OnCut)
     EVT_MENU(wxID_PASTE,                TimingView::OnPaste)
-    EVT_MENU(TIMING_ID_GLASS_N,         TimingView::OnZoomTicksOut)
-    EVT_MENU(TIMING_ID_GLASS_P,         TimingView::OnZoomTicksIn)
+
+    EVT_MENU(TIMING_ID_GLASS_N,         TimingView::OnZoomOut)
+    EVT_MENU(TIMING_ID_GLASS_P,         TimingView::OnZoomIn)
+
     //EVT_MENU(TIMING_ID_CHANGECLOCK,     TimingView::OnEditClock)
     EVT_MENU(TIMING_ID_ADD_CLOCK,       TimingView::OnAddClock)
     EVT_MENU(TIMING_ID_ADD_SIGNAL,      TimingView::OnAddSignal)
     EVT_MENU(TIMING_ID_ADD_BUS,         TimingView::OnAddBus)
-    EVT_MENU(TIMING_ID_DISCONTINUATION, TimingView::OnInsertDiscontTool)
-    EVT_MENU(TIMING_ID_RULER,           TimingView::OnSelectRuler)
-    EVT_MENU(TIMING_ID_HARROW,          TimingView::OnSelectHArrow)
-    EVT_MENU(TIMING_ID_NEUTRAL,         TimingView::OnSelectNeutral)
-    EVT_MENU(TIMING_ID_EDITTEXT,        TimingView::OnSelectTextTool)
+
+    EVT_MENU(TIMING_ID_DISCONTINUITY,   TimingView::OnDiscontinuityTool)
+    EVT_MENU(TIMING_ID_RULER,           TimingView::OnRulerTool)
+    EVT_MENU(TIMING_ID_HARROW,          TimingView::OnHArrowTool)
+    EVT_MENU(TIMING_ID_EDIT,            TimingView::OnEditTool)
+    //EVT_MENU(TIMING_ID_EDITTEXT,        TimingView::OnSelectTextTool)
     EVT_MENU(TIMING_ID_EXPORT_BITMAP,   TimingView::OnExportBitmap)
     EVT_MENU(TIMING_ID_EXPORT_SVG,      TimingView::OnExportSVG)
     EVT_MENU(TIMING_ID_EXPORT_PS,       TimingView::OnExportPS)
 END_EVENT_TABLE()
 
-void TimingView::OnActivateView(bool activate, wxView *activeView, wxView *deactiveView)
-{
-    if ( activate && this == activeView )
-        AttachPanels();
-}
 
+/// //////////////////////////////////// construction and destruction
 TimingView::TimingView()
 {
-    window = (DiagramSplitterWindow *)NULL;
+    splitterwindow = (DiagramSplitterWindow *)NULL;
     frame = (wxDocMDIChildFrame *)NULL;
     GridStepWidth = 15;
     ClkSetPanel = (ClockSettingsPanel *)NULL;
     TranSetPanel = (TransitionSettingsPanel *)NULL;
     AxisSetPanel = (AxisSettingsPanel *)NULL;
     TmeCmprssrPanel = (TimeCompressorSettingsPanel *)NULL;
+    task = NULL;
 }
 bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 {
     frame = wxGetApp().CreateChildFrame(doc, this);
-    window = wxGetApp().GetMainFrame()->CreateWindow(this, frame);
+    splitterwindow = wxGetApp().GetMainFrame()->CreateWindow(this, frame);
 
 #ifdef __X__
     int x, y;
@@ -104,11 +111,37 @@ bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
     frame->Show(true);
     Activate(true);
     UpdateVisibelTicksContainer();
-    if ( ClkSetPanel == NULL ) wxMessageBox(_T("HALT!!!"));
-    else AttachPanels();
+    AttachPanels();
+
+    DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
+    task = new Task(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+    if (!task)
+        return false;
 
     return true;
 }
+// Clean up windows used for displaying the view.
+bool TimingView::OnClose(bool deleteWindow)
+{
+    if (!GetDocument()->Close()) return false;
+
+    DetachPanels();
+
+    splitterwindow->view = (TimingView *)NULL;
+    splitterwindow = (DiagramSplitterWindow *)NULL;
+
+    SetFrame((wxFrame*)NULL);
+    Activate(false);
+
+    // Remove file menu from those managed by the command history
+    wxMenu* fileMenu = frame->GetMenuBar()->GetMenu(0);
+    wxGetApp().GetDocManager()->FileHistoryRemoveMenu(fileMenu);
+
+    if (deleteWindow)
+        delete frame;
+    return true;
+}
+
 void TimingView::SetPanels(ClockSettingsPanel *csp, TransitionSettingsPanel *tsp, AxisSettingsPanel *asp, TimeCompressorSettingsPanel *tcsp)
 {
     ClkSetPanel = csp;
@@ -117,6 +150,76 @@ void TimingView::SetPanels(ClockSettingsPanel *csp, TransitionSettingsPanel *tsp
     TmeCmprssrPanel = tcsp;
 }
 
+/// ///////////////////////////////////////////////////////////////// colours fonts spaces
+wxColour TimingView::GetBackgroundColour() const
+{
+    //return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
+    return *wxWHITE;
+}
+wxColour TimingView::GetLineColour() const
+{
+    return *wxBLACK;
+}
+wxColour TimingView::GetTextColour() const
+{
+    return *wxBLACK;
+}
+wxColour TimingView::GetShadowColour() const
+{
+    return wxColour(0xf0,0xf0,0xf0);
+}
+wxColour TimingView::GetWaveSeparatorColour() const
+{
+    return wxColour(0xe0, 0xe0, 0xe0);
+}
+wxColour TimingView::GetAxisBackgroundColour()const
+{
+    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
+}
+wxColour TimingView::GetAxisLineColour()const
+{
+    return *wxBLACK;
+}
+wxColour TimingView::GetLabelsBackgroundColour()const
+{
+    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
+}
+wxColour TimingView::GetLabelsTextColour()const
+{
+    return *wxBLACK;
+}
+wxColour TimingView::GetLabelsLineColour()const
+{
+    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNSHADOW );
+}
+wxColour TimingView::GetUndefinedSignalColour() const
+{
+    return *wxLIGHT_GREY;
+}
+unsigned int TimingView::GetWavesLeftSpace()const
+{
+    return 10;
+}
+wxString TimingView::GetFloatFormatStr() const
+{
+    unsigned char digitsAfterDecimalpoint = 2;
+    return wxString::Format(_T("\%.%df "), digitsAfterDecimalpoint);
+}
+wxFont TimingView::GetFont() const
+{
+    return wxFont(10, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+}
+wxCoord TimingView::GetHeightOfAxisWindow()const
+{
+    return 60;
+}
+
+/// ////////////////////////////////////////////////////////////  panels
+void TimingView::OnActivateView(bool activate, wxView *activeView, wxView *deactiveView)
+{
+    if ( activate && this == activeView )
+        AttachPanels();
+}
 void TimingView::AttachPanels()
 {
     TimingDocument *doc = (TimingDocument *)GetDocument();
@@ -147,7 +250,6 @@ void TimingView::DetachPanels()
     AxisSetPanel->view = (TimingView *)NULL;
     TmeCmprssrPanel->view = (TimingView *)NULL;
 }
-
 void TimingView::UpdateClockPanel()
 {
     TimingDocument *doc = (TimingDocument *)GetDocument();
@@ -180,7 +282,6 @@ void TimingView::UpdateTransitionPanel()
     TranSetPanel->Set90(doc->en90);
 
 }
-
 void TimingView::UpdateAxisPanel()
 {
     TimingDocument *doc = (TimingDocument *)GetDocument();
@@ -192,22 +293,22 @@ void TimingView::UpdateAxisPanel()
     AxisSetPanel->SetOffset(doc->timeOffset);
     AxisSetPanel->SetTotalLengt(doc->length);
 }
-
 void TimingView::UpdateTimeCompressorPanel(void)
 {
     TimingDocument *doc = (TimingDocument *)GetDocument();
     if ( !doc ) return;
 
-    if ( !DiscontSelected() ) return;
+    if ( !IsDiscontinuitySelected() ) return;
 
-    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx )
-    ////if ( doc->compressors[indx].pos == editingValA )
-    //{
-        TmeCmprssrPanel->SetTimeText(
-            wxString::Format( _("%d"), doc->compressors[indx].length )
-        );
-    //}
+//    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx )
+//        if ( doc->compressors[indx].pos == editingValA )
+//            TmeCmprssrPanel->SetTimeText(
+//                wxString::Format( _("%d"), doc->compressors[indx].length )
+//            );
 }
+
+
+/// ////////////////////////////////////////////////////////// interface for panels
 void TimingView::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength)
 {
     ///SetFocus();
@@ -249,20 +350,22 @@ void TimingView::SetTimeCompressor(wxInt32 time)
     ///SetFocus();
     TimingDocument *doc = (TimingDocument *)GetDocument();
     if ( !doc ) return;
-    if ( !DiscontSelected() ) return;
+    if ( !IsDiscontinuitySelected() ) return;
 
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
-     if ( doc->compressors[indx].pos == GetSelectedCompressorsIndex() )
+    wxInt32 index = GetSelectedDiscontinuity();
+    if ( doc->compressors.find(index) != doc->compressors.end())
         cmdproc->Submit(
-            new ChangeTimeCompressor(doc, GetSelectedCompressorsIndex(), time, doc->compressors[indx].enabled)
+            new ChangeTimeCompressor(doc, index, time, doc->compressors[index].enabled)
         );
 
     UpdateTimeCompressorPanel();
 }
 
-void TimingView::OnDraw(wxDC *dc){} // is virtual and has nothing to do (flicker free machanism is walking on another way)
+/// //////////////////////////////////////////////////////////// drawing
+void TimingView::OnDraw(wxDC *dc){} // is virtual and has nothing to do (flicker free mechanism is walking on another way)
 
+/// ///////////////////////////////////////////////////////////  update internal structure after changes in the document
 void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 {
     TimingDocument *doc = (TimingDocument *)m_viewDocument;
@@ -284,9 +387,16 @@ void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
     UpdateVisibelTicksContainer();
     UpdateHeightsContainer();
 
+    UpdateVerticalLines();
+    UpdateHorizontalArrows();
+
+    UpdateSignals();
+
+
+
     AttachPanels();
-    if (window)
-        window->Update();
+    if (splitterwindow)
+        splitterwindow->Update();
 }
 void TimingView::UpdateHeightsContainer()
 {
@@ -317,10 +427,9 @@ void TimingView::UpdateVisibelTicksContainer()
         VisibleTicks.push_back(n);
 
         bool hascompressor = false;
-        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
-        if ( doc->compressors[indx].pos == n && doc->compressors[indx].enabled )
+        if ( doc->compressors.find(n) != doc->compressors.end() && doc->compressors[n].enabled )
         {
-            n += doc->compressors[indx].length;
+            n += doc->compressors[n].length;
             if ( n > doc->length )
                 VisibleTicks.push_back(n);
             hascompressor = true;
@@ -330,151 +439,213 @@ void TimingView::UpdateVisibelTicksContainer()
 
     }
 }
-
-wxString TimingView::GetFloatFormatStr() const
+void TimingView::UpdateVerticalLines()
 {
-    unsigned char digitsAfterDecimalpoint = 2;
-    return wxString::Format(_T("\%.%df "), digitsAfterDecimalpoint);
-}
-wxFont TimingView::GetFont() const
-{
-    return wxFont(10, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-}
+    TimingDocument *doc = (TimingDocument *)m_viewDocument;
 
-void TimingView::OnDelete(wxCommandEvent& WXUNUSED(event) )
-{
-    //window->DeleteSelection();
-    return;
-}
+    m_vertlines.clear();
 
-// Clean up windows used for displaying the view.
-bool TimingView::OnClose(bool deleteWindow)
-{
-    if (!GetDocument()->Close()) return false;
 
-////    window->DetachPanels();
-//
-//    // Clear the canvas in  case we're in single-window mode,
-//    // and the canvas stays.
-//    window->ClearBackground();
-    window->view = (TimingView *)NULL;
-    window = (DiagramSplitterWindow *)NULL;
-
-    SetFrame((wxFrame*)NULL);
-    Activate(false);
-
-    // Remove file menu from those managed by the command history
-    wxMenu* fileMenu = frame->GetMenuBar()->GetMenu(0);
-    wxGetApp().GetDocManager()->FileHistoryRemoveMenu(fileMenu);
-
-    if (deleteWindow)
-        delete frame;
-    return true;
-}
-
-void TimingView::OnCopy(wxCommandEvent& WXUNUSED(event) )
-{
-    if (wxTheClipboard->Open())
+    for ( wxUint32 k = 0 ; k < doc->vertlines.size() ; ++k)
     {
-////        // This data objects are held by the clipboard,
-//        // so do not delete them in the app.
-//        if ( window->IsTextSelected() )
-//        {
-//            wxString str(window->GetText());
-//            wxTheClipboard->SetData( new wxTextDataObject(str) );
-//        }
-//        else if ( window->IsSignalSelected() )
-//        {
-//            TimingDocument *doc = (TimingDocument*)m_viewDocument;
-//            if ( doc )
-//            {
-//                Signal *sig = new Signal;
-//                *sig = doc->signals[window->GetSelectedSignalNr()];
-//                wxTheClipboard->SetData( new TimingEditorSignaDataObject(sig) );
-//            }
-//        }
-        wxTheClipboard->Close();
-    }
-}
-
-void TimingView::OnCut(wxCommandEvent& WXUNUSED(event) )
-{
-    if (wxTheClipboard->Open())
-    {
-////        // This data objects are held by the clipboard,
-//        // so do not delete them in the app.
-//        if ( window->IsTextSelected() )
-//        {
-//            wxString str(window->GetText());
-//            wxTheClipboard->SetData( new wxTextDataObject(str) );
-//        }
-//        else if ( window->IsSignalSelected() )
-//        {
-//            TimingDocument *doc = (TimingDocument*)m_viewDocument;
-//            if ( doc )
-//            {
-//                Signal *sig = new Signal;
-//                *sig = doc->signals[window->GetSelectedSignalNr()];
-//                wxTheClipboard->SetData( new TimingEditorSignaDataObject(sig) );
-//            }
-//        }
-        wxTheClipboard->Close();
-////        window->DeleteSelection();
-    }
-}
-
-void TimingView::OnPaste(wxCommandEvent& WXUNUSED(event) )
-{
-    if (wxTheClipboard->Open())
-    {
-////        if (wxTheClipboard->IsSupported( wxDF_TEXT ))
-//        {
-//            wxTextDataObject data;
-//            wxTheClipboard->GetData( data );
-//            window->InsertText( data.GetText() );
-//        }
-//        else
-        if (wxTheClipboard->IsSupported( wxDataFormat(TimingEditorSignalFormatId) ) )
+        bool found = false;
+        wxInt32 vpos;
+        for ( wxUint32 i = 0 ; i < VisibleTicks.size() ; ++i)
         {
-            Signal *sig = new Signal;
-            TimingEditorSignaDataObject data(sig);
-
-            wxTheClipboard->GetData( data );
-            AddSignal( *sig );
+            if (VisibleTicks[i] == doc->vertlines[k].vpos)
+            {
+                found = true;
+                vpos = i;
+                break;
+            }
         }
-        wxTheClipboard->Close();
+        if ( !found )
+            continue;
+
+        wxPoint offset(GetWavesLeftSpace() + vpos * GridStepWidth,
+                       heightOffsets[doc->vertlines[k].StartPos]);
+
+        if ( doc->en50 && doc->vertlines[k].vposoffset == 1 )
+            offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+        if ( doc->en90 && doc->vertlines[k].vposoffset == 2 )
+            offset.x +=  GridStepWidth/(100.0/(doc->TransitWidth));
+
+//        dc.DrawLine(
+//            offset.x, offset.y,
+//            offset.x,  heightOffsets[doc->vertlines[k].EndPos + 1]
+//        );
+        m_vertlines.push_back(GraphVerticalLine(offset, wxPoint(offset.x,  heightOffsets[doc->vertlines[k].EndPos + 1])));
     }
-}
-void TimingView::AddSignal(Signal sig)
-{
-    TimingDocument *doc = (TimingDocument*)m_viewDocument;
-    if ( !doc ) return;
 
-////    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
-//    cmdproc->Submit(new AddSignalCommand(doc, window->GetSelectedSignalNr(), sig) );
+}
+void TimingView::UpdateHorizontalArrows()
+{
+    TimingDocument *doc = (TimingDocument *)m_viewDocument;
+
+    m_horizontalarrows.clear();
+
+
+    wxCoord leftSpace = GetWavesLeftSpace();
+
+    /// drawing the horizontal arrows
+    //HArrowOffsets.clear();
+    //HArrowToOffset.clear();
+    for ( wxUint32 n = 0 ; n < doc->harrows.size() ; ++n )
+    {
+        HArrow &ha = doc->harrows[n];
+        bool fromVlineVisible = false, toVlineVisible = false;
+        wxInt32 fromvpos = doc->vertlines[ha.fromVLine].vpos;
+        wxInt32 fromvposoffset = doc->vertlines[ha.fromVLine].vposoffset;
+        wxInt32 tovpos = doc->vertlines[ha.toVLine].vpos;
+        wxInt32 tovposoffset = doc->vertlines[ha.toVLine].vposoffset;
+
+        for ( wxUint32 i = 0 ; i < VisibleTicks.size() ; ++i)
+        {
+            if ( !fromVlineVisible && VisibleTicks[i] == fromvpos )
+            {
+                fromvpos = i;
+                fromVlineVisible = true;
+                //break;
+            }
+            if ( !toVlineVisible && VisibleTicks[i] == tovpos )
+            {
+                tovpos = i;
+                toVlineVisible = true;
+            }
+        }
+        if ( fromVlineVisible && toVlineVisible)
+        {
+            /// calc offset based on vline to start from
+            wxPoint offset(leftSpace + fromvpos * GridStepWidth,
+                    ha.pos + heightOffsets[ha.signalnmbr]);
+            if ( doc->en50 && fromvposoffset == 1 )
+                offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+            else if ( doc->en90 && fromvposoffset == 2 )
+                offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+
+            /// calc offset based on vline where harrow will end
+            wxPoint tooffset(leftSpace + tovpos * GridStepWidth,
+                offset.y);
+            if ( doc->en50 && tovposoffset == 1 )
+                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
+            else if ( doc->en90 && tovposoffset == 2 )
+                tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
+
+
+            if ( offset.x > tooffset.x ) // swap
+            {
+                wxCoord t = offset.x;
+                offset.x = tooffset.x;
+                tooffset.x = t;
+            }
+            ///the text:
+            wxPoint textoff;
+
+            textoff.x  = (offset.x + tooffset.x)/2;
+            if ( ha.textoffset.x > GridStepWidth )
+                textoff.x += GridStepWidth;
+            else
+                textoff.x += ha.textoffset.x;
+            textoff.x += ha.textgridoffset*GridStepWidth;
+            textoff.y  = offset.y + ha.textoffset.y;
+
+            wxString text = ha.text;
+            wxInt32 pos = text.Find( _T("$t$"));
+            if ( pos != wxNOT_FOUND )
+            {
+                wxInt32 l = 0;
+                wxInt32 s = 0;
+
+                if ( doc->vertlines[ha.fromVLine].vpos < doc->vertlines[ha.toVLine].vpos )
+                {
+                    l = doc->vertlines[ha.toVLine].vpos - doc->vertlines[ha.fromVLine].vpos;
+                    if ( doc->en50 && doc->vertlines[ha.fromVLine].vposoffset == 1)
+                        s -= 50;
+                    if ( doc->en90 && doc->vertlines[ha.fromVLine].vposoffset == 2)
+                        s -= 100;
+
+                    if ( doc->en50 && doc->vertlines[ha.toVLine].vposoffset == 1)
+                        s += 50;
+                    if ( doc->en90 && doc->vertlines[ha.toVLine].vposoffset == 2)
+                        s += 100;
+                }
+                else
+                {
+                    l = doc->vertlines[ha.fromVLine].vpos - doc->vertlines[ha.toVLine].vpos;
+                    if ( doc->en50 && doc->vertlines[ha.fromVLine].vposoffset == 1)
+                        s += 50;
+                    if ( doc->en90 && doc->vertlines[ha.fromVLine].vposoffset == 2)
+                        s += 100;
+
+                    if ( doc->en50 && doc->vertlines[ha.toVLine].vposoffset == 1)
+                        s -= 50;
+                    if ( doc->en90 && doc->vertlines[ha.toVLine].vposoffset == 2)
+                        s -= 100;
+                }
+
+                wxString str;
+                double t = l*doc->TickLength + (s*doc->TransitWidth)/10000.0*doc->TickLength;
+                wxInt8 u = doc->TickLengthUnit;
+                while ( u < 3 && (t >= 1000.0 || t <= -1000.0) )
+                {
+                    u++;
+                    t /= 1000.0;
+                }
+                str = wxString::Format(GetFloatFormatStr(), t);
+                switch (u)
+                {
+                    case -5: str += _("fs"); break;
+                    case -4: str += _("ps"); break;
+                    case -3: str += _("ns"); break;
+                    case -2: str += _("us"); break;
+                    case -1: str += _("ms"); break;
+                    case  0: str += _("s"); break;
+                    case  1: str += _("ks"); break;
+                    case  2: str += _("Ms"); break;
+                    default:
+                    case  3: str += _("Gs"); break;
+                }
+                text.Replace( _T("$t$"), str);
+            }
+            m_horizontalarrows.push_back(GraphHorizontalArrow(offset, tooffset, text, textoff));
+        }
+    }
+
+
+}
+void TimingView::UpdateSignals()
+{
+    TimingDocument *doc = (TimingDocument *)m_viewDocument;
+
+    m_graphsignals.clear();
+
+    for ( unsigned int i = 0  ; i < doc->signals.size(); i++ )
+    {
+        if ( doc->signals[i].IsClock )
+            m_graphsignals.push_back(new GraphClockSignal(this, &doc->signals[i], heightOffsets[i]));
+        else if ( doc->signals[i].IsBus )
+            m_graphsignals.push_back(new GraphBusSignal(this, &doc->signals[i], heightOffsets[i]));
+        else
+            m_graphsignals.push_back(new GraphNormalSignal(this, &doc->signals[i], heightOffsets[i]));
+    }
+
 }
 
-void TimingView::OnSelectAll(wxCommandEvent& WXUNUSED(event) )
+/// //////////////////////////////////////////////////////////  make internal structures accessible for the windows
+const VerticalLines &TimingView::GetVerticalLines()const
 {
-    //if( window )
-        ////window->SelectAll();
+    return m_vertlines;
 }
-void TimingView::OnZoomTicksOut(wxCommandEvent& WXUNUSED(event) )
+const HorizontalArrows &TimingView::GetHorizontalArrows()const
 {
-    if ( GridStepWidth > 6 )
-        GridStepWidth  *= 0.7;
-    if ( GridStepWidth < 6 ) GridStepWidth = 6;
-    if ( window )
-        window->Update();
+    return m_horizontalarrows;
 }
-void TimingView::OnZoomTicksIn(wxCommandEvent& WXUNUSED(event) )
+const GraphSignals &TimingView::GetGraphSignals()const
 {
-    if ( GridStepWidth < 150 )
-        GridStepWidth  *= 1.4;
-    if ( GridStepWidth > 150 ) GridStepWidth = 150;
-    if ( window )
-        window->Update();
+    return m_graphsignals;
 }
+
+/// ////////////////////////////////////////////////////////// adding signals
 void TimingView::OnAddClock(wxCommandEvent& event)
 {
     TimingDocument *doc = (TimingDocument*)m_viewDocument;
@@ -513,6 +684,7 @@ void TimingView::OnAddSignal(wxCommandEvent& event)
     for (wxInt32 n = 0 ; n < doc->length; ++n)
         sig.values.push_back(zero);
 
+#warning add fsm reset
 ////    window->SetNeutralState();
 //    window->SetCursor(*wxCROSS_CURSOR);
 
@@ -545,87 +717,129 @@ void TimingView::OnAddBus(wxCommandEvent& event)
 
     cmdproc->Submit( new AddSignalCommand(doc, n, sig) );
 }
-void TimingView::OnInsertDiscontTool(wxCommandEvent& event)
+
+
+/// ///////////////////////////////////////////////////////////////////// tools selected
+void TimingView::OnDiscontinuityTool(wxCommandEvent& event)
 {
-    //if ( window )
-        ////window->OnSelectInsertDiscontTool();
 }
-void TimingView::OnSelectRuler(wxCommandEvent& event)
+void TimingView::OnRulerTool(wxCommandEvent& event)
 {
-    //if ( window )
-        ////window->OnSelectRulerTool();
 }
-void TimingView::OnSelectHArrow(wxCommandEvent& event)
+void TimingView::OnHArrowTool(wxCommandEvent& event)
 {
-    //if ( window )
-        ////window->OnSelectHArrowTool();
 }
-void TimingView::OnSelectTextTool(wxCommandEvent& event)
+//void TimingView::OnSelectTextTool(wxCommandEvent& event)
+
+void TimingView::OnEditTool(wxCommandEvent& event)
 {
-    //if ( window )
-        ////window->OnSelectTextTool();
 }
-void TimingView::OnSelectNeutral(wxCommandEvent& event)
-{
-    //if ( window )
-        ////window->OnSelectNeutralTool();
-}
+
+///  ///////////////////////////////////////////////////////// zooming
 bool TimingView::CanZoomIn(void)
 {
     return GridStepWidth < 150;
 }
 bool TimingView::CanZoomOut(void)
 {
-    return GridStepWidth > 6;
+    return GridStepWidth > 1;
+}
+void TimingView::OnZoomOut(wxCommandEvent& WXUNUSED(event) )
+{
+    if ( GridStepWidth > 1 )
+        GridStepWidth  *= 0.7;
+    if ( GridStepWidth < 1 ) GridStepWidth = 1;
+    if ( splitterwindow )
+        splitterwindow->Update();
+}
+void TimingView::OnZoomIn(wxCommandEvent& WXUNUSED(event) )
+{
+    if ( GridStepWidth < 150 )
+        GridStepWidth  *= 1.4;
+    if ( GridStepWidth > 150 ) GridStepWidth = 150;
+    if ( splitterwindow )
+        splitterwindow->Update();
+}
+
+
+/// ////////////////////////////////////////////////////////////////////// clipboard, cut copy paste (select)
+void TimingView::OnCopy(wxCommandEvent& WXUNUSED(event) )
+{
+    task->Copy();
+}
+void TimingView::OnCut(wxCommandEvent& WXUNUSED(event) )
+{
+    task->Cut();
+}
+void TimingView::OnPaste(wxCommandEvent& WXUNUSED(event) )
+{
+    task->Paste();
+}
+void TimingView::OnDelete(wxCommandEvent& WXUNUSED(event) )
+{
+    task->Delete();
+}
+void TimingView::OnSelectAll(wxCommandEvent& WXUNUSED(event) )
+{
+    task->SelectAll();
 }
 bool TimingView::CanPaste(void)
 {
-    if (wxTheClipboard->Open())
-    {
-        if ( wxTheClipboard->IsSupported( wxDataFormat(TimingEditorSignalFormatId) ) )
-        {
-            wxTheClipboard->Close();
-            return true;
-        }
-        wxTheClipboard->Close();
-    }
-
-////    if ( window && window->CanPaste() )
-//        return true;
-
-    return false;
+    return task->CanPaste();
 }
-bool TimingView::IsSomethingSelected(void)
+bool TimingView::CanDelete(void)
 {
-////    if ( window && (
-//        window->IsTextSelected() ||
-//        window->IsSignalSelected() ||
-//        window->VLineIsSelected() ||
-//        window->HArrowIsSelected() ||
-//        window->DiscontSelected() )
-//    )
-//        return true;
-    return false;
+    return task->CanDelete();
 }
-bool TimingView::IsTextSelected(void)
+bool TimingView::HasActiveSelection(void)
 {
-////    if ( window && window->IsTextSelected() )
-//        return true;
-    return false;
+    return task->HasActiveSelection();
 }
+//bool TimingView::IsTextSelected(void){return false;}
 wxInt32 TimingView::GetSelectedSignalNumber()
 {
-    return -1;
+    return task->GetSelectedSignalNumber();
 }
-wxInt32 TimingView::GetSelectedCompressorsIndex()
+wxInt32 TimingView::GetSelectedDiscontinuity()
 {
-    ////
-    return -1;
+    return task->GetSelectedDiscontinuity();
 }
-bool TimingView::DiscontSelected()
+
+
+
+
+void TimingView::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
-    ////
-    return false;
+    task->LabelsMouse(event, pos);
+}
+void TimingView::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
+{
+    task->WavesMouse(event, pos);
+}
+void TimingView::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
+{
+    task->AxisMouse(event, pos);
+}
+void TimingView::SetTask(Task *newtask)
+{
+    if ( newtask == NULL )
+    {
+        DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
+        newtask = new Task(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+    }
+    if (task && newtask)
+    {
+        delete task;
+        task = newtask;
+    }
+}
+
+
+
+
+bool TimingView::IsDiscontinuitySelected()
+{
+    return GetSelectedDiscontinuity() != -1;
 }
 bool TimingView::IsSelectedSignalClock()
 {
@@ -640,24 +854,15 @@ bool TimingView::IsSelectedSignalClock()
 
     return doc->signals[selsig].IsClock;
 }
-
 bool TimingView::IsSignalSelected(void)
 {
     return GetSelectedSignalNumber() != -1;
 }
-bool TimingView::CanDelete(void)
-{
-////    if ( window && (
-//        window->IsTextSelected() ||
-//        window->IsSignalSelected() ||
-//        window->VLineIsSelected() ||
-//        window->HArrowIsSelected() ||
-//        window->CanDeleteText() ||
-//        window->DiscontSelected() )
-//    )
-//        return true;
-    return false;
-}
+
+
+
+/// ///////////////////// graphics export
+
 void TimingView::OnExportBitmap(wxCommandEvent& event)
 {
 //    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"),_T(""),_T(""),_T("PNG files (*.png)|*.png"),wxSAVE | wxOVERWRITE_PROMPT );

@@ -5,7 +5,7 @@
 
 class DiagramLabelsWindow;
 class DiagramAxisWindow;
-class DiagramWaveWindow;
+class DiagramWavesWindow;
 class TimingView;
 
 class DiagramRightWindow : public wxScrolledWindow
@@ -18,6 +18,8 @@ public:
 
 public:
     void Update();
+    DiagramAxisWindow *GetAxisWindow();
+    DiagramWavesWindow *GetWavesWindow();
 
 private:
     void OnPaint( wxPaintEvent &event );
@@ -25,7 +27,7 @@ private:
 
     TimingView           *m_view;
     DiagramAxisWindow    *m_axis;
-    DiagramWaveWindow    *m_waves;
+    DiagramWavesWindow    *m_waves;
 private:
     DECLARE_DYNAMIC_CLASS(DiagramRightWindow)
     DECLARE_EVENT_TABLE()

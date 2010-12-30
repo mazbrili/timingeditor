@@ -2,6 +2,7 @@
 #define DIAGRAMSPLITTERWINDOW_H
 
 #include <wx/splitter.h>
+#include <wx/dnd.h>
 
 
 class ClockSettingsPanel;
@@ -21,6 +22,13 @@ public:
         //ClockSettingsPanel *clkpanel, TransitionSettingsPanel *trnpanel,  AxisSettingsPanel *axspanel, TimeCompressorSettingsPanel* tcpanel,
         const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style=wxSP_3D);
     virtual ~DiagramSplitterWindow(){}
+
+
+    void OnDragEnter(void);
+    void OnDragLeave(void);
+    wxDragResult OnDragOver(wxPoint pt, wxDragResult def);
+    bool OnDrop(wxPoint pt, wxString str );
+
 private:
     DiagramSplitterWindow(){};
 
@@ -39,6 +47,8 @@ private:
 
 public:
     void Update();
+    DiagramLabelsWindow *GelLabelsWindow();
+    DiagramRightWindow  *GetRightWindow();
 
 private:
     DECLARE_DYNAMIC_CLASS(DiagramSplitterWindow)
