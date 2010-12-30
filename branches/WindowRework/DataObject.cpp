@@ -10,11 +10,11 @@
 #include "enumers.h"
 
 
-TimingEditorSignaDataObject::TimingEditorSignaDataObject(Signal *sig):
+TimingEditorSignalDataObject::TimingEditorSignalDataObject(Signal *sig):
 wxDataObjectSimple(wxDataFormat(TimingEditorSignalFormatId)),
 m_sig(sig)
 {}
-TimingEditorSignaDataObject::~TimingEditorSignaDataObject()
+TimingEditorSignalDataObject::~TimingEditorSignalDataObject()
 {
     delete m_sig;
 }
@@ -22,7 +22,7 @@ TimingEditorSignaDataObject::~TimingEditorSignaDataObject()
 
 
 //wxDataObjectSimple::GetDataSize
-size_t TimingEditorSignaDataObject::GetDataSize() const
+size_t TimingEditorSignalDataObject::GetDataSize() const
 {
     wxMemoryOutputStream memstream;
 
@@ -36,7 +36,7 @@ size_t TimingEditorSignaDataObject::GetDataSize() const
 
 
 //wxDataObjectSimple::GetDataHere
-bool TimingEditorSignaDataObject::GetDataHere(void *buf) const
+bool TimingEditorSignalDataObject::GetDataHere(void *buf) const
 {
     wxMemoryOutputStream memstream;
     m_sig->serialize(memstream);
@@ -52,7 +52,7 @@ bool TimingEditorSignaDataObject::GetDataHere(void *buf) const
 }
 
 //wxDataObjectSimple::SetData
-bool TimingEditorSignaDataObject::SetData(size_t len, const void *buf)
+bool TimingEditorSignalDataObject::SetData(size_t len, const void *buf)
 {
     wxMemoryInputStream memstream((char *)buf, len);
     m_sig->deserialize(memstream);

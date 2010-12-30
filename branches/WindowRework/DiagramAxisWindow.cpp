@@ -4,19 +4,35 @@
 #include "TimingDoc.h"
 #include "TimingView.h"
 
+#include "HoverDrawlet.h"
+
 IMPLEMENT_DYNAMIC_CLASS(DiagramAxisWindow,wxPanel)
 
 BEGIN_EVENT_TABLE(DiagramAxisWindow, wxPanel)
   EVT_PAINT(               DiagramAxisWindow::OnPaint)
   EVT_ERASE_BACKGROUND(    DiagramAxisWindow::OnEraseBackground)
+
+
+  EVT_MOTION(              DiagramAxisWindow::OnMouse)
+  EVT_LEFT_DOWN(           DiagramAxisWindow::OnMouse)
+  EVT_LEFT_UP(             DiagramAxisWindow::OnMouse)
+  EVT_RIGHT_DOWN(          DiagramAxisWindow::OnMouse)
+  EVT_RIGHT_UP(            DiagramAxisWindow::OnMouse)
+  EVT_RIGHT_DCLICK(        DiagramAxisWindow::OnMouse)
+
+
+  EVT_ENTER_WINDOW(      DiagramAxisWindow::OnMouseEnter)
+  EVT_LEAVE_WINDOW(      DiagramAxisWindow::OnMouseLeave)
+
 END_EVENT_TABLE()
 
 DiagramAxisWindow::DiagramAxisWindow(TimingView *view, wxWindow* parent, wxScrolledWindow *scrollowner, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
-: wxPanel( parent, id, pos, size, style )
+: wxPanel( parent, id, pos, size, style ),
+m_owner(scrollowner),
+m_view(view),
+m_drawlet(NULL)
 {
     //ctor
-    m_owner = scrollowner;
-    m_view = view;
 }
 DiagramAxisWindow::~DiagramAxisWindow(){}
 DiagramAxisWindow::DiagramAxisWindow(){}
@@ -26,16 +42,7 @@ void DiagramAxisWindow::OnPaint( wxPaintEvent& WXUNUSED(event) )
     wxPaintDC dc(this);
     PaintBackground(dc);
 
-    // DoPrepareDC(dc);  it will translate both x and y if the
-    // window is scrolled, the label windows are active in one
-    // direction only.  Do the action below instead -- RL.
-    //m_owner->PrepareDC( dc );
-
-    int xScrollUnits, xOrigin;
-
-    m_owner->GetViewStart( &xOrigin, 0 );
-    m_owner->GetScrollPixelsPerUnit( &xScrollUnits, 0 );
-    dc.SetDeviceOrigin( -xOrigin*xScrollUnits, 0 );
+    ShiftDC(dc);
 
     Draw(dc);
 }
@@ -50,12 +57,11 @@ void DiagramAxisWindow::OnEraseBackground(wxEraseEvent &WXUNUSED(event) ){}
 
 wxColour DiagramAxisWindow::GetBackgroundColour() const
 {
-    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
-    //*wxWHITE;
+    return m_view->GetAxisBackgroundColour();
 }
 wxColour DiagramAxisWindow::GetLineColour() const
 {
-    return *wxBLACK;
+    return m_view->GetAxisLineColour();
 }
 
 void DiagramAxisWindow::PaintBackground(wxDC &dc)
@@ -83,8 +89,8 @@ void DiagramAxisWindow::Draw(wxDC & dc)
     wxCoord axispos =  DistanceToAxis;
     if ( ! exporting )
         axispos += DistanceToTicksLine + DistanceFromTicksLine;
-    wxCoord start = 10;
-    wxCoord stop = start + (m_view->GridStepWidth)*(m_view->VisibleTicks.size() - 1);
+    wxCoord leftSpace = m_view->GetWavesLeftSpace();
+    wxCoord stop = leftSpace + (m_view->GridStepWidth)*(m_view->VisibleTicks.size() - 1);
 
 
 
@@ -92,15 +98,15 @@ void DiagramAxisWindow::Draw(wxDC & dc)
     dc.SetPen(wxPen(GetLineColour(), 1));
 
     /// drawing the time axis
-    dc.DrawLine(start , axispos, stop, axispos);
+    dc.DrawLine(leftSpace , axispos, stop, axispos);
 
     for ( wxUint32 n = 0 ; n < m_view->VisibleTicks.size() ; ++n )
     {
         wxInt32 ticks = m_view->VisibleTicks[n];
         if ( ((ticks + doc->timeOffset) % (doc->MarkerLength)) == 0 )
         {
-            dc.DrawLine(start + n*(m_view->GridStepWidth), axispos - 2,
-                        start + n*(m_view->GridStepWidth), axispos + 3);
+            dc.DrawLine(leftSpace + n*(m_view->GridStepWidth), axispos - 2,
+                        leftSpace + n*(m_view->GridStepWidth), axispos + 3);
 
             double t = (ticks + doc->timeOffset) * doc->TickLength;
             wxInt8 u = doc->TickLengthUnit;
@@ -125,15 +131,15 @@ void DiagramAxisWindow::Draw(wxDC & dc)
             }
             wxCoord w, h;
             dc.GetTextExtent(str, &w, &h);
-            dc.DrawText(str, start + n*(m_view->GridStepWidth) - w/2, axispos - h - 4);
+            dc.DrawText(str, leftSpace + n*(m_view->GridStepWidth) - w/2, axispos - h - 4);
         }
     }
 
     /// drawing the ticks
-    dc.DrawLine(start - 3, DistanceToTicksLine, stop + 3, DistanceToTicksLine);
+    dc.DrawLine(leftSpace - 3, DistanceToTicksLine, stop + 3, DistanceToTicksLine);
     for (unsigned int n = 0 ; n <= m_view->VisibleTicks.size()-1; ++n)
-        dc.DrawLine(start + n*(m_view->GridStepWidth), DistanceToTicksLine - 2,
-                    start + n*(m_view->GridStepWidth), DistanceToTicksLine + 3);
+        dc.DrawLine(leftSpace + n*(m_view->GridStepWidth), DistanceToTicksLine - 2,
+                    leftSpace + n*(m_view->GridStepWidth), DistanceToTicksLine + 3);
 
 
     /// drawing the time compressors
@@ -141,14 +147,15 @@ void DiagramAxisWindow::Draw(wxDC & dc)
     {
         wxInt32 tick = m_view->VisibleTicks[k];
         wxInt32 len = 1;
-        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
-            if ( doc->compressors[indx].pos == tick && doc->compressors[indx].enabled )
-                len = doc->compressors[indx].length;
+        if ( doc->compressors.find(tick) != doc->compressors.end() && doc->compressors[tick].enabled )
+        {
+            len = doc->compressors[tick].length;
+        }
         if ( len > 1 )
         {
-            /// triangle
+            /// draw the triangle
             wxPoint offset;
-            offset.x = start + (0.5 + k)*(m_view->GridStepWidth) - 3;
+            offset.x = leftSpace + (0.5 + k)*(m_view->GridStepWidth) - 3;
             offset.y = DistanceToTicksLine-3;
             wxPoint points[] =
             {
@@ -162,13 +169,13 @@ void DiagramAxisWindow::Draw(wxDC & dc)
 
 
             /// split the axis
-            offset.x = start + (0.5 + k) * (m_view->GridStepWidth) - 1;
+            offset.x = leftSpace + (0.5 + k) * (m_view->GridStepWidth) - 1;
             offset.y += DistanceToTicksLine + DistanceFromTicksLine;
             //if ( exporting) offset.y = DistanceToAxis - 3;
             wxPen bgpen = wxPen(GetBackgroundColour(),1);
             for ( wxInt32 n = 0 ; n < 4 ; ++n )
             {
-                bool drawbg =  n != 0 && n != 3;
+                bool drawbg = n != 0 && n != 3;
                 if ( drawbg )
                     dc.SetPen( bgpen );
                 dc.DrawLine(offset.x + n-1 , offset.y,
@@ -178,13 +185,12 @@ void DiagramAxisWindow::Draw(wxDC & dc)
 
             }
         }
-        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
-        if ( doc->compressors[indx].pos == tick && !doc->compressors[indx].enabled )
+        if ( doc->compressors.find(tick) != doc->compressors.end() && doc->compressors[tick].enabled )
         {
 
             wxPoint offset;
-        	len =  doc->compressors[indx].length;
-            offset.x = start  + (0.5 + k) * (m_view->GridStepWidth);
+            len =  doc->compressors[tick].length;
+            offset.x = leftSpace  + (0.5 + k) * (m_view->GridStepWidth);
             offset.y = DistanceToTicksLine-4 ;
             wxPoint points[] =
             {
@@ -192,22 +198,20 @@ void DiagramAxisWindow::Draw(wxDC & dc)
                 offset + wxPoint( 4, 4),
                 offset + wxPoint(-1, 8)
             };
-            //if ( !exporting )
-            //{
             wxInt32 rlen = len;
             for ( wxInt32 i = 1 ; i <= len ; ++i )
             {
-                for ( wxUint32 indx2 = 0 ; indx2 < doc->compressors.size() ; ++indx2)
-                if ( doc->compressors[indx2].pos == tick+i && doc->compressors[indx2].enabled )
+                if ( doc->compressors.find(tick+i) != doc->compressors.end() && doc->compressors[tick+1].enabled )
                 {
-                    if ( rlen > i +(doc->compressors[indx2].length-1))
-                        rlen -= (doc->compressors[indx2].length-1);
+                    if ( rlen > i +(doc->compressors[tick+1].length-1))
+                        rlen -= (doc->compressors[tick+1].length-1);
                     else
                     {
                         rlen = i+1;
                         i = len;//break outer loop
                     }
                 }
+
             }
 
             dc.SetPen(*wxLIGHT_GREY_PEN);
@@ -223,8 +227,81 @@ void DiagramAxisWindow::Draw(wxDC & dc)
 
             dc.SetPen(wxNullPen);
             dc.SetBrush(wxNullBrush);
-            //}
+
         }
     }
 
+    if ( m_drawlet)
+        m_drawlet->Draw(dc);
+}
+
+void DiagramAxisWindow::SetDrawlet(HoverDrawlet *drawlet)
+{
+    wxClientDC dc( this );
+    ShiftDC(dc);
+
+    if (m_drawlet)
+    {
+        m_drawlet->UnDraw(dc);
+        delete m_drawlet;
+        m_drawlet = NULL;
+    }
+
+    if ( drawlet->Draw(dc) )
+        m_drawlet = drawlet;
+    else
+        delete drawlet;
+
+}
+void DiagramAxisWindow::RemoveDrawlet()
+{
+    wxClientDC dc( this );
+    ShiftDC( dc );
+
+    if (m_drawlet)
+    {
+        m_drawlet->UnDraw(dc);
+        delete m_drawlet;
+        m_drawlet = NULL;
+    }
+}
+
+
+void DiagramAxisWindow::OnMouse(wxMouseEvent &event)
+{
+    wxPoint pt(event.GetPosition());
+    int xScrollUnits, xOrigin;
+
+    m_owner->GetViewStart( &xOrigin, 0 );
+    m_owner->GetScrollPixelsPerUnit( &xScrollUnits, 0 );
+    pt.x -= xOrigin*xScrollUnits;
+
+    m_view->AxisMouse(event, pt);
+    event.Skip();
+}
+
+void DiagramAxisWindow::ShiftDC(wxDC &dc)
+{
+    // DoPrepareDC(dc);  it will translate both x and y if the
+    // window is scrolled, the label windows are active in one
+    // direction only.  Do the action below instead -- RL.
+    //m_owner->PrepareDC( dc );
+
+    int xScrollUnits, xOrigin;
+
+    m_owner->GetViewStart( &xOrigin, 0 );
+    m_owner->GetScrollPixelsPerUnit( &xScrollUnits, 0 );
+    dc.SetDeviceOrigin( -xOrigin * xScrollUnits, 0 );
+}
+void DiagramAxisWindow::OnMouseEnter(wxMouseEvent &event)
+{
+    wxClientDC dc( this );
+    ShiftDC( dc );
+
+    if (m_drawlet)
+        m_drawlet->Draw(dc);
+}
+void DiagramAxisWindow::OnMouseLeave(wxMouseEvent &event)
+{
+    RemoveDrawlet();
 }

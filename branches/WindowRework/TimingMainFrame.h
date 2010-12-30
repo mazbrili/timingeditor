@@ -69,13 +69,11 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
 
         void OnUpdateGlassN(wxUpdateUIEvent &event);
         void OnUpdateGlassP(wxUpdateUIEvent &event);
-        void OnUpdateDiscont(wxUpdateUIEvent& event);
+        void OnUpdateTools(wxUpdateUIEvent& event);
 
 
 
-        bool IsSomethingSelected();
-        bool IsTextSelected(void);
-        bool IsSignalSelected(void);
+        bool HasActiveSelection();
         bool CanDelete(void);
 
     public:

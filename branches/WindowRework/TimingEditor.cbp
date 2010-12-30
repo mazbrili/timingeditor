@@ -15,7 +15,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D__WXDEBUG__" />
-					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
+					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswud" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
@@ -57,7 +57,7 @@
 					<Add option="-O2" />
 					<Add option="-O1" />
 					<Add option="-O" />
-					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
+					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswu" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
@@ -98,8 +98,8 @@
 			<Add option="-D__WXMSW__" />
 			<Add option="-DwxUSE_UNICODE" />
 			<Add option="-DWX_PRECOMP" />
-			<Add directory="$(#wx)\include" />
-			<Add directory="$(#wx)\contrib\include" />
+			<Add directory="C:\cpplibs\wxWidgets-2.8.11\include" />
+			<Add directory="C:\cpplibs\wxWidgets-2.8.11\contrib\include" />
 		</Compiler>
 		<ResourceCompiler>
 			<Add directory="$(#wx)\include" />
@@ -118,6 +118,7 @@
 			<Add library="libcomctl32.a" />
 			<Add library="libwsock32.a" />
 			<Add library="libodbc32.a" />
+			<Add library="libgdiplus.a" />
 		</Linker>
 		<Unit filename="AxisSettingsPanel.cpp" />
 		<Unit filename="AxisSettingsPanel.h" />
@@ -133,8 +134,30 @@
 		<Unit filename="DiagramRightWindow.h" />
 		<Unit filename="DiagramSplitterWindow.cpp" />
 		<Unit filename="DiagramSplitterWindow.h" />
-		<Unit filename="DiagramWaveWindow.cpp" />
-		<Unit filename="DiagramWaveWindow.h" />
+		<Unit filename="DiagramWavesWindow.cpp" />
+		<Unit filename="DiagramWavesWindow.h" />
+		<Unit filename="GraphBusSignal.cpp" />
+		<Unit filename="GraphBusSignal.h" />
+		<Unit filename="GraphClockSignal.cpp" />
+		<Unit filename="GraphClockSignal.h" />
+		<Unit filename="GraphHorizontalArrow.cpp" />
+		<Unit filename="GraphHorizontalArrow.h" />
+		<Unit filename="GraphNormalSignal.cpp" />
+		<Unit filename="GraphNormalSignal.h" />
+		<Unit filename="GraphObject.h" />
+		<Unit filename="GraphSignal.cpp" />
+		<Unit filename="GraphSignal.h" />
+		<Unit filename="GraphVerticalLine.cpp" />
+		<Unit filename="GraphVerticalLine.h" />
+		<Unit filename="HoverCross.cpp" />
+		<Unit filename="HoverCross.h" />
+		<Unit filename="HoverDrawlet.h" />
+		<Unit filename="HoverLine.cpp" />
+		<Unit filename="HoverLine.h" />
+		<Unit filename="HoverText.cpp" />
+		<Unit filename="HoverText.h" />
+		<Unit filename="Task.cpp" />
+		<Unit filename="Task.h" />
 		<Unit filename="TimeCompressorSettingsPanel.cpp" />
 		<Unit filename="TimeCompressorSettingsPanel.h" />
 		<Unit filename="TimingApp.cpp" />
@@ -147,10 +170,28 @@
 		<Unit filename="TimingSubFrame.h" />
 		<Unit filename="TimingView.cpp" />
 		<Unit filename="TimingView.h" />
-		<Unit filename="TimingWindow.cpp" />
-		<Unit filename="TimingWindow.h" />
 		<Unit filename="TransitionSettingsPanel.cpp" />
 		<Unit filename="TransitionSettingsPanel.h" />
+		<Unit filename="art\busedge.xpm" />
+		<Unit filename="art\clockedge.xpm" />
+		<Unit filename="art\copy.xpm" />
+		<Unit filename="art\cross.xpm" />
+		<Unit filename="art\cut.xpm" />
+		<Unit filename="art\glassntool.xpm" />
+		<Unit filename="art\glassptool.xpm" />
+		<Unit filename="art\harrow_cur.xpm" />
+		<Unit filename="art\help.xpm" />
+		<Unit filename="art\new.xpm" />
+		<Unit filename="art\open.xpm" />
+		<Unit filename="art\paste.xpm" />
+		<Unit filename="art\redo.xpm" />
+		<Unit filename="art\risingedge.xpm" />
+		<Unit filename="art\ruler_cur.xpm" />
+		<Unit filename="art\save.xpm" />
+		<Unit filename="art\textedit_cur.xpm" />
+		<Unit filename="art\tri.xpm" />
+		<Unit filename="art\tri_cur.xpm" />
+		<Unit filename="art\undo.xpm" />
 		<Unit filename="cmd.cpp" />
 		<Unit filename="cmd.h" />
 		<Unit filename="dndfile.cpp" />
@@ -172,6 +213,15 @@
 			<envvars />
 			<debugger />
 			<SVNInside Login="d_anselmi" ConnectStatus="1" NeedsPassword="1" />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

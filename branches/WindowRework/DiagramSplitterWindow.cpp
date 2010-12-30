@@ -2,6 +2,7 @@
 
 #include "DiagramRightWindow.h"
 #include "DiagramLabelsWindow.h"
+#include "TimingView.h"
 
 IMPLEMENT_DYNAMIC_CLASS(DiagramSplitterWindow, wxSplitterWindow)
 
@@ -13,13 +14,10 @@ DiagramSplitterWindow::DiagramSplitterWindow(TimingView *v, wxWindow* parent, wx
         //ClockSettingsPanel *clkpanel, TransitionSettingsPanel *trnpanel, AxisSettingsPanel *axspanel, TimeCompressorSettingsPanel* tcpanel,
         const wxPoint& pos, const wxSize& size, long style)
 : wxSplitterWindow( parent, id, pos, size, style | wxSUNKEN_BORDER | wxSP_3D ),
-
 //    ClkSetPanel(clkpanel),
 //    TranSetPanel(trnpanel),
 //    AxisSetPanel(axspanel),
 //    TmeCmprssrPanel(tcpanel),
-
-
     view(v)
 {
     //ctor
@@ -27,14 +25,15 @@ DiagramSplitterWindow::DiagramSplitterWindow(TimingView *v, wxWindow* parent, wx
 
 
     m_right = new DiagramRightWindow();
+    const wxCoord MinimumOfLeftWidth = 10;
+    const wxCoord HeightOfAxisWindow = v->GetHeightOfAxisWindow();
 
 
     wxPanel *left = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     m_labels = new DiagramLabelsWindow(view, left, m_right , wxID_ANY, wxDefaultPosition, wxSize(60,wxDefaultCoord) );
 
-    wxCoord HeightOfAxis = 60;
     wxBoxSizer *lsizer = new wxBoxSizer(wxVERTICAL);
-    lsizer->Add(60,HeightOfAxis);
+    lsizer->Add(MinimumOfLeftWidth,HeightOfAxisWindow);
     lsizer->Add(m_labels, 1, wxEXPAND);
     left->SetAutoLayout(true);
     left->SetSizer(lsizer);
@@ -44,12 +43,126 @@ DiagramSplitterWindow::DiagramSplitterWindow(TimingView *v, wxWindow* parent, wx
 
 
     SplitVertically(left, m_right , 100);
-    SetMinimumPaneSize(10);
+    SetMinimumPaneSize(MinimumOfLeftWidth);
 }
-
+DiagramLabelsWindow *DiagramSplitterWindow::GelLabelsWindow()
+{
+    return m_labels;
+}
+DiagramRightWindow  *DiagramSplitterWindow::GetRightWindow()
+{
+    return m_right;
+}
 void DiagramSplitterWindow::Update()
 {
     //m_labels->Refresh();
     m_labels->Update();
     m_right->Update();
+}
+
+void DiagramSplitterWindow::OnDragEnter(void)
+{
+    /*drop = true;
+    dropcaret->Show();
+    Refresh(true);*/
+}
+void DiagramSplitterWindow::OnDragLeave(void)
+{
+    /*drop = false;
+    dropcaret->Hide();
+    Refresh(true);*/
+}
+wxDragResult DiagramSplitterWindow::OnDragOver(wxPoint pt, wxDragResult def)
+{
+    if ( !view )
+        return (wxDragNone);
+//    TimingDocument *doc = (TimingDocument *)view->GetDocument();
+//    if ( !doc )
+//        return (wxDragNone);
+/*
+    wxClientDC dc(this);
+    DoPrepareDC(dc);
+    wxCoord xx, yy;
+    CalcUnscrolledPosition( p.x, p.y, &xx, &yy);
+    dc.SetFont(font);
+    wxCoord dx, dy;
+    //dc.GetTextExtent(_T("H"), &dx, &dy);
+    dx = dc.GetCharWidth();
+    dy = dc.GetCharHeight();
+
+    wxPoint pt(xx, yy);
+
+    if ( dndsource && def == wxDragCopy )
+        dropcopy = true;
+    else
+        dropcopy = false;
+
+/// ////////////////////////////////////////////////////////////////////////////
+    /// cursor over text area?
+    //bool overText = false;
+
+    for (unsigned int n = 0 ; n < textSizes.size() ; ++n )
+    {
+        wxPoint offset( textOffsets[n] );
+        wxPoint size ( textSizes[n] );
+        if( pt.x > offset.x &&
+            pt.x < offset.x + size.x &&
+            pt.y > offset.y &&
+            pt.y < offset.y + size.y
+            )
+        {
+            //textOffset = offset;
+            droppedStringPtr = textStringPtrs[n];
+            /// calc with of the texts
+            wxArrayInt widths;
+            wxString text = *droppedStringPtr;
+            dc.SetFont(font); /// change to font of selected text
+            dc.GetPartialTextExtents(text, widths);
+            widths.Insert(0, 0);
+
+            /// get position of cursor in the text
+            wxInt32 n;
+            for ( n = 0 ; n < widths.GetCount()-1; n++ )
+                if ( pt.x <= 10 + (widths[n] + widths[n+1] )/2 ) break;
+            /// set size of dropcaret mathing to text
+            ///move the cursor to this place
+            if ( !dropcaret->IsVisible() ) dropcaret->Show();
+            dropcaret->SetSize(1, dc.GetCharHeight() );
+            droppos = n;
+            this->Refresh(true);
+            return def;
+        }
+        else
+        {
+            droppos = -1;
+            droppedStringPtr = NULL;
+            if ( dropcaret->IsVisible() ) dropcaret->Hide();
+        }
+    }
+    /// check that a wxCaret is shown where needed and refresh
+    this->Refresh(true);
+*/
+/// ////////////////////////////////////////////////////////////////////////////
+    return(wxDragNone);
+}
+bool DiagramSplitterWindow::OnDrop(wxPoint pt, wxString str )
+{
+
+    if (!view)
+        return( false );
+
+    /*dropcaret->Hide();
+    if ( dndsource )
+    {
+        DroppedText = str;
+    }
+    else
+    {
+        drop = false;
+        InsertDroppedText(str);
+    }
+*/
+    Refresh(true);
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////
+    return true;
 }

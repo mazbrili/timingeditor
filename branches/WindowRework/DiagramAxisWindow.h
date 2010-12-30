@@ -4,6 +4,7 @@
 #include <wx/panel.h>
 
 class TimingView;
+class HoverDrawlet;
 
 class DiagramAxisWindow : public wxPanel
 {
@@ -14,6 +15,9 @@ public:
 public:
     void Update();
 
+    void SetDrawlet(HoverDrawlet *drawlet);
+    void RemoveDrawlet();
+
 private:
     DiagramAxisWindow();
     void OnPaint( wxPaintEvent &event );
@@ -21,12 +25,21 @@ private:
     void PaintBackground(wxDC &dc);
     void Draw(wxDC &dc);
 
+    void ShiftDC(wxDC &dc);
+
 private:
-    virtual wxColour GetBackgroundColour() const;
-    wxColour GetLineColour() const;
+    void OnMouse(wxMouseEvent &event);
+    void OnMouseLeave(wxMouseEvent &event);
+    void OnMouseEnter(wxMouseEvent &event);
+
+private:
+    wxColour GetBackgroundColour()const;
+    wxColour GetLineColour()const;
 private:
     wxScrolledWindow       *m_owner;
     TimingView             *m_view;
+
+    HoverDrawlet           *m_drawlet;
 
     DECLARE_DYNAMIC_CLASS(DiagramAxisWindow)
     DECLARE_EVENT_TABLE()

@@ -113,7 +113,7 @@ public:
 class TimeCompressor
 {
     public:
-        wxInt32 pos;
+        //wxInt32 pos;
         wxInt32 length;
         wxInt32 enabled;
 };
@@ -138,7 +138,7 @@ class TimingDocument: public wxDocument
         std::vector<Signal> signals;
         std::vector<VLine> vertlines;
         std::vector<HArrow> harrows;
-        std::vector<TimeCompressor> compressors;
+        std::map<wxInt32, TimeCompressor> compressors;
 
         wxInt32 SignalHeight;
         wxInt32 MinimumSignalDistance;

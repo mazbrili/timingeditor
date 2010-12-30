@@ -79,7 +79,7 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
 }
 void TimeCompressorSettingsPanel::OnUpdateTextField(wxUpdateUIEvent& event)
 {
-    if ( view && view->DiscontSelected() )
+    if ( view && view->IsDiscontinuitySelected() )
     {
         event.Enable(true);
         return;
@@ -97,7 +97,7 @@ void TimeCompressorSettingsPanel::OnApply(wxCommandEvent &event)
 }
 void TimeCompressorSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 {
-    if ( view && view->DiscontSelected() )
+    if ( view && view->IsDiscontinuitySelected() )
     {
         long val;
         m_textTime->GetValue().ToLong(&val);

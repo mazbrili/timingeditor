@@ -35,6 +35,8 @@
 #include <wx/aboutdlg.h>
 #include "myTipProvider.h"
 
+#include <wx/log.h>
+
 #include "TimingMainFrame.h"
 #include "TimingApp.h"//GetApp
 #include "enumers.h"
@@ -82,13 +84,12 @@ BEGIN_EVENT_TABLE(TimingMainFrame, wxDocMDIParentFrame )
     EVT_UPDATE_UI(TIMING_ID_DELETE,          TimingMainFrame::OnUpdateDelete)
     EVT_UPDATE_UI(TIMING_ID_GLASS_N,         TimingMainFrame::OnUpdateGlassN)
     EVT_UPDATE_UI(TIMING_ID_GLASS_P,         TimingMainFrame::OnUpdateGlassP)
-    EVT_UPDATE_UI(TIMING_ID_DISCONTINUATION, TimingMainFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_RULER,           TimingMainFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_HARROW,          TimingMainFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_EDITTEXT,        TimingMainFrame::OnUpdateDiscont)
-    EVT_UPDATE_UI(TIMING_ID_NEUTRAL,         TimingMainFrame::OnUpdateDiscont)
+    EVT_UPDATE_UI(TIMING_ID_DISCONTINUITY,   TimingMainFrame::OnUpdateTools)
+    EVT_UPDATE_UI(TIMING_ID_RULER,           TimingMainFrame::OnUpdateTools)
+    EVT_UPDATE_UI(TIMING_ID_HARROW,          TimingMainFrame::OnUpdateTools)
+    EVT_UPDATE_UI(TIMING_ID_EDIT,            TimingMainFrame::OnUpdateTools)
     EVT_UPDATE_UI_RANGE(TIMING_ID_ADD_CLOCK,
-                TIMING_ID_ADD_BUS,           TimingMainFrame::OnUpdateDiscont)
+                TIMING_ID_ADD_BUS,           TimingMainFrame::OnUpdateTools)
 END_EVENT_TABLE()
 
 
@@ -135,6 +136,11 @@ TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, 
     m_manager->AddPane(axissetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("AxisPanel")).Caption(wxT("Axis/Time Settings")).CloseButton(false));
     m_manager->AddPane(tcsetpanel  , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TimeCompressorPanel")).Caption(wxT("Time compressor Settings")).CloseButton(false));
 
+    wxTextCtrl *logctrl = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
+    m_manager->AddPane(logctrl, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("LogPanel")).Caption(wxT("Log Panel")).CloseButton(false));
+    wxLogTextCtrl *loggerctrl = new wxLogTextCtrl(logctrl);
+
+    wxLog::SetActiveTarget(loggerctrl);
 
     //Centre(wxBOTH);
     wxConfig *cfg = wxGetApp().GetConfig();
@@ -228,11 +234,11 @@ void TimingMainFrame::OnHelp(wxCommandEvent &event)
 
 void TimingMainFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 {
-    event.Enable(IsTextSelected() || IsSignalSelected());
+    event.Enable(HasActiveSelection());
 }
 void TimingMainFrame::OnUpdateCut(wxUpdateUIEvent& event)
 {
-    event.Enable(IsTextSelected() || IsSignalSelected());
+    event.Enable(HasActiveSelection());
 }
 void TimingMainFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 {
@@ -245,24 +251,10 @@ bool TimingMainFrame::CanDelete(void)
         return true;
     return false;
 }
-bool TimingMainFrame::IsSomethingSelected(void)
+bool TimingMainFrame::HasActiveSelection(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view && view->IsSomethingSelected() )
-        return true;
-    return false;
-}
-bool TimingMainFrame::IsTextSelected(void)
-{
-    TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view && view->IsTextSelected() )
-        return true;
-    return false;
-}
-bool TimingMainFrame::IsSignalSelected(void)
-{
-    TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view && view->IsSignalSelected() )
+    if ( view && view->HasActiveSelection() )
         return true;
     return false;
 }
@@ -276,7 +268,7 @@ void TimingMainFrame::OnUpdatePaste(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-void TimingMainFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
+void TimingMainFrame::OnUpdateTools(wxUpdateUIEvent& event)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view )
@@ -286,12 +278,11 @@ void TimingMainFrame::OnUpdateDiscont(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-//TimingWindow *TimingMainFrame::CreateWindow(wxView *view, wxMDIChildFrame *parent)
+
 DiagramSplitterWindow *TimingMainFrame::CreateWindow(TimingView *view, wxMDIChildFrame *parent)
 {
     view->SetPanels(clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
     return new DiagramSplitterWindow(view, parent, wxID_ANY);
-        //, clksetpanel, trnssetpanel, axissetpanel, tcsetpanel);
 }
 
 void TimingMainFrame::InitToolBar()
@@ -318,11 +309,11 @@ void TimingMainFrame::InitToolBar()
     toolBar->AddTool(TIMING_ID_ADD_SIGNAL, _T("Add Signal"), wxBitmap(risingedge_xpm), _T("Add a signal to the Document"));
     toolBar->AddTool(TIMING_ID_ADD_BUS, _T("Add Bus"), wxBitmap(busedge_xpm), _T("Add a bus to the Document"));
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_NEUTRAL, _T("Select"), wxBitmap(cross_xpm), _T(" Select something or change signal/bus"));
-    toolBar->AddTool(TIMING_ID_DISCONTINUATION, _T("Edit time compressors"), wxBitmap(tri_xpm), _T("Edit time compressors by clicking on the bottom axis"));
+    toolBar->AddTool(TIMING_ID_EDIT, _T("Select"), wxBitmap(cross_xpm), _T(" Select something or change signal/bus"));
+    toolBar->AddTool(TIMING_ID_DISCONTINUITY, _T("Edit time compressors"), wxBitmap(tri_xpm), _T("Edit time compressors by clicking on the bottom axis"));
     toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), _T("Draw vertical line"));
     toolBar->AddTool(TIMING_ID_HARROW, _T("Draw hotizontal arrow"),  wxBitmap(harrow_cur_xpm), _T("Draw a hotizontal arrow") );
-    toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm), _T("Edit text labels") );
+    //toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm), _T("Edit text labels") );
     toolBar->AddSeparator();
     toolBar->AddTool(wxID_ABOUT, _T("Help"), wxBitmap( help_xpm ), _T("Show info about this application"));
     toolBar->Realize();
