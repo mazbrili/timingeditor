@@ -29,6 +29,9 @@ private:
     void OnMouse(wxMouseEvent &event);
     //void OnMouseWheel(wxMouseEvent &event);
 
+    void OnKeyDown(wxKeyEvent &event);
+    void OnKeyUp(wxKeyEvent &event);
+
     void Draw(wxDC &dc);
 
     void PaintBackground(wxDC &dc);

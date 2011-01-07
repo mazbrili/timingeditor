@@ -1,7 +1,7 @@
 
 // Interface Dependencies ---------------------------------------------
-#ifndef HoverCross_h
-#define HoverCross_h
+#ifndef HoverLine_h
+#define HoverLine_h
 
 // For compilers that support precompilation, includes <wx/wx.h>
 #include <wx/wxprec.h>
@@ -17,7 +17,7 @@
 class HoverLine : public HoverDrawlet
 {
 public:
-    HoverLine(wxPoint start, wxPoint stop);
+    HoverLine(wxPoint start, wxPoint stop, wxColour colour);
     virtual ~HoverLine();
 
 
@@ -26,6 +26,7 @@ public:
 
 private:
     wxPoint m_a, m_b;
+    wxColour m_colour;
 };
 
 #endif

@@ -10,14 +10,17 @@
     #include <wx/wx.h>
 #endif
 
+#include <wx/dcmemory.h>
+
+
+
 #include "HoverDrawlet.h"
 
-// END Interface Dependencies -----------------------------------------
 
 class HoverText : public HoverDrawlet
 {
 public:
-    HoverText(wxString txt, wxPoint pos);
+    HoverText(wxString txt, wxPoint pos, wxColour colour);
     virtual ~HoverText();
 
 
@@ -26,7 +29,9 @@ public:
 
 private:
     wxString m_txt;
-    wxPoint m_pos;
+    wxPoint  m_pos;
+    wxColour m_colour;
+    wxBitmap *m_pBitmap;
 };
 
 #endif

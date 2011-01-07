@@ -84,6 +84,7 @@ public:
     wxColour GetLabelsBackgroundColour()const;
     wxColour GetLabelsTextColour()const;
     wxColour GetLabelsLineColour()const;
+    wxColour GetCompressorColour()const;
     wxCoord GetHeightOfAxisWindow()const;
 
     const unsigned int GetScrollPixelsPerUnit()const{return 10;}
@@ -137,10 +138,14 @@ public:
     void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
     void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
     void AxisMouse(const wxMouseEvent &event, const wxPoint &pos);
+    void LabelsKey(const wxKeyEvent &event, bool down);
+    void WavesKey(const wxKeyEvent &event, bool down);
+    void AxisKey(const wxKeyEvent &event, bool down);
 
     void SetTask(Task *task = NULL);
 private:
     Task *task;
+    Task *defaultTask ;
 private:
     wxInt32 GetSelectedSignalNumber();
     wxInt32 GetSelectedDiscontinuity();

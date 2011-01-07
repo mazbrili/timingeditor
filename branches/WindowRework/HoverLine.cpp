@@ -4,10 +4,11 @@
 // END Interface Dependencies -----------------------------------------
 
 
-HoverLine::HoverLine(wxPoint start, wxPoint stop)
+HoverLine::HoverLine(wxPoint start, wxPoint stop, wxColour colour)
     :HoverDrawlet(),
     m_a(start),
-    m_b(stop)
+    m_b(stop),
+    m_colour(colour)
 {}
 HoverLine::~HoverLine(){}
 
@@ -18,7 +19,7 @@ bool HoverLine::Draw(wxDC &dc)
     dc.SetLogicalFunction(wxXOR);
 
     wxPen old_pen = dc.GetPen();
-    dc.SetPen(*wxBLACK_PEN);
+    dc.SetPen(m_colour);
 
     dc.DrawLine(m_a, m_b);
 

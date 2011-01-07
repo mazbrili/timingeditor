@@ -39,6 +39,9 @@ private:
     void OnMouseEnter(wxMouseEvent &event);
     void OnMouseLeave(wxMouseEvent &event);
 
+    void OnKeyDown(wxKeyEvent &event);
+    void OnKeyUp(wxKeyEvent &event);
+
 private:
     wxScrolledWindow        *m_owner;
     DiagramAxisWindow       *m_axis;

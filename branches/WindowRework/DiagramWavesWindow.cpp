@@ -17,17 +17,20 @@ BEGIN_EVENT_TABLE(DiagramWavesWindow, wxPanel)
     EVT_PAINT(            DiagramWavesWindow::OnPaint)
     EVT_ERASE_BACKGROUND( DiagramWavesWindow::OnEraseBackground)
 
-    EVT_MOTION(           DiagramWavesWindow::OnMouse)
-    EVT_LEFT_DOWN(        DiagramWavesWindow::OnMouse)
-    EVT_LEFT_UP(          DiagramWavesWindow::OnMouse)
-    EVT_RIGHT_DOWN(       DiagramWavesWindow::OnMouse)
-    EVT_RIGHT_UP(         DiagramWavesWindow::OnMouse)
-    EVT_RIGHT_DCLICK(     DiagramWavesWindow::OnMouse)
-
-    EVT_ENTER_WINDOW(     DiagramWavesWindow::OnMouseEnter)
-    EVT_LEAVE_WINDOW(     DiagramWavesWindow::OnMouseLeave)
+    EVT_MOUSE_EVENTS(     DiagramWavesWindow::OnMouse)
+//    EVT_MOTION(           DiagramWavesWindow::OnMouse)
+//    EVT_LEFT_DOWN(        DiagramWavesWindow::OnMouse)
+//    EVT_LEFT_UP(          DiagramWavesWindow::OnMouse)
+//    EVT_RIGHT_DOWN(       DiagramWavesWindow::OnMouse)
+//    EVT_RIGHT_UP(         DiagramWavesWindow::OnMouse)
+//    EVT_RIGHT_DCLICK(     DiagramWavesWindow::OnMouse)
+//
+//    EVT_ENTER_WINDOW(     DiagramWavesWindow::OnMouseEnter)
+//    EVT_LEAVE_WINDOW(     DiagramWavesWindow::OnMouseLeave)
 
     //EVT_SIZE(           DiagramWavesWindow::OnSize)
+  EVT_KEY_DOWN(           DiagramWavesWindow::OnKeyDown)
+  EVT_KEY_UP(             DiagramWavesWindow::OnKeyUp)
 END_EVENT_TABLE()
 
 DiagramWavesWindow::DiagramWavesWindow(TimingView *view, wxWindow* parent, wxScrolledWindow *scrollowner, DiagramAxisWindow *axis, DiagramLabelsWindow *labels, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
@@ -268,7 +271,14 @@ void DiagramWavesWindow::OnMouse(wxMouseEvent &event)
     m_view->WavesMouse(event, pt);
     event.Skip();
 }
-
+void DiagramWavesWindow::OnKeyDown(wxKeyEvent &event)
+{
+    m_view->WavesKey(event, true);
+}
+void DiagramWavesWindow::OnKeyUp(wxKeyEvent &event)
+{
+    m_view->WavesKey(event, false);
+}
 void DiagramWavesWindow::OnMouseEnter(wxMouseEvent &event)
 {
     wxClientDC dc( this );
