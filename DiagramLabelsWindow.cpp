@@ -16,17 +16,20 @@ BEGIN_EVENT_TABLE(DiagramLabelsWindow, wxScrolledWindow)
   ////EVT_SIZE(                DiagramLabelsWindow::OnSize)
   ////EVT_MOUSEWHEEL(          DiagramLabelsWindow::OnMousewheel)
 
-  EVT_MOTION(              DiagramLabelsWindow::OnMouse)
-  EVT_LEFT_DOWN(           DiagramLabelsWindow::OnMouse)
-  EVT_LEFT_UP(             DiagramLabelsWindow::OnMouse)
-  EVT_RIGHT_DOWN(          DiagramLabelsWindow::OnMouse)
-  EVT_RIGHT_UP(            DiagramLabelsWindow::OnMouse)
-  EVT_RIGHT_DCLICK(        DiagramLabelsWindow::OnMouse)
-
-  EVT_ENTER_WINDOW(        DiagramLabelsWindow::OnMouseEnter)
-  EVT_LEAVE_WINDOW(        DiagramLabelsWindow::OnMouseLeave)
+    EVT_MOUSE_EVENTS(      DiagramLabelsWindow::OnMouse)
+//  EVT_MOTION(              DiagramLabelsWindow::OnMouse)
+//  EVT_LEFT_DOWN(           DiagramLabelsWindow::OnMouse)
+//  EVT_LEFT_UP(             DiagramLabelsWindow::OnMouse)
+//  EVT_RIGHT_DOWN(          DiagramLabelsWindow::OnMouse)
+//  EVT_RIGHT_UP(            DiagramLabelsWindow::OnMouse)
+//  EVT_RIGHT_DCLICK(        DiagramLabelsWindow::OnMouse)
+//
+//  EVT_ENTER_WINDOW(        DiagramLabelsWindow::OnMouseEnter)
+//  EVT_LEAVE_WINDOW(        DiagramLabelsWindow::OnMouseLeave)
 
   //EVT_CHILD_FOCUS(         DiagramLabelsWindow::OnChildFocus)
+  EVT_KEY_DOWN(            DiagramLabelsWindow::OnKeyDown)
+  EVT_KEY_UP(              DiagramLabelsWindow::OnKeyUp)
 END_EVENT_TABLE()
 
 
@@ -259,6 +262,15 @@ void DiagramLabelsWindow::OnMouse(wxMouseEvent &event)
 
     event.Skip();
 };
+
+void DiagramLabelsWindow::OnKeyDown(wxKeyEvent &event)
+{
+    m_view->LabelsKey(event, true);
+}
+void DiagramLabelsWindow::OnKeyUp(wxKeyEvent &event)
+{
+    m_view->LabelsKey(event, false);
+}
 
 void DiagramLabelsWindow::OnMouseEnter(wxMouseEvent &event)
 {

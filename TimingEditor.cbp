@@ -120,6 +120,8 @@
 			<Add library="libodbc32.a" />
 			<Add library="libgdiplus.a" />
 		</Linker>
+		<Unit filename="AddVerticalLineTask.cpp" />
+		<Unit filename="AddVerticalLineTask.h" />
 		<Unit filename="AxisSettingsPanel.cpp" />
 		<Unit filename="AxisSettingsPanel.h" />
 		<Unit filename="ClockSettingsPanel.cpp" />
@@ -149,9 +151,13 @@
 		<Unit filename="GraphSignal.h" />
 		<Unit filename="GraphVerticalLine.cpp" />
 		<Unit filename="GraphVerticalLine.h" />
+		<Unit filename="HoverCombo.cpp" />
+		<Unit filename="HoverCombo.h" />
 		<Unit filename="HoverCross.cpp" />
 		<Unit filename="HoverCross.h" />
 		<Unit filename="HoverDrawlet.h" />
+		<Unit filename="HoverGraphCaret.cpp" />
+		<Unit filename="HoverGraphCaret.h" />
 		<Unit filename="HoverLine.cpp" />
 		<Unit filename="HoverLine.h" />
 		<Unit filename="HoverText.cpp" />

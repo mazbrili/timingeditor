@@ -56,6 +56,7 @@
 #include "GraphNormalSignal.h"
 
 #include "Task.h"
+#include "AddVerticalLineTask.h"
 
 
 IMPLEMENT_DYNAMIC_CLASS(TimingView, wxView)
@@ -96,6 +97,7 @@ TimingView::TimingView()
     AxisSetPanel = (AxisSettingsPanel *)NULL;
     TmeCmprssrPanel = (TimeCompressorSettingsPanel *)NULL;
     task = NULL;
+    defaultTask = NULL;
 }
 bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 {
@@ -108,15 +110,18 @@ bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
     frame->SetSize(wxDefaultCoord, wxDefaultCoord, x, y);
 #endif
 
-    frame->Show(true);
-    Activate(true);
+    DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
+    defaultTask = new Task(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+    if (!defaultTask)
+        return false;
+
+    task = defaultTask;
+
     UpdateVisibelTicksContainer();
     AttachPanels();
+    Activate(true);
 
-    DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
-    task = new Task(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
-    if (!task)
-        return false;
+    frame->Show(true);
 
     return true;
 }
@@ -156,50 +161,29 @@ wxColour TimingView::GetBackgroundColour() const
     //return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
     return *wxWHITE;
 }
-wxColour TimingView::GetLineColour() const
-{
-    return *wxBLACK;
-}
-wxColour TimingView::GetTextColour() const
-{
-    return *wxBLACK;
-}
-wxColour TimingView::GetShadowColour() const
-{
-    return wxColour(0xf0,0xf0,0xf0);
-}
-wxColour TimingView::GetWaveSeparatorColour() const
-{
-    return wxColour(0xe0, 0xe0, 0xe0);
-}
-wxColour TimingView::GetAxisBackgroundColour()const
-{
-    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
-}
-wxColour TimingView::GetAxisLineColour()const
-{
-    return *wxBLACK;
-}
+wxColour TimingView::GetLineColour() const{return *wxBLACK;}
+wxColour TimingView::GetTextColour() const{return *wxBLACK;}
+wxColour TimingView::GetShadowColour() const{return wxColour(0xf0,0xf0,0xf0);}
+wxColour TimingView::GetWaveSeparatorColour() const{return wxColour(0xe0, 0xe0, 0xe0);}
+wxColour TimingView::GetAxisBackgroundColour()const{
+    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );}
+wxColour TimingView::GetAxisLineColour()const{return *wxBLACK;}
 wxColour TimingView::GetLabelsBackgroundColour()const
 {
     return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
 }
-wxColour TimingView::GetLabelsTextColour()const
-{
-    return *wxBLACK;
-}
+wxColour TimingView::GetLabelsTextColour()const{return *wxBLACK;}
 wxColour TimingView::GetLabelsLineColour()const
 {
     return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNSHADOW );
 }
-wxColour TimingView::GetUndefinedSignalColour() const
+wxColour TimingView::GetUndefinedSignalColour() const{return *wxLIGHT_GREY;}
+wxColour TimingView::GetCompressorColour()const
 {
-    return *wxLIGHT_GREY;
+    //return *wxGREY;
+    return wxTheColourDatabase->Find(_T("GREY"));
 }
-unsigned int TimingView::GetWavesLeftSpace()const
-{
-    return 10;
-}
+unsigned int TimingView::GetWavesLeftSpace()const{return 10;}
 wxString TimingView::GetFloatFormatStr() const
 {
     unsigned char digitsAfterDecimalpoint = 2;
@@ -649,7 +633,7 @@ const GraphSignals &TimingView::GetGraphSignals()const
 void TimingView::OnAddClock(wxCommandEvent& event)
 {
     TimingDocument *doc = (TimingDocument*)m_viewDocument;
-    wxInt32 n = 0;////window->GetSelectedSignalNr();
+    wxInt32 n = GetSelectedSignalNumber();
 
     Signal sig;
     sig.delay=1;
@@ -671,7 +655,7 @@ void TimingView::OnAddClock(wxCommandEvent& event)
 void TimingView::OnAddSignal(wxCommandEvent& event)
 {
     TimingDocument *doc = (TimingDocument*)m_viewDocument;
-    wxInt32 n = 0;///window->GetSelectedSignalNr();
+    wxInt32 n = GetSelectedSignalNumber();
 
     Signal sig;
     sig.delay = 1;
@@ -696,7 +680,7 @@ void TimingView::OnAddSignal(wxCommandEvent& event)
 void TimingView::OnAddBus(wxCommandEvent& event)
 {
     TimingDocument *doc = (TimingDocument*)m_viewDocument;
-    wxInt32 n = 0;////window->GetSelectedSignalNr();
+    wxInt32 n = GetSelectedSignalNumber();
 
     Signal sig;
     sig.delay = 1;
@@ -725,6 +709,12 @@ void TimingView::OnDiscontinuityTool(wxCommandEvent& event)
 }
 void TimingView::OnRulerTool(wxCommandEvent& event)
 {
+    DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
+    AddVerticalLineTask *newtask = new AddVerticalLineTask(this,splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+
+    if ( task != defaultTask )
+        delete task;
+    SetTask(newtask);
 }
 void TimingView::OnHArrowTool(wxCommandEvent& event)
 {
@@ -822,16 +812,21 @@ void TimingView::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 }
 void TimingView::SetTask(Task *newtask)
 {
-    if ( newtask == NULL )
-    {
-        DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
-        newtask = new Task(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
-    }
-    if (task && newtask)
-    {
-        delete task;
-        task = newtask;
-    }
+    if ( !newtask )
+        newtask = defaultTask;
+    task = newtask;
+}
+void TimingView::LabelsKey(const wxKeyEvent &event, bool down)
+{
+    task->LabelsKey(event, down);
+}
+void TimingView::WavesKey(const wxKeyEvent &event, bool down)
+{
+    task->WavesKey(event, down);
+}
+void TimingView::AxisKey(const wxKeyEvent &event, bool down)
+{
+    task->AxisKey(event, down);
 }
 
 

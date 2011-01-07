@@ -12,17 +12,20 @@ BEGIN_EVENT_TABLE(DiagramAxisWindow, wxPanel)
   EVT_PAINT(               DiagramAxisWindow::OnPaint)
   EVT_ERASE_BACKGROUND(    DiagramAxisWindow::OnEraseBackground)
 
+  EVT_MOUSE_EVENTS(        DiagramAxisWindow::OnMouse)
+//  EVT_MOTION(              DiagramAxisWindow::OnMouse)
+//  EVT_LEFT_DOWN(           DiagramAxisWindow::OnMouse)
+//  EVT_LEFT_UP(             DiagramAxisWindow::OnMouse)
+//  EVT_RIGHT_DOWN(          DiagramAxisWindow::OnMouse)
+//  EVT_RIGHT_UP(            DiagramAxisWindow::OnMouse)
+//  EVT_RIGHT_DCLICK(        DiagramAxisWindow::OnMouse)
+//
+//
+//  EVT_ENTER_WINDOW(      DiagramAxisWindow::OnMouseEnter)
+//  EVT_LEAVE_WINDOW(      DiagramAxisWindow::OnMouseLeave)
 
-  EVT_MOTION(              DiagramAxisWindow::OnMouse)
-  EVT_LEFT_DOWN(           DiagramAxisWindow::OnMouse)
-  EVT_LEFT_UP(             DiagramAxisWindow::OnMouse)
-  EVT_RIGHT_DOWN(          DiagramAxisWindow::OnMouse)
-  EVT_RIGHT_UP(            DiagramAxisWindow::OnMouse)
-  EVT_RIGHT_DCLICK(        DiagramAxisWindow::OnMouse)
-
-
-  EVT_ENTER_WINDOW(      DiagramAxisWindow::OnMouseEnter)
-  EVT_LEAVE_WINDOW(      DiagramAxisWindow::OnMouseLeave)
+  EVT_KEY_DOWN(            DiagramAxisWindow::OnKeyDown)
+  EVT_KEY_UP(              DiagramAxisWindow::OnKeyUp)
 
 END_EVENT_TABLE()
 
@@ -214,7 +217,7 @@ void DiagramAxisWindow::Draw(wxDC & dc)
 
             }
 
-            dc.SetPen(*wxLIGHT_GREY_PEN);
+            dc.SetPen(m_view->GetCompressorColour());
             if ( offset.x + (rlen-0.75)*(m_view->GridStepWidth) < stop )
             {
                 dc.DrawLine(offset.x, offset.y, offset.x + (rlen-0.75)*(m_view->GridStepWidth), offset.y);
@@ -278,6 +281,14 @@ void DiagramAxisWindow::OnMouse(wxMouseEvent &event)
 
     m_view->AxisMouse(event, pt);
     event.Skip();
+}
+void DiagramAxisWindow::OnKeyDown(wxKeyEvent &event)
+{
+    m_view->AxisKey(event, true);
+}
+void DiagramAxisWindow::OnKeyUp(wxKeyEvent &event)
+{
+    m_view->AxisKey(event, false);
 }
 
 void DiagramAxisWindow::ShiftDC(wxDC &dc)

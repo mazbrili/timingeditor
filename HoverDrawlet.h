@@ -10,19 +10,17 @@
     #include <wx/wx.h>
 #endif
 
-// END Interface Dependencies -----------------------------------------
-
 class HoverDrawlet
 {
-  public:
-		HoverDrawlet(){}
-		virtual ~HoverDrawlet(){}
+public:
+    HoverDrawlet(){}
+    virtual ~HoverDrawlet(){}
 
 
-		virtual bool Draw(wxDC &dc){return false;}
-        virtual void UnDraw(wxDC &dc) = 0;
+    virtual bool Draw(wxDC &dc){return false;}
+    virtual void UnDraw(wxDC &dc) = 0;
 
-	private:
+private:
 };
 
 #endif

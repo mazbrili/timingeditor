@@ -32,6 +32,9 @@ private:
     void OnMouseLeave(wxMouseEvent &event);
     void OnMouseEnter(wxMouseEvent &event);
 
+    void OnKeyDown(wxKeyEvent &event);
+    void OnKeyUp(wxKeyEvent &event);
+
 private:
     wxColour GetBackgroundColour()const;
     wxColour GetLineColour()const;

@@ -17,7 +17,7 @@
 class HoverCross : public HoverDrawlet
 {
 public:
-    HoverCross(wxPoint center);
+    HoverCross(wxPoint center, wxColour colour);
     virtual ~HoverCross();
 
 
@@ -26,6 +26,7 @@ public:
 
 private:
     wxPoint m_center;
+    wxColour m_colour;
 };
 
 #endif

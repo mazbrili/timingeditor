@@ -5,9 +5,10 @@
 // END Interface Dependencies -----------------------------------------
 
 
-HoverCross::HoverCross(wxPoint center)
+HoverCross::HoverCross(wxPoint center, wxColour colour)
     :HoverDrawlet(),
-    m_center(center)
+    m_center(center),
+    m_colour(colour)
 {}
 HoverCross::~HoverCross(){}
 
@@ -18,7 +19,7 @@ bool HoverCross::Draw(wxDC &dc)
     dc.SetLogicalFunction(wxXOR);
 
     wxPen old_pen = dc.GetPen();
-    dc.SetPen(*wxGREY_PEN);
+    dc.SetPen(m_colour);
 
     dc.CrossHair(m_center);
 
