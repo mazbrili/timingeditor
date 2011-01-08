@@ -41,6 +41,8 @@ public:
     virtual bool CanPaste();
     virtual bool CanDelete();
     virtual bool HasActiveSelection();
+
+    void InitTask();
 private:
     void AddSignal(Signal *sig);
 

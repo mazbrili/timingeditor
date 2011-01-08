@@ -11,10 +11,18 @@ m_labelsWin(labelsWin),
 m_axisWin(axisWin),
 m_waveWin(waveWin)
 {
+    InitTask();
+}
+void Task::InitTask()
+{
     //ctor
     m_axisWin->RemoveDrawlet();
     m_waveWin->RemoveDrawlet();
     m_labelsWin->RemoveDrawlet();
+
+    m_axisWin->SetCursor(*wxCROSS_CURSOR);
+    m_waveWin->SetCursor(*wxCROSS_CURSOR);
+    m_labelsWin->SetCursor(wxNullCursor);
 }
 
 Task::~Task()

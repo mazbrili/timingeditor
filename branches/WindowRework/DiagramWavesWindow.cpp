@@ -42,8 +42,6 @@ m_view(view),
 m_drawlet(NULL)
 {
     (void)new wxTextCtrl( this, wxID_ANY, _T("Text I"), wxPoint(0,100), wxSize(100,25), wxBORDER_NONE );
-
-    SetCursor(*wxCROSS_CURSOR);
 }
 DiagramWavesWindow::DiagramWavesWindow(){}
 DiagramWavesWindow::~DiagramWavesWindow(){}

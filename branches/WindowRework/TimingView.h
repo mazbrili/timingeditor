@@ -61,13 +61,13 @@ public:
     bool OnClose(bool deleteWindow = true);
 
     std::vector<wxInt32> VisibleTicks;
-    //wxInt32 GridStepWidth;
-    double GridStepWidth;
+    wxInt32 GridStepWidth;
+    //double GridStepWidth;
     std::vector<wxCoord> heightOffsets;
 
     wxString GetFloatFormatStr() const;
     wxFont GetFont() const;
-    unsigned int GetWavesLeftSpace()const;
+    int GetWavesLeftSpace()const;
 
     const VerticalLines &GetVerticalLines()const;
     const HorizontalArrows &GetHorizontalArrows()const;
@@ -85,9 +85,10 @@ public:
     wxColour GetLabelsTextColour()const;
     wxColour GetLabelsLineColour()const;
     wxColour GetCompressorColour()const;
+    wxColour GetGraphCaretColour()const;
     wxCoord GetHeightOfAxisWindow()const;
 
-    const unsigned int GetScrollPixelsPerUnit()const{return 10;}
+    const int GetScrollPixelsPerUnit()const{return 10;}
 private:
     void UpdateVisibelTicksContainer();
     void UpdateHeightsContainer();

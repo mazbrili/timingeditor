@@ -15,7 +15,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D__WXDEBUG__" />
-					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswud" />
+					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
@@ -57,7 +57,7 @@
 					<Add option="-O2" />
 					<Add option="-O1" />
 					<Add option="-O" />
-					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswu" />
+					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
@@ -98,8 +98,8 @@
 			<Add option="-D__WXMSW__" />
 			<Add option="-DwxUSE_UNICODE" />
 			<Add option="-DWX_PRECOMP" />
-			<Add directory="C:\cpplibs\wxWidgets-2.8.11\include" />
-			<Add directory="C:\cpplibs\wxWidgets-2.8.11\contrib\include" />
+			<Add directory="$(#wx)\include" />
+			<Add directory="$(#wx)\contrib\include" />
 		</Compiler>
 		<ResourceCompiler>
 			<Add directory="$(#wx)\include" />
