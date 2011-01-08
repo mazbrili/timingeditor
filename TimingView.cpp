@@ -183,7 +183,11 @@ wxColour TimingView::GetCompressorColour()const
     //return *wxGREY;
     return wxTheColourDatabase->Find(_T("GREY"));
 }
-unsigned int TimingView::GetWavesLeftSpace()const{return 10;}
+wxColour TimingView::GetGraphCaretColour()const
+{
+    return *wxBLUE;
+}
+int TimingView::GetWavesLeftSpace()const{return 10;}
 wxString TimingView::GetFloatFormatStr() const
 {
     unsigned char digitsAfterDecimalpoint = 2;
@@ -813,7 +817,10 @@ void TimingView::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 void TimingView::SetTask(Task *newtask)
 {
     if ( !newtask )
+    {
+        defaultTask->InitTask();
         newtask = defaultTask;
+    }
     task = newtask;
 }
 void TimingView::LabelsKey(const wxKeyEvent &event, bool down)

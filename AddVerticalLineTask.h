@@ -38,6 +38,17 @@ private:
 
     void EndTask();
     void NonInvolvedWindowMouse(const wxMouseEvent &event);
+    void HandleKey(const wxKeyEvent &event, bool down);
+
+    void DoCheckWhenMouseDown(const wxPoint &pos);
+    void DoCheckMoving(const wxPoint &pos);
+    void DoCheckWhenMouseUp(const wxPoint &pos);
+    void SetDrawlet();
+private:
+    wxInt32 yStartPos; // above signal number
+    wxInt32 yEndPos; // below signal number
+    wxInt32 xpos;
+    wxUint8 xposoffset;
 };
 
 #endif // ADDVERTICALLINETASK_H
