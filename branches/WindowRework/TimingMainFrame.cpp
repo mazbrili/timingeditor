@@ -70,26 +70,33 @@
 #include "art/clockedge.xpm"
 #include "art/busedge.xpm"
 
-
-
 ///////////////////////////////////////////////////////////////////////////
 IMPLEMENT_CLASS(TimingMainFrame, wxDocMDIParentFrame)
 BEGIN_EVENT_TABLE(TimingMainFrame, wxDocMDIParentFrame )
-    EVT_MENU(wxID_ABOUT,                     TimingMainFrame::OnAbout)
-    EVT_MENU(TIMING_ID_HELP,                 TimingMainFrame::OnHelp)
-    EVT_MENU(TIMING_ID_TIP,                  TimingMainFrame::OnTip)
-    EVT_UPDATE_UI(wxID_COPY,                 TimingMainFrame::OnUpdateCopy)
-    EVT_UPDATE_UI(wxID_CUT,                  TimingMainFrame::OnUpdateCut)
-    EVT_UPDATE_UI(wxID_PASTE,                TimingMainFrame::OnUpdatePaste)
-    EVT_UPDATE_UI(TIMING_ID_DELETE,          TimingMainFrame::OnUpdateDelete)
-    EVT_UPDATE_UI(TIMING_ID_GLASS_N,         TimingMainFrame::OnUpdateGlassN)
-    EVT_UPDATE_UI(TIMING_ID_GLASS_P,         TimingMainFrame::OnUpdateGlassP)
-    EVT_UPDATE_UI(TIMING_ID_DISCONTINUITY,   TimingMainFrame::OnUpdateTools)
-    EVT_UPDATE_UI(TIMING_ID_RULER,           TimingMainFrame::OnUpdateTools)
-    EVT_UPDATE_UI(TIMING_ID_HARROW,          TimingMainFrame::OnUpdateTools)
-    EVT_UPDATE_UI(TIMING_ID_EDIT,            TimingMainFrame::OnUpdateTools)
+    EVT_MENU(wxID_ABOUT,                               TimingMainFrame::OnAbout)
+    EVT_MENU(TIMING_ID_HELP,                           TimingMainFrame::OnHelp)
+    EVT_MENU(TIMING_ID_TIP,                            TimingMainFrame::OnTip)
+    EVT_MENU(TIMING_ID_MENUITEM_CLOCK_TYPE,            TimingMainFrame::HandlePanel)
+    EVT_MENU(TIMING_ID_MENUITEM_TIME_COMPRESSOR,       TimingMainFrame::HandlePanel)
+    EVT_MENU(TIMING_ID_MENUITEM_AXIS_TIME,             TimingMainFrame::HandlePanel)
+    EVT_MENU(TIMING_ID_MENUITEM_TRANSITION,            TimingMainFrame::HandlePanel)
+    EVT_MENU(TIMING_ID_MENUITEM_DEFAULT,               TimingMainFrame::LoadDefaultLayout)
+    EVT_UPDATE_UI(wxID_COPY,                           TimingMainFrame::OnUpdateCopy)
+    EVT_UPDATE_UI(wxID_CUT,                            TimingMainFrame::OnUpdateCut)
+    EVT_UPDATE_UI(wxID_PASTE,                          TimingMainFrame::OnUpdatePaste)
+    EVT_UPDATE_UI(TIMING_ID_DELETE,                    TimingMainFrame::OnUpdateDelete)
+    EVT_UPDATE_UI(TIMING_ID_GLASS_N,                   TimingMainFrame::OnUpdateGlassN)
+    EVT_UPDATE_UI(TIMING_ID_GLASS_P,                   TimingMainFrame::OnUpdateGlassP)
+    EVT_UPDATE_UI(TIMING_ID_DISCONTINUITY,             TimingMainFrame::OnUpdateTools)
+    EVT_UPDATE_UI(TIMING_ID_RULER,                     TimingMainFrame::OnUpdateTools)
+    EVT_UPDATE_UI(TIMING_ID_HARROW,                    TimingMainFrame::OnUpdateTools)
+    EVT_UPDATE_UI(TIMING_ID_EDIT,                      TimingMainFrame::OnUpdateTools)
+    EVT_UPDATE_UI( TIMING_ID_MENUITEM_CLOCK_TYPE,      TimingMainFrame::UpdateMenuItems)
+    EVT_UPDATE_UI( TIMING_ID_MENUITEM_TIME_COMPRESSOR, TimingMainFrame::UpdateMenuItems)
+    EVT_UPDATE_UI( TIMING_ID_MENUITEM_AXIS_TIME,       TimingMainFrame::UpdateMenuItems)
+    EVT_UPDATE_UI( TIMING_ID_MENUITEM_TRANSITION,      TimingMainFrame::UpdateMenuItems)
     EVT_UPDATE_UI_RANGE(TIMING_ID_ADD_CLOCK,
-                TIMING_ID_ADD_BUS,           TimingMainFrame::OnUpdateTools)
+                TIMING_ID_ADD_BUS,                     TimingMainFrame::OnUpdateTools)
 END_EVENT_TABLE()
 
 
@@ -131,14 +138,15 @@ TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, 
     tcsetpanel = new TimeCompressorSettingsPanel(this);
 
 
-    m_manager->AddPane(clksetpanel , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("ClockPanel")).Caption(wxT("Clock-type signal Settings")).CloseButton(false));
-    m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TransitionPanel")).Caption(wxT("Transition Settings")).CloseButton(false));
-    m_manager->AddPane(axissetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("AxisPanel")).Caption(wxT("Axis/Time Settings")).CloseButton(false));
-    m_manager->AddPane(tcsetpanel  , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TimeCompressorPanel")).Caption(wxT("Time compressor Settings")).CloseButton(false));
+    m_manager->AddPane(clksetpanel , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("ClockPanel")).Caption(wxT("Clock-type signal Settings")));
+    m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TransitionPanel")).Caption(wxT("Transition Settings")));
+    m_manager->AddPane(axissetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("AxisPanel")).Caption(wxT("Axis/Time Settings")));
+    m_manager->AddPane(tcsetpanel  , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TimeCompressorPanel")).Caption(wxT("Time compressor Settings")));
 
     wxTextCtrl *logctrl = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
     m_manager->AddPane(logctrl, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("LogPanel")).Caption(wxT("Log Panel")).CloseButton(false));
     wxLogTextCtrl *loggerctrl = new wxLogTextCtrl(logctrl);
+    DefalutLayout = m_manager->SavePerspective();
 
     wxLog::SetActiveTarget(loggerctrl);
 
@@ -176,8 +184,17 @@ void TimingMainFrame::InitMenuBar()
     help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using TimingEditor") );
     help_menu->Append(TIMING_ID_HELP, _T("Help"), _T("Open help pages"));
 
+    wxMenu *panel_menu = new wxMenu;
+    panel_menu->Append(TIMING_ID_MENUITEM_CLOCK_TYPE, _T("Clock-type"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_TIME_COMPRESSOR, _T("Time compressor"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_AXIS_TIME, _T("Axis/Time"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_TRANSITION, _T("Transition"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->AppendSeparator();
+    panel_menu->Append(TIMING_ID_MENUITEM_DEFAULT,_T("Default"));
+
     wxMenuBar *menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, _T("&File"));
+    menu_bar->Append(panel_menu, _T("&View"));
     if (edit_menu)
         menu_bar->Append(edit_menu, _T("&Edit"));
     menu_bar->Append(help_menu, _T("&Help"));
@@ -219,9 +236,11 @@ void TimingMainFrame::OnAbout(wxCommandEvent &event)
 
     wxAboutDialogInfo info;
     info.SetName(_("TimingEditor"));
-    info.SetVersion(_("0.1"));
+    info.SetVersion(_("0.2"));
     info.SetDescription(_("Timing diagram editor."));
-    info.SetCopyright(_T("(C) 2008 Daniel Anselmi <danselmi@NOSPAM@gmx.ch>"));
+    info.SetCopyright(_T("(C) 2008 2009 2010 2011"));
+    info.AddDeveloper(_T("Daniel Anselmi"));
+    info.AddDeveloper(_T("Yves Studer"));
 
     wxAboutBox(info);
 
@@ -244,6 +263,45 @@ void TimingMainFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 {
     event.Enable(CanDelete());
 }
+
+wxString TimingMainFrame::DetectSourceOfEvent(const long EventId)
+{
+    wxString ID = _T("");
+    if(EventId == TIMING_ID_MENUITEM_CLOCK_TYPE)
+        ID = _T("ClockPanel");
+    else if(EventId == TIMING_ID_MENUITEM_TIME_COMPRESSOR)
+        ID = _T("TimeCompressorPanel");
+    else if(EventId == TIMING_ID_MENUITEM_AXIS_TIME)
+        ID = _T("AxisPanel");
+    else if(EventId == TIMING_ID_MENUITEM_TRANSITION)
+        ID = _T("TransitionPanel");
+    return ID;
+}
+
+void TimingMainFrame::HandlePanel(wxCommandEvent& event)
+{
+    wxString ID = DetectSourceOfEvent(event.GetId());
+    if(m_manager->GetPane(ID).IsShown())
+        m_manager->GetPane(ID).Hide().CaptionVisible();
+    else
+        m_manager->GetPane(ID).Show().CaptionVisible();
+    m_manager->Update();
+}
+
+void TimingMainFrame::UpdateMenuItems(wxUpdateUIEvent &event)
+{
+    wxString ID = DetectSourceOfEvent(event.GetId());
+    if(m_manager->GetPane(ID).IsShown())
+        event.Check(true);
+    else
+        event.Check(false);
+}
+
+void TimingMainFrame::LoadDefaultLayout(wxCommandEvent& event)
+{
+    m_manager->LoadPerspective(DefalutLayout);
+}
+
 bool TimingMainFrame::CanDelete(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
