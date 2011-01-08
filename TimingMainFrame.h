@@ -71,7 +71,10 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
         void OnUpdateGlassP(wxUpdateUIEvent &event);
         void OnUpdateTools(wxUpdateUIEvent& event);
 
-
+        void UpdateMenuItems(wxUpdateUIEvent &event);
+        wxString DetectSourceOfEvent(const long EventId);
+        void HandlePanel(wxCommandEvent& event);
+        void LoadDefaultLayout(wxCommandEvent& event);
 
         bool HasActiveSelection();
         bool CanDelete(void);
@@ -92,6 +95,7 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
 
     private:
         wxAuiManager *m_manager;
+        wxString DefalutLayout;
 
     DECLARE_CLASS(TimingMainFrame)
     DECLARE_EVENT_TABLE()
