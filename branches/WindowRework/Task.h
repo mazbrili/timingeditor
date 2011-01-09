@@ -43,6 +43,8 @@ public:
     virtual bool HasActiveSelection();
 
     void InitTask();
+    wxInt32 GetTickFromPosition(const wxPoint &pos);
+    bool IsOverWaves(const wxPoint &pos);
 private:
     void AddSignal(Signal *sig);
 

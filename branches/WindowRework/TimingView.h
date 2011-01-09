@@ -66,6 +66,7 @@ public:
     std::vector<wxCoord> heightOffsets;
 
     wxString GetFloatFormatStr() const;
+    wxString GetTimeString(wxInt32 ticks);
     wxFont GetFont() const;
     int GetWavesLeftSpace()const;
 

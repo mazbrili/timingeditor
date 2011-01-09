@@ -61,15 +61,27 @@ void Task::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     if ( event.Moving() )
     {
+        if ( IsOverWaves(pos) )
+        {
+            wxInt32 tick = GetTickFromPosition(pos);
+
+            wxString str = wxString::Format(_T("tick: %d, t: "), m_view->VisibleTicks[tick]);
+            str += m_view->GetTimeString( m_view->VisibleTicks[tick] );
+
+            m_axisWin->SetDrawlet(
+                new HoverCombo(
+                    new HoverLine(wxPoint(pos.x, 0),
+                                  wxPoint(pos.x, m_view->GetHeightOfAxisWindow()),
+                                  *wxLIGHT_GREY),
+                    new HoverText(str, wxPoint(pos.x,5), *wxLIGHT_GREY )
+                )
+            );
+        }
+        else
+            m_axisWin->SetDrawlet(new HoverLine(wxPoint(pos.x, 0),
+                                  wxPoint(pos.x, m_view->GetHeightOfAxisWindow()),
+                                  *wxLIGHT_GREY));
         m_waveWin->SetDrawlet( new HoverCross(wxPoint(pos.x, pos.y), *wxLIGHT_GREY) );
-        m_axisWin->SetDrawlet(
-            new HoverCombo(
-                new HoverLine(wxPoint(pos.x, 0),
-                              wxPoint(pos.x, m_view->GetHeightOfAxisWindow()),
-                              *wxLIGHT_GREY),
-                new HoverText(_T("gaga"), wxPoint(pos.x,5), *wxLIGHT_GREY )
-            )
-        );
     }
     if(event.Leaving())
     {
@@ -82,17 +94,29 @@ void Task::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     if ( event.Moving() )
     {
+        wxInt32 tick = GetTickFromPosition(pos);
+        if ( pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*(m_view->VisibleTicks.size() - 1))
+        {
+            wxString str = wxString::Format(_T("tick: %d, t: "), m_view->VisibleTicks[tick]);
+            str += m_view->GetTimeString( m_view->VisibleTicks[tick] );
+            m_axisWin->SetDrawlet(
+                new HoverCombo(
+                    new HoverLine(wxPoint(pos.x, 0),
+                                  wxPoint(pos.x, m_view->GetHeightOfAxisWindow()),
+                                  *wxLIGHT_GREY),
+                    new HoverText(str, wxPoint(pos.x,5), *wxLIGHT_GREY )
+                )
+            );
+        }
+        else
+            m_axisWin->SetDrawlet(new HoverLine(wxPoint(pos.x, 0),
+                                  wxPoint(pos.x, m_view->GetHeightOfAxisWindow()),
+                                  *wxLIGHT_GREY));
+
+
         m_waveWin->SetDrawlet(new HoverLine(wxPoint(pos.x, 0),
                               wxPoint(pos.x, m_waveWin->GetSize().GetY()),
                               *wxLIGHT_GREY));
-        m_axisWin->SetDrawlet(
-            new HoverCombo(
-                new HoverLine(wxPoint(pos.x, 0),
-                              wxPoint(pos.x, m_view->GetHeightOfAxisWindow()),
-                              *wxLIGHT_GREY),
-                new HoverText(_T("gaga"), wxPoint(pos.x,5), *wxLIGHT_GREY )
-            )
-        );
     }
     if( event.Leaving())
     {
@@ -238,4 +262,14 @@ void Task::AddSignal(Signal *sig)
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
     cmdproc->Submit(new AddSignalCommand(doc, GetSelectedSignalNumber(), *sig) );
 }
-
+wxInt32 Task::GetTickFromPosition(const wxPoint &pos)
+{
+    return (pos.x - m_view->GetWavesLeftSpace())/(m_view->GridStepWidth);
+}
+bool Task::IsOverWaves(const wxPoint &pos)
+{
+    return //pos.x > m_view->GetWavesLeftSpace() &&
+         pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*(m_view->VisibleTicks.size() - 1) &&
+         //pos.y > m_view->heightOffsets[0]-5 &&
+         pos.y < m_view->heightOffsets[m_view->heightOffsets.size()-1]+5;
+}

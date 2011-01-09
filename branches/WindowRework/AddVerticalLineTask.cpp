@@ -111,14 +111,9 @@ void AddVerticalLineTask::DoCheckWhenMouseDown(const wxPoint &pos)
 
     if ( !doc || !doc->signals.size() )return;
 
-    if ( pos.x < m_view->GetWavesLeftSpace()+10 ||
-         pos.x > m_view->GetWavesLeftSpace() + m_view->GridStepWidth*(m_view->VisibleTicks.size() - 1) ||
-         pos.y < m_view->heightOffsets[0]-5 ||
-         pos.y > m_view->heightOffsets[m_view->heightOffsets.size()-1]+5)
-        return;
+    if (!IsOverWaves(pos) ) return;
 
-    //wxInt32 tick =
-    xpos = (pos.x - m_view->GetWavesLeftSpace())/(m_view->GridStepWidth);
+    xpos = GetTickFromPosition(pos);
 
     //xpos = m_view->VisibleTicks[tick];
 
@@ -181,8 +176,8 @@ void AddVerticalLineTask::DoCheckWhenMouseDown(const wxPoint &pos)
     }
     else
     {
-        yStartPos = k;
         // clicked bottom of previous signal
+        yStartPos = k;
         yEndPos = k - 1;
     }
     //wxLogDebug(_("ybeg: %d, yend: %d, xpos: %d"), yStartPos, yEndPos, xpos);
@@ -198,11 +193,7 @@ void AddVerticalLineTask::DoCheckMoving(const wxPoint &pos)
 
     if ( !doc || !doc->signals.size() )return;
 
-    if ( pos.x < m_view->GetWavesLeftSpace()+10 ||
-         pos.x > m_view->GetWavesLeftSpace() + m_view->GridStepWidth*(m_view->VisibleTicks.size() - 1) ||
-         pos.y < m_view->heightOffsets[0]-5 ||
-         pos.y > m_view->heightOffsets[m_view->heightOffsets.size()-1]+5)
-        return;
+    if (!IsOverWaves(pos) ) return;
 
     unsigned int k;
     for ( k = 0 ; k < m_view->heightOffsets.size()-1 ; ++k )
@@ -226,11 +217,7 @@ void AddVerticalLineTask::DoCheckWhenMouseUp(const wxPoint &pos)
 
     if ( !doc || !doc->signals.size() )return;
 
-    if ( pos.x < m_view->GetWavesLeftSpace()+10 ||
-         pos.x > m_view->GetWavesLeftSpace() + m_view->GridStepWidth*(m_view->VisibleTicks.size() - 1) ||
-         pos.y < m_view->heightOffsets[0]-5 ||
-         pos.y > m_view->heightOffsets[m_view->heightOffsets.size()-1]+5)
-        return;
+    if (!IsOverWaves(pos) ) return;
 
 
     unsigned int k;
