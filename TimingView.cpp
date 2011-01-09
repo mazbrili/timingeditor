@@ -193,6 +193,32 @@ wxString TimingView::GetFloatFormatStr() const
     unsigned char digitsAfterDecimalpoint = 2;
     return wxString::Format(_T("\%.%df "), digitsAfterDecimalpoint);
 }
+wxString TimingView::GetTimeString(wxInt32 ticks)
+{
+    TimingDocument *doc = (TimingDocument *) GetDocument();
+    double t = (ticks + doc->timeOffset) * doc->TickLength;
+    wxInt8 u = doc->TickLengthUnit;
+    while ( u < 3 && (t >= 1000.0 || t <= -1000.0))
+    {
+        u++;
+        t /= 1000.0;
+    }
+    wxString str(wxString::Format(GetFloatFormatStr(), t));
+    switch (u)
+    {
+        case -5: str += _("fs"); break;
+        case -4: str += _("ps"); break;
+        case -3: str += _("ns"); break;
+        case -2: str += _("us"); break;
+        case -1: str += _("ms"); break;
+        case  0: str += _("s"); break;
+        case  1: str += _("ks"); break;
+        case  2: str += _("Ms"); break;
+        default:
+        case  3: str += _("Gs"); break;
+    }
+    return str;
+}
 wxFont TimingView::GetFont() const
 {
     return wxFont(10, wxFONTFAMILY_SWISS,  wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
@@ -650,8 +676,7 @@ void TimingView::OnAddClock(wxCommandEvent& event)
 
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
 
-////    window->SetNeutralState();
-//    window->SetCursor(*wxCROSS_CURSOR);
+    SetTask(NULL);
 
     cmdproc->Submit( new AddSignalCommand(doc, n, sig) );
 
@@ -672,9 +697,7 @@ void TimingView::OnAddSignal(wxCommandEvent& event)
     for (wxInt32 n = 0 ; n < doc->length; ++n)
         sig.values.push_back(zero);
 
-#warning add fsm reset
-////    window->SetNeutralState();
-//    window->SetCursor(*wxCROSS_CURSOR);
+    SetTask(NULL);
 
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
 
@@ -698,8 +721,7 @@ void TimingView::OnAddBus(wxCommandEvent& event)
         sig.values.push_back(zero);
     sig.TextValues[0] = _("Data");
 
-////    window->SetNeutralState();
-//    window->SetCursor(*wxCROSS_CURSOR);
+    SetTask(NULL);
 
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
 
