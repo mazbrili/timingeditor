@@ -22,7 +22,6 @@ bool DiagramRightWindow::Create(TimingView *view, wxWindow *parent, DiagramLabel
     SetTargetWindow( m_waves );
 
     SetBackgroundColour( wxT("WHITE") );
-    //SetCursor( wxCursor( wxCURSOR_HAND ) );
 
     wxBoxSizer *mainsizer = new wxBoxSizer(wxVERTICAL);
     mainsizer->Add(m_axis, 0, wxEXPAND);

@@ -41,7 +41,9 @@ m_labels(labels),
 m_view(view),
 m_drawlet(NULL)
 {
-    (void)new wxTextCtrl( this, wxID_ANY, _T("Text I"), wxPoint(0,100), wxSize(100,25), wxBORDER_NONE );
+    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text I"), wxPoint(0,100), wxSize(80,25), wxBORDER_NONE ));
+    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text II"), wxPoint(0,150), wxSize(80,25), wxBORDER_NONE ));
+    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text III"), wxPoint(0,200), wxSize(80,25), wxBORDER_NONE ));
 }
 DiagramWavesWindow::DiagramWavesWindow(){}
 DiagramWavesWindow::~DiagramWavesWindow(){}
@@ -267,6 +269,8 @@ void DiagramWavesWindow::OnMouse(wxMouseEvent &event)
     m_owner->CalcUnscrolledPosition( scroll_x, scroll_y, &scroll_x, &scroll_y );
     wxPoint pt(scroll_x, scroll_y);
     m_view->WavesMouse(event, pt);
+    if (event.ButtonDown(wxMOUSE_BTN_LEFT))
+        SetFocusIgnoringChildren();
     event.Skip();
 }
 void DiagramWavesWindow::OnKeyDown(wxKeyEvent &event)
@@ -288,5 +292,18 @@ void DiagramWavesWindow::OnMouseEnter(wxMouseEvent &event)
 void DiagramWavesWindow::OnMouseLeave(wxMouseEvent &event)
 {
     RemoveDrawlet();
+}
+bool DiagramWavesWindow::SetCursor(const wxCursor &cursor, bool forchilds )
+{
+    bool ret = wxWindow::SetCursor(cursor);
+
+
+    for (unsigned int i = 0 ; i < textctrls.size(); i++)
+        if (!forchilds)
+            textctrls[i]->SetCursor(wxCURSOR_IBEAM);
+        else
+            textctrls[i]->SetCursor(cursor);
+
+    return ret;
 }
 

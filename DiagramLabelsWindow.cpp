@@ -6,7 +6,7 @@
 #include "TimingView.h"
 
 #include "HoverDrawlet.h"
-
+#include "LabelText.h"
 
 IMPLEMENT_DYNAMIC_CLASS(DiagramLabelsWindow,wxScrolledWindow)
 
@@ -75,8 +75,6 @@ void DiagramLabelsWindow::Update()
         if ( sig.IsBus )
             str += _T(" [") + sig.buswidth + _T("]");
 
-        //str += _T("Really loooooooooooong label");
-
         GetTextExtent(str, &w, &h);
 
         wxCoord additionaloffset = doc->SignalHeight/2 +
@@ -85,9 +83,11 @@ void DiagramLabelsWindow::Update()
                                    h/2;
 
         //dc.DrawText(str, 10, m_view->heightOffsets[k] + additionaloffset);
-        textctrls.push_back(new wxTextCtrl(this, wxID_ANY, str,
-                                           wxPoint(GetOffsetToLabelTextCtrl(), m_view->heightOffsets[k] + additionaloffset),
-                                           wxSize(w+10,h+5), wxBORDER_NONE )); //wxBORDER_NONE| wxTE_DONTWRAP | wxBORDER_SIMPLE
+        LabelText *label = new LabelText(this, str,
+                                         wxPoint(GetOffsetToLabelTextCtrl(), m_view->heightOffsets[k] + additionaloffset),
+                                         wxSize(w+10,h+5), k);
+        label->SetBackgroundColour(this->GetBackgroundColour());
+        textctrls.push_back( label );
         if ( width < w )
             width = w;
 
@@ -259,6 +259,9 @@ void DiagramLabelsWindow::OnMouse(wxMouseEvent &event)
     pt.y -= yOrigin*yScrollUnits;
 
     m_view->LabelsMouse(event, pt);
+
+    if (event.ButtonDown(wxMOUSE_BTN_LEFT))
+        SetFocusIgnoringChildren();
 
     event.Skip();
 };

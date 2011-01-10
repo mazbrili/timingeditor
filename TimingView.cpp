@@ -459,7 +459,6 @@ void TimingView::UpdateVerticalLines()
 
     m_vertlines.clear();
 
-
     for ( wxUint32 k = 0 ; k < doc->vertlines.size() ; ++k)
     {
         bool found = false;
@@ -624,8 +623,6 @@ void TimingView::UpdateHorizontalArrows()
             m_horizontalarrows.push_back(GraphHorizontalArrow(offset, tooffset, text, textoff));
         }
     }
-
-
 }
 void TimingView::UpdateSignals()
 {

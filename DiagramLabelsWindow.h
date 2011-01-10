@@ -9,6 +9,7 @@ class TimingView;
 //class TimingTextCtrl;
 //class wxStaticLine;
 class HoverDrawlet;
+class LabelText;
 
 class DiagramLabelsWindow : public wxScrolledWindow
 {
@@ -53,7 +54,7 @@ public:
     virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL);
 
 private:
-    std::vector<wxTextCtrl*> textctrls;
+    std::vector<LabelText*> textctrls;
 
 private:
     wxScrolledWindow   *m_owner;
