@@ -21,7 +21,7 @@ Task(view, labelsWin, axisWin, waveWin)
     cursImage.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, 2);
     wxCursor newcursor(cursImage);
 
-    m_waveWin->SetCursor(newcursor);
+    m_waveWin->SetCursor(newcursor, true);
     m_axisWin->SetCursor(*wxCROSS_CURSOR);
     m_labelsWin->SetCursor(wxNullCursor);
 }

@@ -162,6 +162,8 @@
 		<Unit filename="HoverLine.h" />
 		<Unit filename="HoverText.cpp" />
 		<Unit filename="HoverText.h" />
+		<Unit filename="LabelText.cpp" />
+		<Unit filename="LabelText.h" />
 		<Unit filename="Task.cpp" />
 		<Unit filename="Task.h" />
 		<Unit filename="TimeCompressorSettingsPanel.cpp" />

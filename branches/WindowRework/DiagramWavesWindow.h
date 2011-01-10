@@ -3,6 +3,8 @@
 
 #include <wx/panel.h>
 
+#include <vector>
+
 
 class wxScrolledWindow;
 class DiagramAxisWindow;
@@ -20,6 +22,7 @@ public:
 
     void SetDrawlet(HoverDrawlet *drawlet);
     void RemoveDrawlet();
+    virtual bool SetCursor(const wxCursor &cursor, bool forchilds = false );
 private:
     DiagramWavesWindow();
     void OnPaint( wxPaintEvent &event );
@@ -49,6 +52,9 @@ private:
     TimingView              *m_view;
 
     HoverDrawlet            *m_drawlet;
+
+
+    std::vector<wxTextCtrl*> textctrls;
 
     DECLARE_DYNAMIC_CLASS(DiagramWavesWindow)
     DECLARE_EVENT_TABLE()
