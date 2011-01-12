@@ -57,6 +57,7 @@
 
 #include "Task.h"
 #include "AddVerticalLineTask.h"
+#include "EditTextTask.h"
 
 
 IMPLEMENT_DYNAMIC_CLASS(TimingView, wxView)
@@ -735,8 +736,6 @@ void TimingView::OnRulerTool(wxCommandEvent& event)
     DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
     AddVerticalLineTask *newtask = new AddVerticalLineTask(this,splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
 
-    if ( task != defaultTask )
-        delete task;
     SetTask(newtask);
 }
 void TimingView::OnHArrowTool(wxCommandEvent& event)
@@ -820,6 +819,7 @@ wxInt32 TimingView::GetSelectedDiscontinuity()
 
 
 
+/// //////////////////////////// delegates to task
 
 void TimingView::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
@@ -835,12 +835,20 @@ void TimingView::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 }
 void TimingView::SetTask(Task *newtask)
 {
+    if ( task != defaultTask )
+    {
+        delete task;
+    }
     if ( !newtask )
     {
         defaultTask->InitTask();
         newtask = defaultTask;
     }
     task = newtask;
+}
+void TimingView::TextHasFocus(TimingTextCtrl *ctrl)
+{
+    task->TextHasFocus(ctrl);
 }
 void TimingView::LabelsKey(const wxKeyEvent &event, bool down)
 {
@@ -854,9 +862,12 @@ void TimingView::AxisKey(const wxKeyEvent &event, bool down)
 {
     task->AxisKey(event, down);
 }
+//bool TimingView::CanEditText()
+//{
+//    return task->CanEditText();
+//}
 
-
-
+/// //////////////////////////////////////////////////
 
 bool TimingView::IsDiscontinuitySelected()
 {

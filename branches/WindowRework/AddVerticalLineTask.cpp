@@ -1,8 +1,14 @@
 #include "AddVerticalLineTask.h"
 
+#include "DiagramAxisWindow.h"
+#include "DiagramLabelsWindow.h"
+#include "DiagramWavesWindow.h"
+#include "TimingView.h"
 #include "HoverCombo.h"
 #include "HoverGraphCaret.h"
 #include "HoverLine.h"
+
+#include "cmd.h"
 
 #include "art/ruler_cur.xpm" // defines ruler_cur_xpm
 
@@ -103,7 +109,6 @@ bool AddVerticalLineTask::CanPaste(){return false;}
 void AddVerticalLineTask::EndTask()
 {
     m_view->SetTask(NULL);
-    delete this;
 }
 void AddVerticalLineTask::DoCheckWhenMouseDown(const wxPoint &pos)
 {
@@ -212,7 +217,6 @@ void AddVerticalLineTask::DoCheckMoving(const wxPoint &pos)
 
 void AddVerticalLineTask::DoCheckWhenMouseUp(const wxPoint &pos)
 {
-    wxInt32 endpos;
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
 
     if ( !doc || !doc->signals.size() )return;

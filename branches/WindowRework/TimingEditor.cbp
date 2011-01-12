@@ -15,7 +15,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D__WXDEBUG__" />
-					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
+					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswud" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
@@ -57,7 +57,7 @@
 					<Add option="-O2" />
 					<Add option="-O1" />
 					<Add option="-O" />
-					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
+					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswu" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
@@ -98,8 +98,8 @@
 			<Add option="-D__WXMSW__" />
 			<Add option="-DwxUSE_UNICODE" />
 			<Add option="-DWX_PRECOMP" />
-			<Add directory="$(#wx)\include" />
-			<Add directory="$(#wx)\contrib\include" />
+			<Add directory="C:\cpplibs\wxWidgets-2.8.11\include" />
+			<Add directory="C:\cpplibs\wxWidgets-2.8.11\contrib\include" />
 		</Compiler>
 		<ResourceCompiler>
 			<Add directory="$(#wx)\include" />
@@ -124,6 +124,8 @@
 		<Unit filename="AddVerticalLineTask.h" />
 		<Unit filename="AxisSettingsPanel.cpp" />
 		<Unit filename="AxisSettingsPanel.h" />
+		<Unit filename="BusWidthText.cpp" />
+		<Unit filename="BusWidthText.h" />
 		<Unit filename="ClockSettingsPanel.cpp" />
 		<Unit filename="ClockSettingsPanel.h" />
 		<Unit filename="DataObject.cpp" />
@@ -138,6 +140,8 @@
 		<Unit filename="DiagramSplitterWindow.h" />
 		<Unit filename="DiagramWavesWindow.cpp" />
 		<Unit filename="DiagramWavesWindow.h" />
+		<Unit filename="EditTextTask.cpp" />
+		<Unit filename="EditTextTask.h" />
 		<Unit filename="GraphBusSignal.cpp" />
 		<Unit filename="GraphBusSignal.h" />
 		<Unit filename="GraphClockSignal.cpp" />
@@ -176,6 +180,8 @@
 		<Unit filename="TimingMainFrame.h" />
 		<Unit filename="TimingSubFrame.cpp" />
 		<Unit filename="TimingSubFrame.h" />
+		<Unit filename="TimingTextCtrl.cpp" />
+		<Unit filename="TimingTextCtrl.h" />
 		<Unit filename="TimingView.cpp" />
 		<Unit filename="TimingView.h" />
 		<Unit filename="TransitionSettingsPanel.cpp" />
@@ -219,7 +225,11 @@
 		<Extensions>
 			<code_completion />
 			<envvars />
-			<debugger />
+			<debugger>
+				<remote_debugging>
+					<options conn_type="-1" additional_cmds="run" />
+				</remote_debugging>
+			</debugger>
 			<SVNInside Login="d_anselmi" ConnectStatus="1" NeedsPassword="1" />
 			<DoxyBlocks>
 				<comment_style block="0" line="0" />

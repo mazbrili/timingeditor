@@ -4,18 +4,11 @@
 #include <wx/clipbrd.h>
 #include <wx/event.h>
 
-#include "TimingView.h"
-#include "DataObject.h"
-
-#include "cmd.h"
-#include "DiagramAxisWindow.h"
-#include "DiagramLabelsWindow.h"
-#include "DiagramWavesWindow.h"
-
+class TimingView;
 class DiagramLabelsWindow;
 class DiagramAxisWindow;
 class DiagramWavesWindow;
-
+class TimingTextCtrl;
 class Signal;
 
 class Task
@@ -41,6 +34,9 @@ public:
     virtual bool CanPaste();
     virtual bool CanDelete();
     virtual bool HasActiveSelection();
+    //virtual void EndTask();
+    virtual void TextHasFocus(TimingTextCtrl *ctrl);
+
 
     void InitTask();
     wxInt32 GetTickFromPosition(const wxPoint &pos);

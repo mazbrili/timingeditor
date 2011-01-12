@@ -40,17 +40,13 @@
 #include "TimingView.h"
 #include "TimingDoc.h"
 
-
-
-//(*AppHeaders
 #include <wx/image.h>
-//*)
 
 IMPLEMENT_APP(TimingApp);
 
 bool TimingApp::OnInit()
 {
-	//(*AppInitialize
+
 	bool wxsOK = true;
 	wxInitAllImageHandlers();
 
@@ -85,27 +81,18 @@ bool TimingApp::OnInit()
     /// Create the main frame window
     mainframe = new TimingMainFrame(m_docManager,(wxFrame *) NULL);
 
-
     SetTopWindow(mainframe);
-
 
 #ifndef __WXMAC__
     mainframe->Show(true);
-#endif //ndef __WXMAC__
-
-    //wxInitAllImageHandlers();
-    wxImage::AddHandler( new wxPNGHandler );
-
+#endif
 
     /// open documents specified as parameters from command line
     for ( size_t n = 0 ; n < parser.GetParamCount() ; n++ )
         m_docManager->CreateDocument(parser.GetParam(n), wxDOC_SILENT );
 
-
     mainframe->ShowTip();
 
-
-    //*)
 	return wxsOK;
 }
 
