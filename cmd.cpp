@@ -1208,30 +1208,71 @@ bool ChangeHArrowTextPosCommand::Undo(void)
 {
     return Do();
 }
-ChangeTextCommand::ChangeTextCommand(TimingDocument *doc, wxInt32 number, wxString text)
-    : wxCommand(true, _("change Text")),
-    m_doc(doc),
-    m_nmbr(number),
-    m_newText(text)
+
+
+
+ChangeSignalName::ChangeSignalName(TimingDocument *doc, wxString newName, unsigned int SignalNumber):
+wxCommand(true, _T("Change signal name")),
+m_doc(doc),
+m_signalNumber(SignalNumber),
+m_newText(newName)
 {}
-ChangeTextCommand::~ChangeTextCommand()
-{}
-bool ChangeTextCommand::Do(void)
+ChangeSignalName::~ChangeSignalName(){}
+bool ChangeSignalName::Do()
 {
+    bool haschanged;
     wxString tmp(
-        m_doc->GetText(m_nmbr)
+        m_doc->signals[m_signalNumber].name
     );
-    m_doc->SetText(m_nmbr, m_newText);
-    m_newText = tmp;
+    haschanged = tmp != m_newText;
+    if ( haschanged )
+    {
+        m_doc->signals[m_signalNumber].name = m_newText;
+        m_newText = tmp;
+    }
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
-    return true;
+    return haschanged;
 }
-bool ChangeTextCommand::Undo(void)
+bool ChangeSignalName::Undo()
 {
     return Do();
 }
+
+
+ChangeSignalBuswidth::ChangeSignalBuswidth(TimingDocument *doc, wxString newName, unsigned int SignalNumber):
+wxCommand(true, _T("Change signal bus-width")),
+m_doc(doc),
+m_signalNumber(SignalNumber),
+m_newText(newName)
+{}
+ChangeSignalBuswidth::~ChangeSignalBuswidth(){}
+bool ChangeSignalBuswidth::Do()
+{
+    bool haschanged;
+    wxString tmp(
+        m_doc->signals[m_signalNumber].buswidth
+    );
+    haschanged = tmp != m_newText;
+    if ( haschanged )
+    {
+        m_doc->signals[m_signalNumber].buswidth = m_newText;
+        m_newText = tmp;
+    }
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return haschanged;
+}
+bool ChangeSignalBuswidth::Undo()
+{
+    return Do();
+}
+
+
+
+
 ChangeTransitionWidth::ChangeTransitionWidth(TimingDocument *doc, wxInt8 width, bool en50, bool en90)
     :wxCommand(true, _("change transition width") ),
     m_doc(doc),

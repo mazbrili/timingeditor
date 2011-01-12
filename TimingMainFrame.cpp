@@ -64,7 +64,6 @@
 #include "art/tri.xpm"
 #include "art/ruler_cur.xpm"
 #include "art/harrow_cur.xpm"
-#include "art/textedit_cur.xpm"
 #include "art/cross.xpm"
 #include "art/risingedge.xpm"
 #include "art/clockedge.xpm"
@@ -192,9 +191,14 @@ void TimingMainFrame::InitMenuBar()
     panel_menu->AppendSeparator();
     panel_menu->Append(TIMING_ID_MENUITEM_DEFAULT,_T("Default"));
 
+    wxMenu *view_menu = new wxMenu;
+    //view_menu->AppendSeparator();
+    view_menu->Append(wxID_ANY, _T("Panel"),panel_menu, _T("Show or Hide Panel"));
+
+
     wxMenuBar *menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, _T("&File"));
-    menu_bar->Append(panel_menu, _T("&View"));
+    menu_bar->Append(view_menu, _T("&View"));
     if (edit_menu)
         menu_bar->Append(edit_menu, _T("&Edit"));
     menu_bar->Append(help_menu, _T("&Help"));

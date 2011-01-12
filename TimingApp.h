@@ -18,8 +18,6 @@
 //    Contact e-mail: daniel anselmi <danselmi@gmx.ch>
 //    Program URL   : http://sourceforge.net/projects/timingeditor/
 //
-//
-
 #ifndef TIMINGAPP_H
 #define TIMINGAPP_H
 

@@ -26,7 +26,7 @@
 #include <wx/docview.h>
 #include <wx/cmdproc.h>
 
-class TimingDocument;
+#include "TimingDoc.h"
 
 class DeleteVLineCommand : public wxCommand
 {
@@ -261,16 +261,28 @@ protected:
     wxInt32 m_gridoff;
 };
 
-class ChangeTextCommand : public wxCommand
+class ChangeSignalName : public wxCommand
 {
 public:
-    ChangeTextCommand(TimingDocument *doc, wxInt32 number, wxString text);
-    ~ChangeTextCommand();
-    bool Do(void);
-    bool Undo(void);
+    ChangeSignalName(TimingDocument *doc, wxString newName, unsigned int SignalNumber);
+    ~ChangeSignalName();
+    bool Do();
+    bool Undo();
 protected:
     TimingDocument *m_doc;
-    wxInt32 m_nmbr;
+    unsigned int m_signalNumber;
+    wxString m_newText;
+};
+class ChangeSignalBuswidth : public wxCommand
+{
+public:
+    ChangeSignalBuswidth(TimingDocument *doc, wxString newName, unsigned int SignalNumber);
+    ~ChangeSignalBuswidth();
+    bool Do();
+    bool Undo();
+protected:
+    TimingDocument *m_doc;
+    unsigned int m_signalNumber;
     wxString m_newText;
 };
 class ChangeTransitionWidth : public wxCommand

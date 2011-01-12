@@ -1,9 +1,18 @@
 #include "Task.h"
 
+#include "DiagramAxisWindow.h"
+#include "DiagramLabelsWindow.h"
+#include "DiagramWavesWindow.h"
+#include "TimingView.h"
+#include "DataObject.h"
 #include "HoverCross.h"
 #include "HoverText.h"
 #include "HoverLine.h"
 #include "HoverCombo.h"
+
+#include "EditTextTask.h"
+#include "cmd.h"
+
 
 Task::Task(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin):
 m_view(view),
@@ -36,13 +45,13 @@ void Task::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
         bool found = false;
         for ( unsigned int k = 0 ; k < m_view->heightOffsets.size()-1 ; ++k )
         {
-            if(pos.y > m_view->heightOffsets[k+1] - 6 && pos.y < m_view->heightOffsets[k+1]-1 )
+            if(pos.y > m_view->heightOffsets[k+1] - 3 && pos.y < m_view->heightOffsets[k+1]-1 )
             {
                 m_labelsWin->SetCursor(wxCursor(wxCURSOR_SIZENS));
                 found = true;
                 break;
             }
-            else if ( pos.y > m_view->heightOffsets[k]+1 && pos.y < m_view->heightOffsets[k] + 6)
+            else if ( pos.y > m_view->heightOffsets[k]+1 && pos.y < m_view->heightOffsets[k] + 3)
             {
                 m_labelsWin->SetCursor(wxCursor(wxCURSOR_SIZENS));
                 found = true;
@@ -95,7 +104,7 @@ void Task::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
     if ( event.Moving() )
     {
         wxInt32 tick = GetTickFromPosition(pos);
-        if ( pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*(m_view->VisibleTicks.size() - 1))
+        if ( pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1))
         {
             wxString str = wxString::Format(_T("tick: %d, t: "), m_view->VisibleTicks[tick]);
             str += m_view->GetTimeString( m_view->VisibleTicks[tick] );
@@ -185,13 +194,6 @@ void Task::Paste()
 {
     if (wxTheClipboard->Open())
     {
-////        if (wxTheClipboard->IsSupported( wxDF_TEXT ))
-//        {
-//            wxTextDataObject data;
-//            wxTheClipboard->GetData( data );
-//            window->InsertText( data.GetText() );
-//        }
-//        else
         if (wxTheClipboard->IsSupported( wxDataFormat(TimingEditorSignalFormatId) ) )
         {
             Signal *sig = new Signal;
@@ -269,7 +271,11 @@ wxInt32 Task::GetTickFromPosition(const wxPoint &pos)
 bool Task::IsOverWaves(const wxPoint &pos)
 {
     return //pos.x > m_view->GetWavesLeftSpace() &&
-         pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*(m_view->VisibleTicks.size() - 1) &&
+         pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1) &&
          //pos.y > m_view->heightOffsets[0]-5 &&
          pos.y < m_view->heightOffsets[m_view->heightOffsets.size()-1]+5;
+}
+void Task::TextHasFocus(TimingTextCtrl *ctrl)
+{
+    m_view->SetTask(new EditTextTask(m_view, m_labelsWin, m_axisWin, m_waveWin, ctrl));
 }

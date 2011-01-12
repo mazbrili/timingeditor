@@ -42,6 +42,8 @@ class Signal;
 class GraphSignal;
 class Task;
 
+class TimingTextCtrl;
+
 typedef std::vector<GraphVerticalLine> VerticalLines;
 typedef std::vector<GraphHorizontalArrow> HorizontalArrows;
 typedef std::vector<GraphSignal*> GraphSignals;
@@ -136,6 +138,7 @@ public:
     bool IsSignalSelected(void);
     bool IsSelectedSignalClock(void);
     bool IsDiscontinuitySelected(void);
+    //bool CanEditText();
 
     void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
     void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -145,6 +148,7 @@ public:
     void AxisKey(const wxKeyEvent &event, bool down);
 
     void SetTask(Task *task = NULL);
+    void TextHasFocus(TimingTextCtrl *ctrl);
 private:
     Task *task;
     Task *defaultTask ;

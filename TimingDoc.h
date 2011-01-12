@@ -126,7 +126,7 @@ class TimingDocument: public wxDocument
 
     public:
         bool IsReadOnly(void){return m_readOnly;}
-
+    private:
         void SetText(wxInt32 number, wxString text);
         wxString GetText(wxInt32 number);
 

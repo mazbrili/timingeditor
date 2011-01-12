@@ -7,6 +7,7 @@
 
 #include "HoverDrawlet.h"
 #include "LabelText.h"
+#include "BusWidthText.h"
 
 IMPLEMENT_DYNAMIC_CLASS(DiagramLabelsWindow,wxScrolledWindow)
 
@@ -15,26 +16,20 @@ BEGIN_EVENT_TABLE(DiagramLabelsWindow, wxScrolledWindow)
   EVT_ERASE_BACKGROUND(    DiagramLabelsWindow::OnEraseBackground)
   ////EVT_SIZE(                DiagramLabelsWindow::OnSize)
   ////EVT_MOUSEWHEEL(          DiagramLabelsWindow::OnMousewheel)
-
-    EVT_MOUSE_EVENTS(      DiagramLabelsWindow::OnMouse)
-//  EVT_MOTION(              DiagramLabelsWindow::OnMouse)
-//  EVT_LEFT_DOWN(           DiagramLabelsWindow::OnMouse)
-//  EVT_LEFT_UP(             DiagramLabelsWindow::OnMouse)
-//  EVT_RIGHT_DOWN(          DiagramLabelsWindow::OnMouse)
-//  EVT_RIGHT_UP(            DiagramLabelsWindow::OnMouse)
-//  EVT_RIGHT_DCLICK(        DiagramLabelsWindow::OnMouse)
-//
-//  EVT_ENTER_WINDOW(        DiagramLabelsWindow::OnMouseEnter)
-//  EVT_LEAVE_WINDOW(        DiagramLabelsWindow::OnMouseLeave)
-
-  //EVT_CHILD_FOCUS(         DiagramLabelsWindow::OnChildFocus)
+  EVT_MOUSE_EVENTS(        DiagramLabelsWindow::OnMouse)
   EVT_KEY_DOWN(            DiagramLabelsWindow::OnKeyDown)
   EVT_KEY_UP(              DiagramLabelsWindow::OnKeyUp)
+
+  //EVT_SET_FOCUS(           DiagramLabelsWindow::OnSetFocus)
+
 END_EVENT_TABLE()
 
-
+//void DiagramLabelsWindow::OnSetFocus(wxFocusEvent &event)
+//{
+//    wxLogDebug(_T("DiagramLabelsWindow::OnSetFocus"));
+//}
 DiagramLabelsWindow::DiagramLabelsWindow(TimingView *view, wxWindow* parent, wxScrolledWindow *scrollowner, wxWindowID id , const wxPoint& pos, const wxSize& size, long style)
-: wxScrolledWindow(  parent, id, pos, size, style/* | wxNO_FULL_REPAINT_ON_RESIZE | wxCLIP_CHILDREN*/ ),
+: wxScrolledWindow(  parent, id, pos, size, style ),
 m_owner(scrollowner),
 m_view(view),
 m_drawlet(NULL)
@@ -43,8 +38,6 @@ m_drawlet(NULL)
     SetVirtualSize(300, -1);
 
     SetScrollRate( m_view->GetScrollPixelsPerUnit(), 0);
-
-    //(void*)new wxTextCtrl(this, wxID_ANY, _T("TEST"), wxPoint(20,20), wxSize(50,20), wxBORDER_SIMPLE ); //wxBORDER_NONE| wxTE_DONTWRAP
 
 }
 DiagramLabelsWindow::~DiagramLabelsWindow(){}
@@ -61,6 +54,10 @@ void DiagramLabelsWindow::Update()
         textctrls[i]->Destroy();
     textctrls.clear();
 
+    for ( unsigned int i = 0 ; i < bwidthctrls.size(); i++)
+        bwidthctrls[i]->Destroy();
+    bwidthctrls.clear();
+
 
     wxCoord width = 0;
     wxCoord w, h;
@@ -72,10 +69,7 @@ void DiagramLabelsWindow::Update()
         Signal &sig = doc->signals[k];
         wxString str = sig.name;
 
-        if ( sig.IsBus )
-            str += _T(" [") + sig.buswidth + _T("]");
-
-        GetTextExtent(str, &w, &h);
+        GetTextExtent(str+_("["), &w, &h);
 
         wxCoord additionaloffset = doc->SignalHeight/2 +
                                    doc->MinimumSignalDistance/2 +
@@ -83,11 +77,30 @@ void DiagramLabelsWindow::Update()
                                    h/2;
 
         //dc.DrawText(str, 10, m_view->heightOffsets[k] + additionaloffset);
-        LabelText *label = new LabelText(this, str,
+        LabelText *label = new LabelText(this, m_view, str,
                                          wxPoint(GetOffsetToLabelTextCtrl(), m_view->heightOffsets[k] + additionaloffset),
                                          wxSize(w+10,h+5), k);
         label->SetBackgroundColour(this->GetBackgroundColour());
         textctrls.push_back( label );
+
+
+        if ( sig.IsBus )
+        {
+            wxCoord wadd;
+            str = sig.buswidth;
+            GetTextExtent(str+_("["), &wadd, &h);
+
+            BusWidthText *bwidth = new BusWidthText(this, m_view, str,
+                                                    wxPoint(GetOffsetToLabelTextCtrl()+ w+10, m_view->heightOffsets[k] + additionaloffset ),
+                                                    wxSize(wadd+10,h+5), k);
+            bwidth->SetBackgroundColour(this->GetBackgroundColour());
+            label->SetBuswidthField(bwidth);
+            bwidthctrls.push_back(bwidth);
+            w += wadd + 10;
+        }
+
+
+
         if ( width < w )
             width = w;
 
@@ -136,10 +149,6 @@ const unsigned int DiagramLabelsWindow::GetOffsetToLabelTextCtrl()const
 {
     return 10;
 }
-//void DiagramLabelsWindow::OnChildFocus(wxChildFocusEvent &event)
-//{
-//
-//}
 void DiagramLabelsWindow::ScrollWindow(int dx, int dy, const wxRect* rect)
 {
     wxScrolledWindow::ScrollWindow(dx, dy, rect);
@@ -201,35 +210,6 @@ void DiagramLabelsWindow::Draw(wxDC &dc)
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
     if ( !doc ) return;
 
-
-//    // draw the text to show the signal names
-//    wxCoord width = 0;
-//    wxCoord w, h;
-//    dc.SetPen(wxPen(GetTextColour(), 1));
-//    dc.SetFont(m_view->GetFont());
-//    for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
-//    {
-//        Signal &sig = doc->signals[k];
-//        wxString str = sig.name;
-//
-//        if ( sig.IsBus )
-//            str += _T(" [") + sig.buswidth + _T("]");
-//
-//        GetTextExtent(str, &w, &h);
-//
-//        wxCoord additionaloffset = doc->SignalHeight/2 +
-//                                   doc->MinimumSignalDistance/2 +
-//                                   sig.prespace-
-//                                   h/2;
-//        dc.DrawText(str, 10, m_view->heightOffsets[k] + additionaloffset);
-//        if ( width < w )
-//            width = w;
-//
-//    }
-//    width += 30;
-//    SetVirtualSize(width, -1);
-//    dc.SetPen(wxNullPen);
-
     // draw the horizontal lines
     wxCoord width = GetVirtualSize().GetX();
     if ( width < GetClientSize().x)
@@ -260,10 +240,10 @@ void DiagramLabelsWindow::OnMouse(wxMouseEvent &event)
 
     m_view->LabelsMouse(event, pt);
 
-    if (event.ButtonDown(wxMOUSE_BTN_LEFT))
+    if ( event.ButtonDown(/*wxMOUSE_BTN_LEFT*/) )
         SetFocusIgnoringChildren();
 
-    event.Skip();
+    //event.Skip();
 };
 
 void DiagramLabelsWindow::OnKeyDown(wxKeyEvent &event)

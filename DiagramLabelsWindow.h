@@ -10,6 +10,7 @@ class TimingView;
 //class wxStaticLine;
 class HoverDrawlet;
 class LabelText;
+class BusWidthText;
 
 class DiagramLabelsWindow : public wxScrolledWindow
 {
@@ -21,9 +22,9 @@ private:
     void OnPaint( wxPaintEvent &event );
     void OnEraseBackground(wxEraseEvent &WXUNUSED(event) );
     //void OnSize( wxSizeEvent &WXUNUSED(event) );
+    //void OnSetFocus(wxFocusEvent &event);
 
 private:
-    //void OnChildFocus(wxChildFocusEvent &event);
 
     void OnMouseLeave(wxMouseEvent &event);
     void OnMouseEnter(wxMouseEvent &event);
@@ -55,6 +56,7 @@ public:
 
 private:
     std::vector<LabelText*> textctrls;
+    std::vector<BusWidthText*> bwidthctrls;
 
 private:
     wxScrolledWindow   *m_owner;

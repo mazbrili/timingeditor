@@ -3,7 +3,6 @@
 
 #include "Task.h"
 
-
 class AddVerticalLineTask : public Task
 {
 public:
@@ -27,7 +26,11 @@ public:
     virtual bool CanPaste();
     //virtual bool CanDelete();
     //virtual bool HasActiveSelection();
+    //virtual bool CanEditText(){return false;}
+
 private:
+    void EndTask();
+
     typedef enum{
         waitingFirstPoint,
         waitingSecondPoint
@@ -36,7 +39,6 @@ protected:
 private:
     states state;
 
-    void EndTask();
     void NonInvolvedWindowMouse(const wxMouseEvent &event);
     void HandleKey(const wxKeyEvent &event, bool down);
 

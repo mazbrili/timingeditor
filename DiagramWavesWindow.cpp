@@ -269,7 +269,7 @@ void DiagramWavesWindow::OnMouse(wxMouseEvent &event)
     m_owner->CalcUnscrolledPosition( scroll_x, scroll_y, &scroll_x, &scroll_y );
     wxPoint pt(scroll_x, scroll_y);
     m_view->WavesMouse(event, pt);
-    if (event.ButtonDown(wxMOUSE_BTN_LEFT))
+    if (event.ButtonDown(/*wxMOUSE_BTN_LEFT*/))
         SetFocusIgnoringChildren();
     event.Skip();
 }
