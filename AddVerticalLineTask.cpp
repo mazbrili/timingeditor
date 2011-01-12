@@ -15,7 +15,10 @@
 AddVerticalLineTask::AddVerticalLineTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin):
 Task(view, labelsWin, axisWin, waveWin)
 {
-    //ctor
+    InitTask();
+}
+void AddVerticalLineTask::InitTask()
+{
     m_axisWin->RemoveDrawlet();
     m_waveWin->RemoveDrawlet();
     m_labelsWin->RemoveDrawlet();

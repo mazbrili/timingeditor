@@ -10,11 +10,13 @@ class EditTextTask;
 class TimingTextCtrl : public wxTextCtrl
 {
 public:
-    TimingTextCtrl(wxWindow *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, long style = 0);
+    TimingTextCtrl(wxPanel *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, long style = 0);
     virtual ~TimingTextCtrl();
 
     virtual void RestoreText();
     virtual wxCommand *GetCommand()=0;
+
+    void SetFocusToParent();
 protected:
     TimingTextCtrl(){}
 

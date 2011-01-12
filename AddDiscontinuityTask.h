@@ -1,13 +1,13 @@
-#ifndef ADDVERTICALLINETASK_H
-#define ADDVERTICALLINETASK_H
+#ifndef ADDDISCONTINUITYTASK_H
+#define ADDDISCONTINUITYTASK_H
 
 #include "Task.h"
 
-class AddVerticalLineTask : public Task
+class AddDiscontinuityTask : public Task
 {
 public:
-    AddVerticalLineTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin);
-    virtual ~AddVerticalLineTask();
+    AddDiscontinuityTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin);
+    virtual ~AddDiscontinuityTask();
 
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
     virtual void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -27,31 +27,25 @@ public:
     //virtual bool CanDelete();
     //virtual bool HasActiveSelection();
     //virtual bool CanEditText(){return false;}
+    //virtual void TextHasFocus(TimingTextCtrl *ctrl);
     virtual void InitTask();
 
 private:
     void EndTask();
 
-    typedef enum{
-        waitingFirstPoint,
-        waitingSecondPoint
-    }states;
 protected:
 private:
-    states state;
 
-    void NonInvolvedWindowMouse(const wxMouseEvent &event);
     void HandleKey(const wxKeyEvent &event, bool down);
 
     void DoCheckWhenMouseDown(const wxPoint &pos);
-    void DoCheckMoving(const wxPoint &pos);
-    void DoCheckWhenMouseUp(const wxPoint &pos);
-    void SetDrawlet();
+    //void NonInvolvedWindowMouse(const wxMouseEvent &event);
+    //void DoCheckMoving(const wxPoint &pos);
+    //void DoCheckWhenMouseUp(const wxPoint &pos);
+    //void SetDrawlet();
 private:
-    wxInt32 yStartPos; // above signal number
-    wxInt32 yEndPos; // below signal number
-    wxInt32 xpos;
-    wxUint8 xposoffset;
+
 };
 
-#endif // ADDVERTICALLINETASK_H
+#endif // ADDDISCONTINUITYTASK_H
+

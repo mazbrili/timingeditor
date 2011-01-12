@@ -55,8 +55,9 @@
 #include "GraphClockSignal.h"
 #include "GraphNormalSignal.h"
 
-#include "Task.h"
+#include "MainTask.h"
 #include "AddVerticalLineTask.h"
+#include "AddDiscontinuityTask.h"
 #include "EditTextTask.h"
 
 
@@ -112,7 +113,7 @@ bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 #endif
 
     DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
-    defaultTask = new Task(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+    defaultTask = new MainTask(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
     if (!defaultTask)
         return false;
 
@@ -730,6 +731,10 @@ void TimingView::OnAddBus(wxCommandEvent& event)
 /// ///////////////////////////////////////////////////////////////////// tools selected
 void TimingView::OnDiscontinuityTool(wxCommandEvent& event)
 {
+    DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
+    AddDiscontinuityTask *newtask = new AddDiscontinuityTask(this,splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+
+    SetTask(newtask);
 }
 void TimingView::OnRulerTool(wxCommandEvent& event)
 {

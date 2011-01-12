@@ -30,6 +30,9 @@ public:
     virtual bool HasActiveSelection();
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
+    virtual void InitTask();
+private:
+    friend class TimingTextCtrl;
     void EndTask();
 private:
     void OnMouse(const wxMouseEvent &event);

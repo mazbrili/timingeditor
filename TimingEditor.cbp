@@ -120,6 +120,8 @@
 			<Add library="libodbc32.a" />
 			<Add library="libgdiplus.a" />
 		</Linker>
+		<Unit filename="AddDiscontinuityTask.cpp" />
+		<Unit filename="AddDiscontinuityTask.h" />
 		<Unit filename="AddVerticalLineTask.cpp" />
 		<Unit filename="AddVerticalLineTask.h" />
 		<Unit filename="AxisSettingsPanel.cpp" />
@@ -168,6 +170,8 @@
 		<Unit filename="HoverText.h" />
 		<Unit filename="LabelText.cpp" />
 		<Unit filename="LabelText.h" />
+		<Unit filename="MainTask.cpp" />
+		<Unit filename="MainTask.h" />
 		<Unit filename="Task.cpp" />
 		<Unit filename="Task.h" />
 		<Unit filename="TimeCompressorSettingsPanel.cpp" />

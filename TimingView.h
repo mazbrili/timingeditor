@@ -92,6 +92,11 @@ public:
     wxCoord GetHeightOfAxisWindow()const;
 
     const int GetScrollPixelsPerUnit()const{return 10;}
+
+    const int GetDistanceToTicksLine()const{return 25;}
+    const int GetDistanceFromTicksLine()const{return 5;}
+    const int GetDistanceToAxis()const{return 25;}
+
 private:
     void UpdateVisibelTicksContainer();
     void UpdateHeightsContainer();
