@@ -6,7 +6,7 @@
 class LabelText : public TimingTextCtrl
 {
 public:
-    LabelText(wxWindow *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber);
+    LabelText(wxPanel *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber);
     virtual ~LabelText();
 
     virtual wxCommand *GetCommand();

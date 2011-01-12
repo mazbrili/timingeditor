@@ -50,12 +50,6 @@ void DiagramAxisWindow::OnPaint( wxPaintEvent& WXUNUSED(event) )
     Draw(dc);
 }
 
-const int DistanceToTicksLine    = 25;
-const int DistanceFromTicksLine  = 5;
-const int DistanceToAxis        = 25;
-const int DistanceFromAxis      = 20;
-
-
 void DiagramAxisWindow::OnEraseBackground(wxEraseEvent &WXUNUSED(event) ){}
 
 wxColour DiagramAxisWindow::GetBackgroundColour() const
@@ -84,6 +78,11 @@ void DiagramAxisWindow::Update()
 void DiagramAxisWindow::Draw(wxDC & dc)
 {
     bool exporting = false;
+
+    const int DistanceToTicksLine   = m_view->GetDistanceToTicksLine();
+    const int DistanceFromTicksLine = m_view->GetDistanceFromTicksLine();
+    const int DistanceToAxis        = m_view->GetDistanceToAxis();
+    //const int DistanceFromAxis      = 20;
 
     if (!m_view) return;
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();

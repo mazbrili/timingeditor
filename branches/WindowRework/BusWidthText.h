@@ -6,7 +6,7 @@
 class BusWidthText : public TimingTextCtrl
 {
 public:
-    BusWidthText(wxWindow *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber);
+    BusWidthText(wxPanel *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber);
     virtual ~BusWidthText();
 
     virtual wxCommand *GetCommand();

@@ -1,6 +1,7 @@
-#ifndef BASETASK_H
-#define BASETASK_H
+#ifndef MAINTASK_H
+#define MAINTASK_H
 
+#include "Task.h"
 #include <wx/event.h>
 
 class TimingView;
@@ -10,14 +11,11 @@ class DiagramWavesWindow;
 class TimingTextCtrl;
 class Signal;
 
-class Task
+class MainTask : public Task
 {
 public:
-    Task(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin);
-    virtual ~Task();
-
-    // interface:
-    virtual void InitTask() = 0;
+    MainTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin);
+    virtual ~MainTask();
 
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
     virtual void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -38,18 +36,12 @@ public:
     virtual bool HasActiveSelection();
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
-public:
-    // common methods
-    wxInt32 GetTickFromPosition(const wxPoint &pos);
-    bool IsOverWaves(const wxPoint &pos);
 
+    virtual void InitTask();
 private:
-    void Init();
-protected:
-    TimingView          *m_view;
-    DiagramLabelsWindow *m_labelsWin;
-    DiagramAxisWindow   *m_axisWin;
-    DiagramWavesWindow  *m_waveWin;
+    void AddSignal(Signal *sig);
+
 };
 
-#endif // BASETASK_H
+#endif // MAINTASK_H
+

@@ -11,7 +11,7 @@ BEGIN_EVENT_TABLE(BusWidthText, TimingTextCtrl)
   //EVT_KILL_FOCUS(          BusWidthText::OnKillFocus)
 END_EVENT_TABLE()
 
-BusWidthText::BusWidthText(wxWindow *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber):
+BusWidthText::BusWidthText(wxPanel *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber):
 TimingTextCtrl(parent, view, value, pos, size, wxTE_PROCESS_ENTER | wxBORDER_NONE ), //wxBORDER_NONE| wxTE_DONTWRAP | wxBORDER_SIMPLE
 m_signalNumber(signalNumber)
 {

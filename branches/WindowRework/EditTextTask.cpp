@@ -1,23 +1,28 @@
 #include "EditTextTask.h"
 
+
+#include <wx/clipbrd.h>
+
 #include "TimingTextCtrl.h"
 
 #include "DiagramAxisWindow.h"
 #include "DiagramLabelsWindow.h"
 #include "DiagramWavesWindow.h"
 #include "TimingView.h"
-#include "HoverCombo.h"
-#include "HoverGraphCaret.h"
-#include "HoverLine.h"
-
 #include "cmd.h"
 
 EditTextTask::EditTextTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin, TimingTextCtrl *txtctrl):
 Task(view, labelsWin, axisWin, waveWin),
 m_txtctrl(txtctrl)
 {
+    InitTask();
+}
+
+void EditTextTask::InitTask()
+{
     editdone = false;
-    txtctrl->edittask = this;}
+    m_txtctrl->edittask = this;
+}
 
 EditTextTask::~EditTextTask()
 {
