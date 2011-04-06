@@ -192,8 +192,9 @@ wxColour TimingView::GetGraphCaretColour()const
 int TimingView::GetWavesLeftSpace()const{return 10;}
 wxString TimingView::GetFloatFormatStr() const
 {
-    unsigned char digitsAfterDecimalpoint = 2;
-    return wxString::Format(_T("\%.%df "), digitsAfterDecimalpoint);
+    unsigned char digitsAfterDecimalpoint = 3;
+    wxString format = _T("\%.") + wxString::Format(_T("%d"),digitsAfterDecimalpoint) + _T("f");
+    return format;
 }
 wxString TimingView::GetTimeString(wxInt32 ticks)
 {

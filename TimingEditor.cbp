@@ -234,7 +234,6 @@
 					<options conn_type="-1" additional_cmds="run" />
 				</remote_debugging>
 			</debugger>
-			<SVNInside Login="d_anselmi" ConnectStatus="1" NeedsPassword="1" />
 			<DoxyBlocks>
 				<comment_style block="0" line="0" />
 				<doxyfile_project />
