@@ -110,7 +110,7 @@ void DiagramAxisWindow::Draw(wxDC & dc)
             dc.DrawLine(leftSpace + n*(m_view->GridStepWidth), axispos - 2,
                         leftSpace + n*(m_view->GridStepWidth), axispos + 3);
 
-            double t = (ticks + doc->timeOffset) * doc->TickLength;
+            double t = ((double)ticks + doc->timeOffset) * doc->TickLength;
             wxInt8 u = doc->TickLengthUnit;
             while ( u < 3 && (t >= 1000.0 || t <= -1000.0))
             {

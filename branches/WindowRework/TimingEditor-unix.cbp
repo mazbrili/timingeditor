@@ -41,12 +41,60 @@
 			<Add option="`wx-config --libs`" />
 			<Add library="wx_gtk2u_svg-2.8" />
 		</Linker>
+		<Unit filename="AddDiscontinuityTask.cpp" />
+		<Unit filename="AddDiscontinuityTask.h" />
+		<Unit filename="AddVerticalLineTask.cpp" />
+		<Unit filename="AddVerticalLineTask.h" />
 		<Unit filename="AxisSettingsPanel.cpp" />
 		<Unit filename="AxisSettingsPanel.h" />
+		<Unit filename="BusWidthText.cpp" />
+		<Unit filename="BusWidthText.h" />
 		<Unit filename="ClockSettingsPanel.cpp" />
 		<Unit filename="ClockSettingsPanel.h" />
 		<Unit filename="DataObject.cpp" />
 		<Unit filename="DataObject.h" />
+		<Unit filename="DiagramAxisWindow.cpp" />
+		<Unit filename="DiagramAxisWindow.h" />
+		<Unit filename="DiagramLabelsWindow.cpp" />
+		<Unit filename="DiagramLabelsWindow.h" />
+		<Unit filename="DiagramRightWindow.cpp" />
+		<Unit filename="DiagramRightWindow.h" />
+		<Unit filename="DiagramSplitterWindow.cpp" />
+		<Unit filename="DiagramSplitterWindow.h" />
+		<Unit filename="DiagramWavesWindow.cpp" />
+		<Unit filename="DiagramWavesWindow.h" />
+		<Unit filename="EditTextTask.cpp" />
+		<Unit filename="EditTextTask.h" />
+		<Unit filename="GraphBusSignal.cpp" />
+		<Unit filename="GraphBusSignal.h" />
+		<Unit filename="GraphClockSignal.cpp" />
+		<Unit filename="GraphClockSignal.h" />
+		<Unit filename="GraphHorizontalArrow.cpp" />
+		<Unit filename="GraphHorizontalArrow.h" />
+		<Unit filename="GraphNormalSignal.cpp" />
+		<Unit filename="GraphNormalSignal.h" />
+		<Unit filename="GraphObject.h" />
+		<Unit filename="GraphSignal.cpp" />
+		<Unit filename="GraphSignal.h" />
+		<Unit filename="GraphVerticalLine.cpp" />
+		<Unit filename="GraphVerticalLine.h" />
+		<Unit filename="HoverCombo.cpp" />
+		<Unit filename="HoverCombo.h" />
+		<Unit filename="HoverCross.cpp" />
+		<Unit filename="HoverCross.h" />
+		<Unit filename="HoverDrawlet.h" />
+		<Unit filename="HoverGraphCaret.cpp" />
+		<Unit filename="HoverGraphCaret.h" />
+		<Unit filename="HoverLine.cpp" />
+		<Unit filename="HoverLine.h" />
+		<Unit filename="HoverText.cpp" />
+		<Unit filename="HoverText.h" />
+		<Unit filename="LabelText.cpp" />
+		<Unit filename="LabelText.h" />
+		<Unit filename="MainTask.cpp" />
+		<Unit filename="MainTask.h" />
+		<Unit filename="Task.cpp" />
+		<Unit filename="Task.h" />
 		<Unit filename="TimeCompressorSettingsPanel.cpp" />
 		<Unit filename="TimeCompressorSettingsPanel.h" />
 		<Unit filename="TimingApp.cpp" />
@@ -57,12 +105,32 @@
 		<Unit filename="TimingMainFrame.h" />
 		<Unit filename="TimingSubFrame.cpp" />
 		<Unit filename="TimingSubFrame.h" />
+		<Unit filename="TimingTextCtrl.cpp" />
+		<Unit filename="TimingTextCtrl.h" />
 		<Unit filename="TimingView.cpp" />
 		<Unit filename="TimingView.h" />
-		<Unit filename="TimingWindow.cpp" />
-		<Unit filename="TimingWindow.h" />
 		<Unit filename="TransitionSettingsPanel.cpp" />
 		<Unit filename="TransitionSettingsPanel.h" />
+		<Unit filename="art/busedge.xpm" />
+		<Unit filename="art/clockedge.xpm" />
+		<Unit filename="art/copy.xpm" />
+		<Unit filename="art/cross.xpm" />
+		<Unit filename="art/cut.xpm" />
+		<Unit filename="art/glassntool.xpm" />
+		<Unit filename="art/glassptool.xpm" />
+		<Unit filename="art/harrow_cur.xpm" />
+		<Unit filename="art/help.xpm" />
+		<Unit filename="art/new.xpm" />
+		<Unit filename="art/open.xpm" />
+		<Unit filename="art/paste.xpm" />
+		<Unit filename="art/redo.xpm" />
+		<Unit filename="art/risingedge.xpm" />
+		<Unit filename="art/ruler_cur.xpm" />
+		<Unit filename="art/save.xpm" />
+		<Unit filename="art/textedit_cur.xpm" />
+		<Unit filename="art/tri.xpm" />
+		<Unit filename="art/tri_cur.xpm" />
+		<Unit filename="art/undo.xpm" />
 		<Unit filename="cmd.cpp" />
 		<Unit filename="cmd.h" />
 		<Unit filename="dndfile.cpp" />
@@ -81,7 +149,15 @@
 			<envvars />
 			<lib_finder disable_auto="1" />
 			<debugger />
-			<SVNInside Login="d_anselmi" ConnectStatus="1" NeedsPassword="1" />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
