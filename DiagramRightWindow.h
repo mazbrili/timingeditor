@@ -27,7 +27,7 @@ private:
 
     TimingView           *m_view;
     DiagramAxisWindow    *m_axis;
-    DiagramWavesWindow    *m_waves;
+    DiagramWavesWindow   *m_waves;
 private:
     DECLARE_DYNAMIC_CLASS(DiagramRightWindow)
     DECLARE_EVENT_TABLE()

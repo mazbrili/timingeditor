@@ -23,10 +23,17 @@ m_waveWin(waveWin)
 {
     Init();
 }
-void Task::InitTask()
+
+Task::Task(const Task *task):
+m_view(task->m_view),
+m_labelsWin(task->m_labelsWin),
+m_axisWin(task->m_axisWin),
+m_waveWin(task->m_waveWin)
 {
     Init();
+
 }
+
 void Task::Init()
 {
     //ctor
@@ -139,6 +146,17 @@ wxInt32 Task::GetTickFromPosition(const wxPoint &pos)
 {
     return (pos.x - m_view->GetWavesLeftSpace())/(m_view->GridStepWidth);
 }
+wxInt32 Task::GetSignalFromPosition(const wxPoint &pos)
+{
+    for ( unsigned int k = 0 ; k < m_view->heightOffsets.size()-1 ; ++k )
+    {
+        if(pos.y > m_view->heightOffsets[k] && pos.y < m_view->heightOffsets[k+1] )
+        {
+            return k;
+        }
+    }
+    return -1;
+}
 bool Task::IsOverWaves(const wxPoint &pos)
 {
     return //pos.x > m_view->GetWavesLeftSpace() &&
@@ -150,4 +168,14 @@ void Task::TextHasFocus(TimingTextCtrl *ctrl)
 {
     // ???
     ctrl->SetFocusToParent();
+}
+
+void Task::UpdateTimeCompressorPanel(bool attach)
+{
+    TimeCompressorSettingsPanel::GetInstance()->view = NULL;
+}
+
+void Task::UpdateClockSettingsPanel(bool attach)
+{
+    ClockSettingsPanel::GetInstance()->view = NULL;
 }

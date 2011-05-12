@@ -11,14 +11,9 @@
 #include "TimingView.h"
 #include "cmd.h"
 
-EditTextTask::EditTextTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin, TimingTextCtrl *txtctrl):
-Task(view, labelsWin, axisWin, waveWin),
+EditTextTask::EditTextTask(const Task *task, TimingTextCtrl *txtctrl):
+Task(task),
 m_txtctrl(txtctrl)
-{
-    InitTask();
-}
-
-void EditTextTask::InitTask()
 {
     editdone = false;
     m_txtctrl->edittask = this;
@@ -30,18 +25,18 @@ EditTextTask::~EditTextTask()
         m_txtctrl->RestoreText();
 }
 
-void EditTextTask::LabelsKey(const wxKeyEvent &event, bool down)
-{
-    wxLogDebug(_T("EditTextTask::LabelsKey"));
-}
-void EditTextTask::WavesKey(const wxKeyEvent &event, bool down)
-{
-
-}
-void EditTextTask::AxisKey(const wxKeyEvent &event, bool down)
-{
-
-}
+//void EditTextTask::LabelsKey(const wxKeyEvent &event, bool down)
+//{
+//    //::wxLogMessage(_T("EditTextTask::LabelsKey"));
+//}
+//void EditTextTask::WavesKey(const wxKeyEvent &event, bool down)
+//{
+//
+//}
+//void EditTextTask::AxisKey(const wxKeyEvent &event, bool down)
+//{
+//
+//}
 void EditTextTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     OnMouse(event);
@@ -124,7 +119,7 @@ void EditTextTask::TextHasFocus(TimingTextCtrl *ctrl)
     if (m_txtctrl == ctrl) return;
     SendCommandToProcessor();
 
-    m_labelsWin->SetFocus();
+    //m_labelsWin->SetFocus();
 
     m_view->SetTask(NULL/*new EditTextTask(m_view, m_labelsWin, m_axisWin, m_waveWin, ctrl)*/);
 }

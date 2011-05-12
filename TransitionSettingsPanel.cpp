@@ -161,5 +161,19 @@ TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPo
 	this->SetSizer( bSizer1 );
 	this->Layout();
 	bSizer1->Fit( this );
+	instance = this;
 }
+
+TransitionSettingsPanel* TransitionSettingsPanel::instance = NULL;
+TransitionSettingsPanel *TransitionSettingsPanel::GetInstance()
+{
+    return instance;
+}
+
+TransitionSettingsPanel::~TransitionSettingsPanel()
+{
+    if (instance == this)
+        instance = NULL;
+}
+
 

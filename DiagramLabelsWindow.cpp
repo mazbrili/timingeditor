@@ -153,12 +153,12 @@ void DiagramLabelsWindow::ScrollWindow(int dx, int dy, const wxRect* rect)
 {
     wxScrolledWindow::ScrollWindow(dx, dy, rect);
 
-    int xScrollUnits, xOrigin;
-    wxScrolledWindow::GetViewStart(&xOrigin, 0);
-    wxScrolledWindow::GetScrollPixelsPerUnit( &xScrollUnits, 0);
-
-    for( unsigned int i = 0; i < textctrls.size(); i++)
-        textctrls[i]->SetSize(GetOffsetToLabelTextCtrl()-xOrigin*xScrollUnits, wxDefaultCoord, wxDefaultCoord, wxDefaultCoord);
+//    int xScrollUnits, xOrigin;
+//    wxScrolledWindow::GetViewStart(&xOrigin, 0);
+//    wxScrolledWindow::GetScrollPixelsPerUnit( &xScrollUnits, 0);
+//
+//    for( unsigned int i = 0; i < textctrls.size(); i++)
+//        textctrls[i]->SetSize(GetOffsetToLabelTextCtrl()-xOrigin*xScrollUnits, wxDefaultCoord, wxDefaultCoord, wxDefaultCoord);
 
 }
 
@@ -216,7 +216,7 @@ void DiagramLabelsWindow::Draw(wxDC &dc)
         width = GetClientSize().x;
     dc.SetPen(wxPen(GetLineColour(), 1));
     for ( unsigned int k = 0 ; k < m_view->heightOffsets.size() ; ++k )
-        dc.DrawLine(0, m_view->heightOffsets[k], width+m_view->GetScrollPixelsPerUnit(), m_view->heightOffsets[k]);
+        dc.DrawLine(0, m_view->heightOffsets[k], width+m_view->GetScrollPixelsPerUnit()+20, m_view->heightOffsets[k]);
     dc.SetPen(wxNullPen);
 
     if (m_drawlet)

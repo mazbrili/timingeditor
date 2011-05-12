@@ -65,8 +65,15 @@ class AxisSettingsPanel : public wxPanel
         void OnUpdatePanelApply(wxUpdateUIEvent& event);
         void OnApply(wxCommandEvent &event);
 
-	public:
+    public:
+        static AxisSettingsPanel *GetInstance();
+    private:
+        static AxisSettingsPanel *instance;
+
+    friend class TimingMainFrame;
+	private:
 		AxisSettingsPanel( wxWindow* parent, int id = -1, wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 500,300 ), int style = wxTAB_TRAVERSAL );
+		virtual ~AxisSettingsPanel();
 
 	DECLARE_EVENT_TABLE()
 };

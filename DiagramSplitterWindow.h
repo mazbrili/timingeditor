@@ -32,6 +32,8 @@ public:
 private:
     DiagramSplitterWindow(){};
 
+    void OnIdleDoSetSashPosition(wxIdleEvent& event);
+
 
 
 

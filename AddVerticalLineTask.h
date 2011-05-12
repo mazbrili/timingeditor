@@ -6,7 +6,7 @@
 class AddVerticalLineTask : public Task
 {
 public:
-    AddVerticalLineTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin);
+    AddVerticalLineTask(const Task *task);
     virtual ~AddVerticalLineTask();
 
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -27,7 +27,6 @@ public:
     //virtual bool CanDelete();
     //virtual bool HasActiveSelection();
     //virtual bool CanEditText(){return false;}
-    virtual void InitTask();
 
 private:
     void EndTask();

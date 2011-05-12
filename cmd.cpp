@@ -435,19 +435,10 @@ RemoveDiscontCommand::RemoveDiscontCommand(TimingDocument *doc, wxInt32 discont)
 RemoveDiscontCommand::~RemoveDiscontCommand(){}
 bool RemoveDiscontCommand::Do(void)
 {
-    bool hadcomp = false;
-    for ( std::map<wxInt32, TimeCompressor>::iterator idx = m_doc->compressors.begin() ;
-        idx != m_doc->compressors.end() ; idx++ )
-    if ( idx->first == m_pos )
+    if (m_doc->compressors.find(m_pos) != m_doc->compressors.end())
     {
-        m_cmprssr = (idx->second);
-        m_doc->compressors.erase(idx);
-        hadcomp = true;
-        break;
-    }
-
-    if( hadcomp )
-    {
+        m_cmprssr = m_doc->compressors[m_pos];
+        m_doc->compressors.erase(m_pos);
         m_doc->Modify(true);
         m_doc->UpdateAllViews();
         return true;
@@ -1373,13 +1364,32 @@ bool ChangeAxisSettings::Undo(void)
     }
 }
 
-ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time, bool en)
-    :wxCommand(true, _("Change time compressor length") ),
+
+ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time, bool en):
+    wxCommand(true, _("Change time compressor") ),
     m_doc(doc),
     m_time(time),
     m_index(index),
     m_en(en)
 {}
+ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time):
+    wxCommand(true, _("Change time compressor length") ),
+    m_doc(doc),
+    m_time(time),
+    m_index(index)
+{
+    if ( m_doc->compressors.find(m_index) != m_doc->compressors.end())
+        m_en = m_doc->compressors[m_index].enabled;
+}
+ChangeTimeCompressor::ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, bool en)
+    :wxCommand(true, _("Enable/Disable time compressor") ),
+    m_doc(doc),
+    m_index(index),
+    m_en(en)
+{
+    if ( m_doc->compressors.find(m_index) != m_doc->compressors.end())
+        m_time = m_doc->compressors[m_index].length;
+}
 bool ChangeTimeCompressor::Do(void)
 {
     if ( m_doc->compressors.find(m_index) != m_doc->compressors.end())

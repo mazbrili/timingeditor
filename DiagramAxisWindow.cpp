@@ -148,88 +148,134 @@ void DiagramAxisWindow::Draw(wxDC & dc)
     for ( wxUint32 k = 0 ; k < m_view->VisibleTicks.size()-1 ; ++k )
     {
         wxInt32 tick = m_view->VisibleTicks[k];
-        wxInt32 len = 1;
-        if ( doc->compressors.find(tick) != doc->compressors.end() && doc->compressors[tick].enabled )
+        //wxInt32 len = 1;
+        if ( doc->compressors.find(tick) != doc->compressors.end() )
         {
-            len = doc->compressors[tick].length;
-        }
-        if ( len > 1 )
-        {
-            /// draw the triangle
-            wxPoint offset;
-            offset.x = leftSpace + (0.5 + k)*(m_view->GridStepWidth) - 3;
-            offset.y = DistanceToTicksLine-3;
-            wxPoint points[] =
+            wxString str;
+            if ( doc->compressors[tick].enabled )
             {
-                offset + wxPoint(0, 0),
-                offset + wxPoint(8, 0),
-                offset + wxPoint(4, 6)
-            };
-            dc.SetBrush(wxBrush(GetLineColour()));
-            dc.DrawPolygon(3, points);
-            dc.SetBrush(wxNullBrush);
-
-
-            /// split the axis
-            offset.x = leftSpace + (0.5 + k) * (m_view->GridStepWidth) - 1;
-            offset.y += DistanceToTicksLine + DistanceFromTicksLine;
-            //if ( exporting) offset.y = DistanceToAxis - 3;
-            wxPen bgpen = wxPen(GetBackgroundColour(),1);
-            for ( wxInt32 n = 0 ; n < 4 ; ++n )
-            {
-                bool drawbg = n != 0 && n != 3;
-                if ( drawbg )
-                    dc.SetPen( bgpen );
-                dc.DrawLine(offset.x + n-1 , offset.y,
-                            offset.x + n-1 , offset.y + 6);
-                if ( drawbg )
-                    dc.SetPen( wxNullPen );
-
-            }
-        }
-        if ( doc->compressors.find(tick) != doc->compressors.end() && doc->compressors[tick].enabled )
-        {
-
-            wxPoint offset;
-            len =  doc->compressors[tick].length;
-            offset.x = leftSpace  + (0.5 + k) * (m_view->GridStepWidth);
-            offset.y = DistanceToTicksLine-4 ;
-            wxPoint points[] =
-            {
-                offset + wxPoint(-1, 0),
-                offset + wxPoint( 4, 4),
-                offset + wxPoint(-1, 8)
-            };
-            wxInt32 rlen = len;
-            for ( wxInt32 i = 1 ; i <= len ; ++i )
-            {
-                if ( doc->compressors.find(tick+i) != doc->compressors.end() && doc->compressors[tick+1].enabled )
+                if (doc->compressors[tick].length > 1)
                 {
-                    if ( rlen > i +(doc->compressors[tick+1].length-1))
-                        rlen -= (doc->compressors[tick+1].length-1);
+                    /// draw the triangle
+                    wxPoint offset;
+                    offset.x = leftSpace + (0.5 + k)*(m_view->GridStepWidth) - 3;
+                    offset.y = DistanceToTicksLine-3;
+                    wxPoint points[] =
+                    {
+                        offset + wxPoint(0, 0),
+                        offset + wxPoint(8, 0),
+                        offset + wxPoint(4, 6)
+                    };
+                    if ( m_view->IsDiscontinuitySelected() && m_view->GetSelectedDiscontinuity()==tick )
+                    {
+                        wxPen pen(*wxBLUE);
+                        dc.SetBrush(*wxBLUE_BRUSH);
+                        dc.SetPen(pen);
+                    }
                     else
                     {
-                        rlen = i+1;
-                        i = len;//break outer loop
+                        dc.SetBrush(wxBrush(GetLineColour()));
+                        dc.SetPen(m_view->GetCompressorColour());
+                    }
+                    dc.DrawPolygon(3, points);
+                    str = wxString::Format(_T("drawing an enabled time compressor at tick: %d"), tick);
+
+
+                    /// split the axis
+                    offset.x = leftSpace + (0.5 + k) * (m_view->GridStepWidth) - 1;
+                    offset.y += DistanceToTicksLine + DistanceFromTicksLine;
+                    for ( wxInt32 n = 0 ; n < 4 ; ++n )
+                    {
+                        if ( n != 0 && n != 3 )
+                            dc.SetPen( wxPen(GetBackgroundColour(),1) );
+                        else
+                            dc.SetPen( wxPen(*wxBLACK,1));
+                        dc.DrawLine(offset.x + n-1 , offset.y,
+                                    offset.x + n-1 , offset.y + 6);
+                    }
+                }
+                else
+                {
+                    /// draw the triangle
+                    wxPoint offset;
+                    offset.x = leftSpace + (0.5 + k)*(m_view->GridStepWidth) - 3;
+                    offset.y = DistanceToTicksLine-3;
+                    wxPoint points[] =
+                    {
+                        offset + wxPoint(0, 0),
+                        offset + wxPoint(8, 0),
+                        offset + wxPoint(4, 6)
+                    };
+                    if ( m_view->IsDiscontinuitySelected() && m_view->GetSelectedDiscontinuity()==tick )
+                    {
+                        wxPen pen(*wxBLUE);
+                        dc.SetBrush(*wxBLUE_BRUSH);
+                        dc.SetPen(pen);
+                    }
+                    else
+                    {
+                        dc.SetPen(m_view->GetCompressorColour());
+                        dc.SetBrush(*wxWHITE_BRUSH);
+                    }
+                    dc.DrawPolygon(3, points);
+
+                    str = wxString::Format(_T("drawing an enabled but zero length time compressor at tick: %d"), tick);
+
+                }
+            }
+            else
+            {
+                // draw the disabled time compressor
+                wxPoint offset;
+                wxInt32 len =  doc->compressors[tick].length;
+                offset.x = leftSpace  + (0.5 + k) * (m_view->GridStepWidth);
+                offset.y = DistanceToTicksLine-4 ;
+                wxPoint points[] =
+                {
+                    offset + wxPoint(-1, 0),
+                    offset + wxPoint( 4, 4),
+                    offset + wxPoint(-1, 8)
+                };
+                wxInt32 rlen = len;
+                for ( wxInt32 i = 1 ; i <= len ; ++i )
+                {
+                    if ( doc->compressors.find(tick+i) != doc->compressors.end() && doc->compressors[tick+i].enabled )
+                    {
+                        if ( rlen > i +(doc->compressors[tick+i].length-1))
+                            rlen -= (doc->compressors[tick+i].length-1);
+                        else
+                        {
+                            rlen = i+1;
+                            i = len;//break outer loop
+                        }
                     }
                 }
 
+                dc.SetPen(m_view->GetCompressorColour());
+                if ( offset.x + (rlen-0.75)*(m_view->GridStepWidth) < stop )
+                {
+                    dc.DrawLine(offset.x, offset.y, offset.x + (rlen-0.75)*(m_view->GridStepWidth), offset.y);
+                    dc.DrawLine(offset.x + (rlen-0.75)*(m_view->GridStepWidth), offset.y, offset.x + (rlen-0.75)*(m_view->GridStepWidth), offset.y+3);
+                }
+                else
+                    dc.DrawLine(offset.x, offset.y, stop, offset.y);
+                if ( m_view->IsDiscontinuitySelected() && m_view->GetSelectedDiscontinuity()==tick )
+                {
+                    wxPen pen(*wxBLUE);
+                    dc.SetBrush(*wxBLUE_BRUSH);
+                    dc.SetPen(pen);
+                }
+                else
+                {
+                    //dc.SetBrush(wxBrush(GetLineColour()));
+                    dc.SetPen(m_view->GetCompressorColour());
+                    dc.SetBrush(*wxWHITE_BRUSH);
+                }
+                dc.DrawPolygon(3, points);
+                str = wxString::Format(_T("drawing an disabled time compressor at tick: %d"), tick);
+
             }
-
-            dc.SetPen(m_view->GetCompressorColour());
-            if ( offset.x + (rlen-0.75)*(m_view->GridStepWidth) < stop )
-            {
-                dc.DrawLine(offset.x, offset.y, offset.x + (rlen-0.75)*(m_view->GridStepWidth), offset.y);
-                dc.DrawLine(offset.x + (rlen-0.75)*(m_view->GridStepWidth), offset.y, offset.x + (rlen-0.75)*(m_view->GridStepWidth), offset.y+3);
-            }
-            else
-                dc.DrawLine(offset.x, offset.y, stop, offset.y);
-            dc.SetBrush(*wxWHITE_BRUSH);
-            dc.DrawPolygon(3, points);
-
-            dc.SetPen(wxNullPen);
-            dc.SetBrush(wxNullBrush);
-
+            ::wxLogMessage(str);
         }
     }
 

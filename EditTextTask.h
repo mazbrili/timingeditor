@@ -8,15 +8,15 @@ class TimingTextCtrl;
 class EditTextTask : public Task
 {
 public:
-    EditTextTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin, TimingTextCtrl *txtctrl);
+    EditTextTask(const Task *task, TimingTextCtrl *txtctrl);
     virtual ~EditTextTask();
 
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
     virtual void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
     virtual void AxisMouse(const wxMouseEvent &event, const wxPoint &pos);
-    virtual void LabelsKey(const wxKeyEvent &event, bool down);
-    virtual void WavesKey(const wxKeyEvent &event, bool down);
-    virtual void AxisKey(const wxKeyEvent &event, bool down);
+//    virtual void LabelsKey(const wxKeyEvent &event, bool down);
+//    virtual void WavesKey(const wxKeyEvent &event, bool down);
+//    virtual void AxisKey(const wxKeyEvent &event, bool down);
 
     //virtual wxInt32 GetSelectedSignalNumber();
     //virtual wxInt32 GetSelectedDiscontinuity();
@@ -30,7 +30,6 @@ public:
     virtual bool HasActiveSelection();
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
-    virtual void InitTask();
 private:
     friend class TimingTextCtrl;
     void EndTask();
