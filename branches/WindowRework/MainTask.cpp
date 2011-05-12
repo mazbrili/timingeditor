@@ -13,40 +13,45 @@
 #include "HoverCombo.h"
 
 #include "EditTextTask.h"
+#include "EditTimeCompressorTask.h"
 #include "cmd.h"
 
 
-MainTask::MainTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin):
-Task(view, labelsWin, axisWin, waveWin)
-{}
-void MainTask::InitTask(){}
+MainTask::MainTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin)
+:Task(view, labelsWin, axisWin, waveWin)
+{
+//    m_view = view;
+//    m_labelsWin = labelsWin;
+//    m_axisWin = axisWin;
+//    m_waveWin = waveWin;
+}
+
+void MainTask::InitTask()
+{
+    Task::Init();
+}
 MainTask::~MainTask()
 {}
 void MainTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
+    const int CatchWidth = 5;
+    int k = GetSignalFromPosition(pos);
+
     if ( event.Moving() )
     {
-        bool found = false;
-        for ( unsigned int k = 0 ; k < m_view->heightOffsets.size()-1 ; ++k )
-        {
-            if(pos.y > m_view->heightOffsets[k+1] - 3 && pos.y < m_view->heightOffsets[k+1]-1 )
-            {
-                m_labelsWin->SetCursor(wxCursor(wxCURSOR_SIZENS));
-                found = true;
-                break;
-            }
-            else if ( pos.y > m_view->heightOffsets[k]+1 && pos.y < m_view->heightOffsets[k] + 3)
-            {
-                m_labelsWin->SetCursor(wxCursor(wxCURSOR_SIZENS));
-                found = true;
-                break;
-            }
-        }
-        if ( !found )
+        if ( k != -1 && ((pos.y > m_view->heightOffsets[k+1] - CatchWidth-1 && pos.y < m_view->heightOffsets[k+1]-1) ||
+            ( pos.y > m_view->heightOffsets[k]+1 && pos.y < m_view->heightOffsets[k] + CatchWidth+1)))
+            m_labelsWin->SetCursor(wxCursor(wxCURSOR_SIZENS));
+        else
             m_labelsWin->SetCursor(wxNullCursor);
+
         m_axisWin->RemoveDrawlet();
         m_waveWin->RemoveDrawlet();
         return;
+    }
+    if (event.ButtonDown(wxMOUSE_BTN_LEFT))
+    {
+        //if ( != -1 )
     }
 
 }
@@ -56,7 +61,18 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 }
 void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
+    //call default
     Task::AxisMouse(event, pos);
+
+    //::wxLogMessage(_T("MainTask::AxisMouse"));
+
+    if (event.ButtonDown(wxMOUSE_BTN_LEFT))
+    {
+        TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
+        wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
+        if(doc->compressors.find(tick) != doc->compressors.end())
+            m_view->SetTask(new EditTimeCompressorTask(this, tick));
+    }
 }
 
 void MainTask::LabelsKey(const wxKeyEvent &event, bool down){}
@@ -183,5 +199,5 @@ void MainTask::AddSignal(Signal *sig)
 void MainTask::TextHasFocus(TimingTextCtrl *ctrl)
 {
 // TODO (danselmi#1#): Check for a real default implementation
-    m_view->SetTask(new EditTextTask(m_view, m_labelsWin, m_axisWin, m_waveWin, ctrl));
+    m_view->SetTask(new EditTextTask(this, ctrl));
 }

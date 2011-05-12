@@ -9,12 +9,8 @@
 
 #include "art/tri_cur.xpm" // defines ruler_cur_xpm
 
-AddDiscontinuityTask::AddDiscontinuityTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin):
-Task(view, labelsWin, axisWin, waveWin)
-{
-    InitTask();
-}
-void AddDiscontinuityTask::InitTask()
+AddDiscontinuityTask::AddDiscontinuityTask(const Task *task):
+Task(task)
 {
         //done by base:
 //    m_axisWin->RemoveDrawlet();

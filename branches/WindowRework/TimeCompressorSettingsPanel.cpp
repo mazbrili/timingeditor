@@ -46,8 +46,8 @@ BEGIN_EVENT_TABLE(TimeCompressorSettingsPanel, wxPanel)
 END_EVENT_TABLE()
 
 TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
-    ( wxWindow* parent, int id, wxPoint pos, wxSize size, int style )
-    : wxPanel( parent, id, pos, size, style ),
+    ( wxWindow* parent )
+    : wxPanel( parent, wxID_ANY, wxDefaultPosition, wxSize( 500,300 ), wxTAB_TRAVERSAL ),
     view(NULL)
 {
     wxStaticText* staticText;
@@ -76,6 +76,7 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
 	this->SetSizer( bSizer3 );
 	this->Layout();
 	bSizer3->Fit( this );
+	instance = this;
 }
 void TimeCompressorSettingsPanel::OnUpdateTextField(wxUpdateUIEvent& event)
 {
@@ -115,4 +116,16 @@ void TimeCompressorSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
         return;
     }
     event.Enable(false);
+}
+
+TimeCompressorSettingsPanel* TimeCompressorSettingsPanel::instance = NULL;
+TimeCompressorSettingsPanel *TimeCompressorSettingsPanel::GetInstance()
+{
+    return instance;
+}
+
+TimeCompressorSettingsPanel::~TimeCompressorSettingsPanel()
+{
+    if (instance == this)
+        instance = NULL;
 }

@@ -12,16 +12,13 @@
 
 #include "art/ruler_cur.xpm" // defines ruler_cur_xpm
 
-AddVerticalLineTask::AddVerticalLineTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin):
-Task(view, labelsWin, axisWin, waveWin)
+AddVerticalLineTask::AddVerticalLineTask(const Task *task):
+Task(task)
 {
-    InitTask();
-}
-void AddVerticalLineTask::InitTask()
-{
-    m_axisWin->RemoveDrawlet();
-    m_waveWin->RemoveDrawlet();
-    m_labelsWin->RemoveDrawlet();
+    //done by base
+//    m_axisWin->RemoveDrawlet();
+//    m_waveWin->RemoveDrawlet();
+//    m_labelsWin->RemoveDrawlet();
     state = waitingFirstPoint;
 
     wxBitmap cursBitmap(ruler_cur_xpm);

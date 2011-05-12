@@ -43,6 +43,15 @@
 class TimingView;
 class TimeCompressorSettingsPanel : public wxPanel
 {
+    public:
+        static TimeCompressorSettingsPanel *GetInstance();
+    private:
+        static TimeCompressorSettingsPanel *instance;
+
+    friend class TimingMainFrame;
+	private:
+		TimeCompressorSettingsPanel( wxWindow* parent );
+		virtual ~TimeCompressorSettingsPanel();
 	private:
         void OnUpdatePanelApply(wxUpdateUIEvent& event);
         void OnUpdateTextField(wxUpdateUIEvent& event);
@@ -60,8 +69,6 @@ class TimeCompressorSettingsPanel : public wxPanel
         void SetTimeText(const wxString &str){m_textTime->SetValue(str);}
         void SetUnmodified(){m_textTime->SetModified(false);}
 
-	public:
-		TimeCompressorSettingsPanel( wxWindow* parent, int id = -1, wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 500,300 ), int style = wxTAB_TRAVERSAL );
 	DECLARE_EVENT_TABLE()
 };
 

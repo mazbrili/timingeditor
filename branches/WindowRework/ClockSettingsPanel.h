@@ -42,6 +42,8 @@
 #define ID_DEFAULT wxID_ANY // Default
 
 class TimingView;
+class TimingMainFrame;
+
 class ClockSettingsPanel : public wxPanel
 {
 	private:
@@ -68,8 +70,19 @@ class ClockSettingsPanel : public wxPanel
         void SetShowPeriod(bool en);
         void SetUnmodified();
 
-	public:
+    public:
+        static ClockSettingsPanel *GetInstance();
+    private:
+        static ClockSettingsPanel *instance;
+
+    friend class TimingMainFrame;
+	private:
 		ClockSettingsPanel( wxWindow* parent, int id = -1, wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 307,97 ), int style = wxTAB_TRAVERSAL );
+		ClockSettingsPanel(){}
+        ClockSettingsPanel(const ClockSettingsPanel&){}
+        virtual ~ClockSettingsPanel();
+
+
     DECLARE_EVENT_TABLE()
 };
 

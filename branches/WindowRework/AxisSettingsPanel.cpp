@@ -216,5 +216,18 @@ AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxS
 	this->Layout();
 
 	bSizer3->Fit( this );
+	instance = this;
+}
+
+AxisSettingsPanel* AxisSettingsPanel::instance = NULL;
+AxisSettingsPanel *AxisSettingsPanel::GetInstance()
+{
+    return instance;
+}
+
+AxisSettingsPanel::~AxisSettingsPanel()
+{
+    if (instance == this)
+        instance = NULL;
 }
 

@@ -23,14 +23,13 @@ DiagramSplitterWindow::DiagramSplitterWindow(TimingView *v, wxWindow* parent, wx
     //ctor
     SetSplitMode(wxSPLIT_VERTICAL );
 
+    const wxCoord MinimumOfLeftWidth = 10;
+    const wxCoord HeightOfAxisWindow = view->GetHeightOfAxisWindow();
 
     m_right = new DiagramRightWindow();
-    const wxCoord MinimumOfLeftWidth = 10;
-    const wxCoord HeightOfAxisWindow = v->GetHeightOfAxisWindow();
-
-
     wxPanel *left = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
-    m_labels = new DiagramLabelsWindow(view, left, m_right , wxID_ANY, wxDefaultPosition, wxSize(60,wxDefaultCoord) );
+    m_labels = new DiagramLabelsWindow(view, left, m_right , wxID_ANY, wxDefaultPosition, wxSize(100,wxDefaultCoord) );
+    m_right->Create(view, this, m_labels, wxID_ANY, wxDefaultPosition, wxDefaultSize );
 
     wxBoxSizer *lsizer = new wxBoxSizer(wxVERTICAL);
     lsizer->Add(MinimumOfLeftWidth,HeightOfAxisWindow);
@@ -38,13 +37,23 @@ DiagramSplitterWindow::DiagramSplitterWindow(TimingView *v, wxWindow* parent, wx
     left->SetAutoLayout(true);
     left->SetSizer(lsizer);
 
-
-    m_right->Create(view, this, m_labels, wxID_ANY, wxDefaultPosition, wxDefaultSize );
-
-
-    SplitVertically(left, m_right , 100);
+    // set to a minimum width so it will not become invisible
     SetMinimumPaneSize(MinimumOfLeftWidth);
+    SplitVertically(left, m_right , 100);
+    Connect( wxEVT_IDLE, (wxObjectEventFunction)&DiagramSplitterWindow::OnIdleDoSetSashPosition );
+    //::wxLogMessage(_T("SetSashPosition() does nothing %d"), GetClientSize().GetWidth());
+    //SetSashPosition(100);
 }
+
+void DiagramSplitterWindow::OnIdleDoSetSashPosition(wxIdleEvent& WXUNUSED(event))
+{
+    if ( GetClientSize().GetWidth() > 20 )
+    {
+        SetSashPosition(100);
+        Disconnect( wxEVT_IDLE, (wxObjectEventFunction)&DiagramSplitterWindow::OnIdleDoSetSashPosition );
+    }
+}
+
 DiagramLabelsWindow *DiagramSplitterWindow::GelLabelsWindow()
 {
     return m_labels;

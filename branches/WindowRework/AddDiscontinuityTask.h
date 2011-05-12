@@ -6,7 +6,7 @@
 class AddDiscontinuityTask : public Task
 {
 public:
-    AddDiscontinuityTask(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin);
+    AddDiscontinuityTask(const Task *task);
     virtual ~AddDiscontinuityTask();
 
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -28,7 +28,6 @@ public:
     //virtual bool HasActiveSelection();
     //virtual bool CanEditText(){return false;}
     //virtual void TextHasFocus(TimingTextCtrl *ctrl);
-    virtual void InitTask();
 
 private:
     void EndTask();

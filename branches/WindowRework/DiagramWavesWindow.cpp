@@ -91,7 +91,7 @@ void DiagramWavesWindow::ScrollWindow( int dx, int dy, const wxRect *rect )
 {
     wxPanel::ScrollWindow( dx, dy, rect );
     m_axis->ScrollWindow( dx, 0, rect );
-    m_labels->ScrollWindow( 0, dy );
+    m_labels->ScrollWindow( 0, dy, rect );
 }
 
 void DiagramWavesWindow::PaintBackground(wxDC &dc)
@@ -166,12 +166,11 @@ void DiagramWavesWindow::DrawDiscontinuities(wxDC &dc)
                         offset + ind + wxPoint(+7, +0.8*doc->SignalHeight),
                         offset + ind + wxPoint(+0, +1.2*doc->SignalHeight)
                     };
-                    bool drawbg =  n != 0 && n != 3;
-                    if ( drawbg )
+                    if ( n != 0 && n != 3 )
                         dc.SetPen(wxPen(GetBackgroundColour(),1));
+                    else
+                        dc.SetPen(wxPen(*wxBLACK, 1));
                     dc.DrawSpline(4, points);
-                    if ( drawbg )
-                        dc.SetPen(wxNullPen);
 
                 }
             }

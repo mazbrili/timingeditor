@@ -94,10 +94,10 @@ TimingView::TimingView()
     splitterwindow = (DiagramSplitterWindow *)NULL;
     frame = (wxDocMDIChildFrame *)NULL;
     GridStepWidth = 15;
-    ClkSetPanel = (ClockSettingsPanel *)NULL;
-    TranSetPanel = (TransitionSettingsPanel *)NULL;
-    AxisSetPanel = (AxisSettingsPanel *)NULL;
-    TmeCmprssrPanel = (TimeCompressorSettingsPanel *)NULL;
+//    ClkSetPanel = (ClockSettingsPanel *)NULL;
+//    TranSetPanel = (TransitionSettingsPanel *)NULL;
+//    AxisSetPanel = (AxisSettingsPanel *)NULL;
+//    TmeCmprssrPanel = (TimeCompressorSettingsPanel *)NULL;
     task = NULL;
     defaultTask = NULL;
 }
@@ -149,13 +149,13 @@ bool TimingView::OnClose(bool deleteWindow)
     return true;
 }
 
-void TimingView::SetPanels(ClockSettingsPanel *csp, TransitionSettingsPanel *tsp, AxisSettingsPanel *asp, TimeCompressorSettingsPanel *tcsp)
-{
-    ClkSetPanel = csp;
-    TranSetPanel = tsp;
-    AxisSetPanel = asp;
-    TmeCmprssrPanel = tcsp;
-}
+//void TimingView::SetPanels(ClockSettingsPanel *csp, TransitionSettingsPanel *tsp, AxisSettingsPanel *asp, TimeCompressorSettingsPanel *tcsp)
+//{
+//    ClkSetPanel = csp;
+//    TranSetPanel = tsp;
+//    AxisSetPanel = asp;
+//    TmeCmprssrPanel = tcsp;
+//}
 
 /// ///////////////////////////////////////////////////////////////// colours fonts spaces
 wxColour TimingView::GetBackgroundColour() const
@@ -247,25 +247,24 @@ void TimingView::AttachPanels()
         return;
     }
 
-    ClkSetPanel->view = this;
-    if ( IsSelectedSignalClock() )
-        UpdateClockPanel();
-
-    TranSetPanel->view = this;
+    TransitionSettingsPanel::GetInstance()->view = this;
     UpdateTransitionPanel();
 
-    AxisSetPanel->view = this;
+    AxisSettingsPanel::GetInstance()->view = this;
     UpdateAxisPanel();
 
-    TmeCmprssrPanel->view = this;
-    UpdateTimeCompressorPanel();
+    task->UpdateTimeCompressorPanel();
+    //ClkSetPanel->view = this;
+    //if ( IsSelectedSignalClock() )
+
+    task->UpdateClockSettingsPanel();
 }
 void TimingView::DetachPanels()
 {
-    ClkSetPanel->view = (TimingView *)NULL;
-    TranSetPanel->view = (TimingView *)NULL;
-    AxisSetPanel->view = (TimingView *)NULL;
-    TmeCmprssrPanel->view = (TimingView *)NULL;
+    TransitionSettingsPanel::GetInstance()->view = (TimingView *)NULL;
+    AxisSettingsPanel::GetInstance()->view = (TimingView *)NULL;
+    task->UpdateClockSettingsPanel(false);
+    task->UpdateTimeCompressorPanel(false);
 }
 void TimingView::UpdateClockPanel()
 {
@@ -294,9 +293,9 @@ void TimingView::UpdateTransitionPanel()
     TimingDocument *doc = (TimingDocument *)GetDocument();
     if ( !doc ) return;
 
-    TranSetPanel->SetTransitionWidth(doc->TransitWidth);
-    TranSetPanel->Set50(doc->en50);
-    TranSetPanel->Set90(doc->en90);
+    TransitionSettingsPanel::GetInstance()->SetTransitionWidth(doc->TransitWidth);
+    TransitionSettingsPanel::GetInstance()->Set50(doc->en50);
+    TransitionSettingsPanel::GetInstance()->Set90(doc->en90);
 
 }
 void TimingView::UpdateAxisPanel()
@@ -304,26 +303,12 @@ void TimingView::UpdateAxisPanel()
     TimingDocument *doc = (TimingDocument *)GetDocument();
     if ( !doc ) return;
 
-    AxisSetPanel->SetTickLength(doc->TickLength);
-    AxisSetPanel->SetLengthUnit(doc->TickLengthUnit + 5);
-    AxisSetPanel->SetMarkerLength(doc->MarkerLength);
-    AxisSetPanel->SetOffset(doc->timeOffset);
-    AxisSetPanel->SetTotalLengt(doc->length);
+    AxisSettingsPanel::GetInstance()->SetTickLength(doc->TickLength);
+    AxisSettingsPanel::GetInstance()->SetLengthUnit(doc->TickLengthUnit + 5);
+    AxisSettingsPanel::GetInstance()->SetMarkerLength(doc->MarkerLength);
+    AxisSettingsPanel::GetInstance()->SetOffset(doc->timeOffset);
+    AxisSettingsPanel::GetInstance()->SetTotalLengt(doc->length);
 }
-void TimingView::UpdateTimeCompressorPanel(void)
-{
-    TimingDocument *doc = (TimingDocument *)GetDocument();
-    if ( !doc ) return;
-
-    if ( !IsDiscontinuitySelected() ) return;
-
-//    for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx )
-//        if ( doc->compressors[indx].pos == editingValA )
-//            TmeCmprssrPanel->SetTimeText(
-//                wxString::Format( _("%d"), doc->compressors[indx].length )
-//            );
-}
-
 
 /// ////////////////////////////////////////////////////////// interface for panels
 void TimingView::SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength)
@@ -376,7 +361,6 @@ void TimingView::SetTimeCompressor(wxInt32 time)
             new ChangeTimeCompressor(doc, index, time, doc->compressors[index].enabled)
         );
 
-    UpdateTimeCompressorPanel();
 }
 
 /// //////////////////////////////////////////////////////////// drawing
@@ -439,11 +423,14 @@ void TimingView::UpdateVisibelTicksContainer()
 
     VisibleTicks.clear();
     wxInt32 n = 0;
+    ::wxLogMessage(_T("UpdateVisibleTicks") );
     while ( n <= doc->length )
     {
         VisibleTicks.push_back(n);
 
         bool hascompressor = false;
+        if ( doc->compressors.find(n) != doc->compressors.end() )
+            ::wxLogMessage(_T("UpdateVisibleTicks::compressor at %d"),n );
         if ( doc->compressors.find(n) != doc->compressors.end() && doc->compressors[n].enabled )
         {
             n += doc->compressors[n].length;
@@ -732,15 +719,13 @@ void TimingView::OnAddBus(wxCommandEvent& event)
 /// ///////////////////////////////////////////////////////////////////// tools selected
 void TimingView::OnDiscontinuityTool(wxCommandEvent& event)
 {
-    DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
-    AddDiscontinuityTask *newtask = new AddDiscontinuityTask(this,splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+    AddDiscontinuityTask *newtask = new AddDiscontinuityTask(defaultTask);
 
     SetTask(newtask);
 }
 void TimingView::OnRulerTool(wxCommandEvent& event)
 {
-    DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
-    AddVerticalLineTask *newtask = new AddVerticalLineTask(this,splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+    AddVerticalLineTask *newtask = new AddVerticalLineTask(defaultTask);
 
     SetTask(newtask);
 }
@@ -841,15 +826,19 @@ void TimingView::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 }
 void TimingView::SetTask(Task *newtask)
 {
+    // current task is not the default
     if ( task != defaultTask )
     {
         delete task;
     }
+
+    // no new task given
     if ( !newtask )
     {
         defaultTask->InitTask();
         newtask = defaultTask;
     }
+
     task = newtask;
 }
 void TimingView::TextHasFocus(TimingTextCtrl *ctrl)

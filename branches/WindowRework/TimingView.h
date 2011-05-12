@@ -41,6 +41,7 @@ class TransitionSettingsPanel;
 class Signal;
 class GraphSignal;
 class Task;
+class MainTask;
 
 class TimingTextCtrl;
 
@@ -103,14 +104,14 @@ private:
     void UpdateVerticalLines();
     void UpdateHorizontalArrows();
 
-    ClockSettingsPanel *ClkSetPanel;
-    TransitionSettingsPanel *TranSetPanel;
-    AxisSettingsPanel *AxisSetPanel;
-    TimeCompressorSettingsPanel *TmeCmprssrPanel;
+//    ClockSettingsPanel *ClkSetPanel;
+//    TransitionSettingsPanel *TranSetPanel;
+//    AxisSettingsPanel *AxisSetPanel;
+//    TimeCompressorSettingsPanel *TmeCmprssrPanel;
 
     void AttachPanels();
     void DetachPanels();
-    void UpdateTimeCompressorPanel(void);
+    //void UpdateTimeCompressorPanel(void);
     void UpdateClockPanel();
     void UpdateTransitionPanel();
     void UpdateAxisPanel();
@@ -122,7 +123,8 @@ private:
 
 
 public:
-    void SetPanels(ClockSettingsPanel *csp, TransitionSettingsPanel *tsp, AxisSettingsPanel *asp, TimeCompressorSettingsPanel *tcsp);
+    //void UpdateTimeCompressorPanel(void);
+    //void SetPanels(ClockSettingsPanel *csp, TransitionSettingsPanel *tsp, AxisSettingsPanel *asp, TimeCompressorSettingsPanel *tcsp);
 
 public:
     void SetAxis(wxInt8 unit, wxInt32 ticklength, wxInt32 markerlength, wxInt32 offset, wxInt32 totallength);
@@ -156,8 +158,8 @@ public:
     void TextHasFocus(TimingTextCtrl *ctrl);
 private:
     Task *task;
-    Task *defaultTask ;
-private:
+    MainTask *defaultTask;
+public:
     wxInt32 GetSelectedSignalNumber();
     wxInt32 GetSelectedDiscontinuity();
 

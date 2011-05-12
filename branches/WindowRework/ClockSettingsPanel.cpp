@@ -47,6 +47,7 @@ BEGIN_EVENT_TABLE(ClockSettingsPanel, wxPanel)
 END_EVENT_TABLE()
 
 
+
 void ClockSettingsPanel::SetUnmodified()
 {
     m_textDelay->SetModified(false);
@@ -180,5 +181,17 @@ ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, w
 	this->SetSizer( bSizer1 );
 	this->Layout();
 	bSizer1->Fit( this );
+	instance = this;
 }
 
+ClockSettingsPanel* ClockSettingsPanel::instance = NULL;
+ClockSettingsPanel *ClockSettingsPanel::GetInstance()
+{
+    return instance;
+}
+
+ClockSettingsPanel::~ClockSettingsPanel()
+{
+    if (instance == this)
+        instance = NULL;
+}

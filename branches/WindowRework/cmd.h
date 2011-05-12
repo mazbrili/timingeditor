@@ -320,6 +320,8 @@ class ChangeTimeCompressor : public wxCommand
 {
 public:
     ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time, bool en);
+    ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, wxInt32 time);
+    ChangeTimeCompressor(TimingDocument *doc, wxInt32 index, bool en);
     ~ChangeTimeCompressor();
     bool Do(void);
     bool Undo(void);

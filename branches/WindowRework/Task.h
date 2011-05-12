@@ -14,10 +14,8 @@ class Task
 {
 public:
     Task(TimingView *view, DiagramLabelsWindow *labelsWin, DiagramAxisWindow *axisWin, DiagramWavesWindow *waveWin);
+    Task(const Task *task);
     virtual ~Task();
-
-    // interface:
-    virtual void InitTask() = 0;
 
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
     virtual void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -38,14 +36,17 @@ public:
     virtual bool HasActiveSelection();
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
+    virtual void UpdateTimeCompressorPanel(bool attach = true);
+    virtual void UpdateClockSettingsPanel(bool attach = true);
+
 public:
     // common methods
     wxInt32 GetTickFromPosition(const wxPoint &pos);
+    wxInt32 GetSignalFromPosition(const wxPoint &pos);
     bool IsOverWaves(const wxPoint &pos);
 
-private:
-    void Init();
 protected:
+    void Init();
     TimingView          *m_view;
     DiagramLabelsWindow *m_labelsWin;
     DiagramAxisWindow   *m_axisWin;

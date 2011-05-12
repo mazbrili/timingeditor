@@ -31,11 +31,13 @@ void LabelText::SetBuswidthField(TimingTextCtrl * widthctrl)
 //}
 void LabelText::OnSetFocus(wxFocusEvent &event)
 {
-    wxLogDebug(_T("LabelText::OnSetFocus %d"), m_signalNumber);
+    ::wxLogMessage(_T("LabelText::OnSetFocus %d"), m_signalNumber);
     m_view->TextHasFocus(this);
 }
 void LabelText::OnKillFocus(wxFocusEvent &event)
-{}
+{
+    ::wxLogMessage(_T("LabelText::OnKillFocus %d"), m_signalNumber);
+}
 wxCommand *LabelText::GetCommand()
 {
     return new ChangeSignalName((TimingDocument *)m_view->GetDocument(), GetValue(), m_signalNumber);

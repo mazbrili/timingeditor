@@ -65,6 +65,8 @@
 		<Unit filename="DiagramWavesWindow.h" />
 		<Unit filename="EditTextTask.cpp" />
 		<Unit filename="EditTextTask.h" />
+		<Unit filename="EditTimeCompressorTask.cpp" />
+		<Unit filename="EditTimeCompressorTask.h" />
 		<Unit filename="GraphBusSignal.cpp" />
 		<Unit filename="GraphBusSignal.h" />
 		<Unit filename="GraphClockSignal.cpp" />

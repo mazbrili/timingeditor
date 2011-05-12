@@ -78,8 +78,17 @@ class TransitionSettingsPanel : public wxPanel
 		bool en50,en90;
 		wxInt8 transwidth;
 
-	public:
+
+    public:
+        static TransitionSettingsPanel *GetInstance();
+    private:
+        static TransitionSettingsPanel *instance;
+
+    friend class TimingMainFrame;
+	private:
 		TransitionSettingsPanel( wxWindow* parent, int id = -1, wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 500,132 ), int style = wxTAB_TRAVERSAL );
+		virtual ~TransitionSettingsPanel();
+
     DECLARE_EVENT_TABLE()
 };
 

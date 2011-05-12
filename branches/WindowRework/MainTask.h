@@ -37,7 +37,7 @@ public:
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
 
-    virtual void InitTask();
+    void InitTask();
 private:
     void AddSignal(Signal *sig);
 
