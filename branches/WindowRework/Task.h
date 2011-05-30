@@ -31,9 +31,10 @@ public:
     virtual void Paste();
     virtual void Delete();
     virtual void SelectAll();
+    virtual bool CanCopy();
+    virtual bool CanCut();
     virtual bool CanPaste();
     virtual bool CanDelete();
-    virtual bool HasActiveSelection();
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
     virtual void UpdateTimeCompressorPanel(bool attach = true);
@@ -47,6 +48,11 @@ public:
 
 protected:
     void Init();
+    bool IsSignalInClipboard();
+    void AddSignal(Signal *sig);
+    void PasteSignalFromClipboard();
+
+
     TimingView          *m_view;
     DiagramLabelsWindow *m_labelsWin;
     DiagramAxisWindow   *m_axisWin;

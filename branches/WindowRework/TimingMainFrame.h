@@ -76,8 +76,11 @@ class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
         void HandlePanel(wxCommandEvent& event);
         void LoadDefaultLayout(wxCommandEvent& event);
 
-        bool HasActiveSelection();
+        //bool HasActiveSelection();
         bool CanDelete(void);
+        bool CanCopy(void);
+        bool CanCut(void);
+        bool CanPaste(void);
 
     public:
 

@@ -23,7 +23,11 @@
 				<Option compiler="gcc" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
+					<Add option="-Os" />
+					<Add option="-O3" />
 					<Add option="-O2" />
+					<Add option="-O1" />
+					<Add option="-O" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -41,6 +45,8 @@
 			<Add option="`wx-config --libs`" />
 			<Add library="wx_gtk2u_svg-2.8" />
 		</Linker>
+		<Unit filename="ActiveSignalTask.cpp" />
+		<Unit filename="ActiveSignalTask.h" />
 		<Unit filename="AddDiscontinuityTask.cpp" />
 		<Unit filename="AddDiscontinuityTask.h" />
 		<Unit filename="AddVerticalLineTask.cpp" />
@@ -87,6 +93,8 @@
 		<Unit filename="HoverDrawlet.h" />
 		<Unit filename="HoverGraphCaret.cpp" />
 		<Unit filename="HoverGraphCaret.h" />
+		<Unit filename="HoverHatch.cpp" />
+		<Unit filename="HoverHatch.h" />
 		<Unit filename="HoverLine.cpp" />
 		<Unit filename="HoverLine.h" />
 		<Unit filename="HoverText.cpp" />

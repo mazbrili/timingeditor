@@ -57,7 +57,7 @@ void ClockSettingsPanel::SetUnmodified()
 }
 void ClockSettingsPanel::OnUpdateTextFields(wxUpdateUIEvent& event)
 {
-    if ( view && view->IsSignalSelected() && view->IsSelectedSignalClock() )
+    if ( view && view->IsSignalSelected() && view->IsClockSelected() )
     {
         event.Enable(true);
         return;
@@ -67,7 +67,7 @@ void ClockSettingsPanel::OnUpdateTextFields(wxUpdateUIEvent& event)
 void ClockSettingsPanel::OnUpdateClockPeriod(wxUpdateUIEvent& event)
 {
     if ( view && view->IsSignalSelected() &&
-        view->IsSelectedSignalClock() && m_checkShadow->IsChecked())
+        view->IsClockSelected() && m_checkShadow->IsChecked())
     {
         event.Enable(true);
         return;
@@ -102,7 +102,7 @@ void ClockSettingsPanel::SetShowPeriod(bool en)
 
 void ClockSettingsPanel::OnUpdatePanelClkApply(wxUpdateUIEvent& event)
 {
-    if ( view && view->IsSignalSelected() && view->IsSelectedSignalClock() )
+    if ( view && view->IsSignalSelected() && view->IsClockSelected() )
     {
         long valp, vald;
         m_textPeriod->GetValue().ToLong(&valp);

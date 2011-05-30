@@ -1,10 +1,12 @@
 #include "Task.h"
 
+#include <wx/clipbrd.h>
+
 #include "DiagramAxisWindow.h"
 #include "DiagramLabelsWindow.h"
 #include "DiagramWavesWindow.h"
 #include "TimingView.h"
-//#include "DataObject.h"
+#include "DataObject.h"
 #include "HoverCross.h"
 #include "HoverText.h"
 #include "HoverLine.h"
@@ -137,11 +139,17 @@ bool Task::CanDelete()
 {
     return false;
 }
-bool Task::HasActiveSelection()
+bool Task::CanCopy()
 {
     return false;
 }
-
+bool Task::CanCut()
+{
+    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
+    if (doc)
+        return ( CanCopy() & !doc->IsReadOnly() );
+    return false;
+}
 wxInt32 Task::GetTickFromPosition(const wxPoint &pos)
 {
     return (pos.x - m_view->GetWavesLeftSpace())/(m_view->GridStepWidth);
@@ -178,4 +186,43 @@ void Task::UpdateTimeCompressorPanel(bool attach)
 void Task::UpdateClockSettingsPanel(bool attach)
 {
     ClockSettingsPanel::GetInstance()->view = NULL;
+}
+bool Task::IsSignalInClipboard()
+{
+    if (wxTheClipboard->Open())
+    {
+        if ( wxTheClipboard->IsSupported( wxDataFormat(TimingEditorSignalFormatId) ) )
+        {
+            wxTheClipboard->Close();
+            return true;
+        }
+        wxTheClipboard->Close();
+    }
+    return false;
+}
+void Task::AddSignal(Signal *sig)
+{
+    TimingDocument *doc = (TimingDocument*)m_view->GetDocument();
+    if ( !doc ) return;
+
+    wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+    if(cmdproc)
+        cmdproc->Submit(new AddSignalCommand(doc, GetSelectedSignalNumber(), *sig) );
+}
+void Task::PasteSignalFromClipboard()
+{
+    if (wxTheClipboard->Open())
+    {
+        if (wxTheClipboard->IsSupported( wxDataFormat(TimingEditorSignalFormatId) ) )
+        {
+            Signal *sig = new Signal;
+            TimingEditorSignalDataObject data(sig);
+
+            wxTheClipboard->GetData( data );
+            AddSignal( sig );
+            // do not delete sig since it is "owned" by the dataObject
+            //delete sig;
+        }
+        wxTheClipboard->Close();
+    }
 }

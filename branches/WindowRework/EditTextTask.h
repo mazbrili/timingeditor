@@ -25,14 +25,16 @@ public:
     virtual void Paste();
     virtual void Delete();
     virtual void SelectAll();
+    virtual bool CanCut();
+    virtual bool CanCopy();
     virtual bool CanPaste();
     virtual bool CanDelete();
-    virtual bool HasActiveSelection();
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
 private:
     friend class TimingTextCtrl;
     void EndTask();
+    bool IsTextSelected();
 private:
     void OnMouse(const wxMouseEvent &event);
 

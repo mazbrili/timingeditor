@@ -254,9 +254,6 @@ void TimingView::AttachPanels()
     UpdateAxisPanel();
 
     task->UpdateTimeCompressorPanel();
-    //ClkSetPanel->view = this;
-    //if ( IsSelectedSignalClock() )
-
     task->UpdateClockSettingsPanel();
 }
 void TimingView::DetachPanels()
@@ -265,28 +262,6 @@ void TimingView::DetachPanels()
     AxisSettingsPanel::GetInstance()->view = (TimingView *)NULL;
     task->UpdateClockSettingsPanel(false);
     task->UpdateTimeCompressorPanel(false);
-}
-void TimingView::UpdateClockPanel()
-{
-    TimingDocument *doc = (TimingDocument *)GetDocument();
-    if ( !doc ) return;
-
-    if ( IsSelectedSignalClock() )
-    {
-//        wxInt32 n;
-//        wxString str;
-
-////        n = doc->signals[editingNumber].delay;
-//        str = wxString::Format ( _( "%d" ) , n);
-//        ClkSetPanel->SetDelayText(str);
-//
-//        n = doc->signals[editingNumber].ticks;
-//        str = wxString::Format ( _( "%d" ) , n);
-//        ClkSetPanel->SetTicksText(str);
-//
-//        ClkSetPanel->SetShadowed(doc->signals[editingNumber].GenerateBackground);
-//        ClkSetPanel->SetShowPeriod(doc->signals[editingNumber].ShowPeriodCount);
-    }
 }
 void TimingView::UpdateTransitionPanel()
 {
@@ -329,7 +304,7 @@ void TimingView::SetClock(wxInt32 delay, wxInt32 ticks, bool shadow, bool DrawPe
     if ( !doc ) return;
     wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
 
-    if ( IsSelectedSignalClock() )
+    if ( IsClockSelected() )
     {
         cmdproc->Submit(
             new ChangeClockParamCommand(doc, GetSelectedSignalNumber() , ticks, delay, shadow, DrawPeriod)
@@ -794,11 +769,14 @@ bool TimingView::CanDelete(void)
 {
     return task->CanDelete();
 }
-bool TimingView::HasActiveSelection(void)
+bool TimingView::CanCopy(void)
 {
-    return task->HasActiveSelection();
+    return task->CanCopy();
 }
-//bool TimingView::IsTextSelected(void){return false;}
+bool TimingView::CanCut(void)
+{
+    return task->CanCut();
+}
 wxInt32 TimingView::GetSelectedSignalNumber()
 {
     return task->GetSelectedSignalNumber();
@@ -868,7 +846,7 @@ bool TimingView::IsDiscontinuitySelected()
 {
     return GetSelectedDiscontinuity() != -1;
 }
-bool TimingView::IsSelectedSignalClock()
+bool TimingView::IsClockSelected()
 {
     wxInt32 selsig = GetSelectedSignalNumber();
 
