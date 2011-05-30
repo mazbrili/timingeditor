@@ -20,11 +20,12 @@ public:
 
 
     bool CanDelete();
-    bool HasActiveSelection();
+    void Delete();
     wxInt32 GetSelectedDiscontinuity();
 protected:
 
 private:
+    void EndTask();
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
 

@@ -101,8 +101,6 @@ void AddDiscontinuityTask::HandleKey(const wxKeyEvent &event, bool down)
     if ( down && event.GetKeyCode() == WXK_ESCAPE)
         EndTask();
 }
-void AddDiscontinuityTask::Paste(){}
-bool AddDiscontinuityTask::CanPaste(){return false;}
 
 void AddDiscontinuityTask::EndTask()
 {

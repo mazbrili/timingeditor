@@ -24,16 +24,15 @@ public:
     virtual void WavesKey(const wxKeyEvent &event, bool down);
     virtual void AxisKey(const wxKeyEvent &event, bool down);
 
-    virtual wxInt32 GetSelectedSignalNumber();
-    virtual wxInt32 GetSelectedDiscontinuity();
-    virtual void Copy();
-    virtual void Cut();
+    //virtual void Copy();
+    //virtual void Cut();
     virtual void Paste();
-    virtual void Delete();
-    virtual void SelectAll();
+    //virtual void Delete();
+    //virtual void SelectAll();
+    //virtual bool CanCopy();
+    //virtual bool CanCut();
     virtual bool CanPaste();
-    virtual bool CanDelete();
-    virtual bool HasActiveSelection();
+    //virtual bool CanDelete();
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
 

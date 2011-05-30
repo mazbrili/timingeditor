@@ -112,7 +112,7 @@ private:
     void AttachPanels();
     void DetachPanels();
     //void UpdateTimeCompressorPanel(void);
-    void UpdateClockPanel();
+    //void UpdateClockPanel();
     void UpdateTransitionPanel();
     void UpdateAxisPanel();
     void UpdateSignals();
@@ -138,12 +138,14 @@ public:
 public:
     bool CanZoomIn(void);
     bool CanZoomOut(void);
-    bool CanPaste(void);
-    bool HasActiveSelection(void);
+    bool CanPAste(void);
     bool CanDelete(void);
+    bool CanCopy(void);
+    bool CanPaste(void);
+    bool CanCut(void);
     //bool IsTextSelected(void);
     bool IsSignalSelected(void);
-    bool IsSelectedSignalClock(void);
+    bool IsClockSelected(void);
     bool IsDiscontinuitySelected(void);
     //bool CanEditText();
 

@@ -104,8 +104,6 @@ void AddVerticalLineTask::NonInvolvedWindowMouse(const wxMouseEvent &event)
     else if ( event.RightDown() )
         EndTask();
 }
-void AddVerticalLineTask::Paste(){}
-bool AddVerticalLineTask::CanPaste(){return false;}
 void AddVerticalLineTask::EndTask()
 {
     m_view->SetTask(NULL);

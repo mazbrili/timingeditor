@@ -9,6 +9,7 @@
 
 #include "enumers.h"
 
+//const wxChar *TimingEditorSignalFormatId = _T("TimingEditorSignalDataFormat");
 
 TimingEditorSignalDataObject::TimingEditorSignalDataObject(Signal *sig):
 wxDataObjectSimple(wxDataFormat(TimingEditorSignalFormatId)),
@@ -31,7 +32,7 @@ size_t TimingEditorSignalDataObject::GetDataSize() const
     if ( memstream.GetLength() != wxInvalidOffset )
         return( memstream.GetLength() );
 
-    return( 0 );
+    return 0;
 }
 
 
@@ -44,7 +45,7 @@ bool TimingEditorSignalDataObject::GetDataHere(void *buf) const
     ///copy the data
     wxInt32 len =  memstream.CopyTo((char *)buf, memstream.GetLength() );
 
-    ///check that copied data has the same length as the data in the memorystream
+    ///check that copied data has the same length as the data in the MemoryStream
     if ( len == memstream.GetLength() )
         return true;
     else

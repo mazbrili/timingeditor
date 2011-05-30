@@ -20,14 +20,6 @@ public:
     //virtual wxInt32 GetSelectedDiscontinuity();
     //virtual void Copy();
     //virtual void Cut();
-    virtual void Paste();
-    //virtual void Delete();
-    //virtual void SelectAll();
-    virtual bool CanPaste();
-    //virtual bool CanDelete();
-    //virtual bool HasActiveSelection();
-    //virtual bool CanEditText(){return false;}
-    //virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
 private:
     void EndTask();

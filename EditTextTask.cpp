@@ -105,13 +105,21 @@ void EditTextTask::SelectAll()
 {
     m_txtctrl->SetSelection(-1, -1);
 }
-bool EditTextTask::CanDelete()
-{
-    return HasActiveSelection();
-}
-bool EditTextTask::HasActiveSelection()
+bool EditTextTask::IsTextSelected()
 {
     return !(m_txtctrl->GetStringSelection().IsEmpty());
+}
+bool EditTextTask::CanDelete()
+{
+    return IsTextSelected();
+}
+bool EditTextTask::CanCopy()
+{
+    return IsTextSelected();
+}
+bool EditTextTask::CanCut()
+{
+    return IsTextSelected();
 }
 void EditTextTask::TextHasFocus(TimingTextCtrl *ctrl)
 {
@@ -125,7 +133,9 @@ void EditTextTask::TextHasFocus(TimingTextCtrl *ctrl)
 }
 void EditTextTask::SendCommandToProcessor()
 {
-    m_view->GetDocument()->GetCommandProcessor()->Submit(m_txtctrl->GetCommand());
+    wxCommandProcessor *cmdprc = m_view->GetDocument()->GetCommandProcessor();
+    if  (cmdprc)
+        cmdprc->Submit(m_txtctrl->GetCommand());
     editdone = true;
 }
 

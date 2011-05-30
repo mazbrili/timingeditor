@@ -25,9 +25,9 @@ bool EditTimeCompressorTask::CanDelete()
 {
     return m_tick != -1;
 }
-bool EditTimeCompressorTask::HasActiveSelection()
+void EditTimeCompressorTask::Delete()
 {
-    return m_tick != -1;
+    #warning not yet implemented!!
 }
 
 wxInt32 EditTimeCompressorTask::GetSelectedDiscontinuity()
@@ -67,20 +67,21 @@ void EditTimeCompressorTask::AxisMouse(const wxMouseEvent &event, const wxPoint 
         }
         else
         {
-            m_tick = -1;
-            UpdateTimeCompressorPanel();
-            m_axisWin->Refresh();
-            m_view->SetTask(NULL);
+            EndTask();
         }
     }
 
     if(event.ButtonDown(wxMOUSE_BTN_RIGHT))
     {
-        m_tick = -1;
-        UpdateTimeCompressorPanel();
-        m_axisWin->Refresh();
-        m_view->SetTask(NULL);
+        EndTask();
     }
+}
+void EditTimeCompressorTask::EndTask()
+{
+    m_tick = -1;
+    UpdateTimeCompressorPanel();
+    m_axisWin->Refresh();
+    m_view->SetTask(NULL);
 }
 void EditTimeCompressorTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
@@ -90,10 +91,7 @@ void EditTimeCompressorTask::OnMouse(const wxMouseEvent &event)
 {
     if (event.Button(wxMOUSE_BTN_ANY ))
     {
-        m_tick = -1;
-        UpdateTimeCompressorPanel();
-        m_axisWin->Refresh();
-        m_view->SetTask(NULL);
+        EndTask();
     }
 }
 
@@ -112,7 +110,8 @@ void EditTimeCompressorTask::AxisKey(const wxKeyEvent &event, bool down)
 
 void EditTimeCompressorTask::OnKey(const wxKeyEvent &event, bool down)
 {
-    //if(event.)
+    if ( down && event.GetKeyCode() == WXK_ESCAPE)
+        EndTask();
 }
 void EditTimeCompressorTask::UpdateTimeCompressorPanel(bool attach)
 {

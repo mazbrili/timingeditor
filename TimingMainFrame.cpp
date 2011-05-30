@@ -257,11 +257,11 @@ void TimingMainFrame::OnHelp(wxCommandEvent &event)
 
 void TimingMainFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 {
-    event.Enable(HasActiveSelection());
+    event.Enable(CanCopy());
 }
 void TimingMainFrame::OnUpdateCut(wxUpdateUIEvent& event)
 {
-    event.Enable(HasActiveSelection());
+    event.Enable(CanCut());
 }
 void TimingMainFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 {
@@ -306,17 +306,33 @@ void TimingMainFrame::LoadDefaultLayout(wxCommandEvent& event)
     m_manager->LoadPerspective(DefalutLayout);
 }
 
+
+bool TimingMainFrame::CanCopy(void)
+{
+    TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
+    if ( view && view->CanCopy() )
+        return true;
+    return false;
+}
+bool TimingMainFrame::CanCut(void)
+{
+    TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
+    if ( view && view->CanCut() )
+        return true;
+    return false;
+}
+bool TimingMainFrame::CanPaste(void)
+{
+    TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
+    if ( view && view->CanPaste() )
+        return true;
+    return false;
+}
+
 bool TimingMainFrame::CanDelete(void)
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanDelete() )
-        return true;
-    return false;
-}
-bool TimingMainFrame::HasActiveSelection(void)
-{
-    TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
-    if ( view && view->HasActiveSelection() )
         return true;
     return false;
 }
