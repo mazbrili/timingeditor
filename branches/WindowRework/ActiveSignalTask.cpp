@@ -17,13 +17,14 @@ Task(task),
 m_sig(sig)
 {
     //ctor
-    UpdateClockSettingsPanel();
     //::wxLogMessage(_T("ActiveSignalTask::ActiveSignalTask"));
     if ( m_sig < 0 || (unsigned int) m_sig >= m_view->heightOffsets.size()-1)
     {
         EndTask();
         return;
     }
+
+    UpdateClockSettingsPanel();
 
     SetDrawlets();
 }
@@ -58,6 +59,7 @@ void ActiveSignalTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos
         }
         m_sig = k;
         SetDrawlets();
+        UpdateClockSettingsPanel();
     }
 }
 void ActiveSignalTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
