@@ -58,7 +58,6 @@ void EditTextTask::OnMouse(const wxMouseEvent &event)
 }
 void EditTextTask::EndTask()
 {
-    // create command and send to commandProcessor
     SendCommandToProcessor();
     m_view->SetTask(NULL);
 }
@@ -111,7 +110,7 @@ bool EditTextTask::IsTextSelected()
 }
 bool EditTextTask::CanDelete()
 {
-    return IsTextSelected();
+    return IsTextSelected() & !IsReadOnly();
 }
 bool EditTextTask::CanCopy()
 {
@@ -119,7 +118,7 @@ bool EditTextTask::CanCopy()
 }
 bool EditTextTask::CanCut()
 {
-    return IsTextSelected();
+    return IsTextSelected() & !IsReadOnly();
 }
 void EditTextTask::TextHasFocus(TimingTextCtrl *ctrl)
 {
@@ -133,6 +132,7 @@ void EditTextTask::TextHasFocus(TimingTextCtrl *ctrl)
 }
 void EditTextTask::SendCommandToProcessor()
 {
+    // create command and send to commandProcessor
     wxCommandProcessor *cmdprc = m_view->GetDocument()->GetCommandProcessor();
     if  (cmdprc)
         cmdprc->Submit(m_txtctrl->GetCommand());

@@ -40,7 +40,6 @@
 #include <wx/filename.h>
 
 #include "TimingView.h"
-#include "TimingWindow.h"
 #include "TimingMainFrame.h"
 #include "TimingApp.h"
 #include "cmd.h"
@@ -193,7 +192,7 @@ int TimingView::GetWavesLeftSpace()const{return 10;}
 wxString TimingView::GetFloatFormatStr() const
 {
     unsigned char digitsAfterDecimalpoint = 3;
-    wxString format = _T("\%.") + wxString::Format(_T("%d"),digitsAfterDecimalpoint) + _T("f");
+    wxString format = _T("%.") + wxString::Format(_T("%d"),digitsAfterDecimalpoint) + _T("f");
     return format;
 }
 wxString TimingView::GetTimeString(wxInt32 ticks)
@@ -373,6 +372,7 @@ void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
     AttachPanels();
     if (splitterwindow)
         splitterwindow->Update();
+    task->Update();
 }
 void TimingView::UpdateHeightsContainer()
 {
@@ -398,14 +398,13 @@ void TimingView::UpdateVisibelTicksContainer()
 
     VisibleTicks.clear();
     wxInt32 n = 0;
-    ::wxLogMessage(_T("UpdateVisibleTicks") );
     while ( n <= doc->length )
     {
         VisibleTicks.push_back(n);
 
         bool hascompressor = false;
-        if ( doc->compressors.find(n) != doc->compressors.end() )
-            ::wxLogMessage(_T("UpdateVisibleTicks::compressor at %d"),n );
+//        if ( doc->compressors.find(n) != doc->compressors.end() )
+//            ::wxLogMessage(_T("UpdateVisibleTicks::compressor at %d"),n );
         if ( doc->compressors.find(n) != doc->compressors.end() && doc->compressors[n].enabled )
         {
             n += doc->compressors[n].length;

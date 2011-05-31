@@ -109,7 +109,7 @@ void DiagramLabelsWindow::Update()
     SetVirtualSize(width, -1);
 
 
-
+    RemoveDrawlet();
     Refresh();
 }
 //void DiagramLabelsWindow::UpdateSizeToMatchLabels()
@@ -244,7 +244,7 @@ void DiagramLabelsWindow::OnMouse(wxMouseEvent &event)
         SetFocusIgnoringChildren();
 
     //event.Skip();
-};
+}
 
 void DiagramLabelsWindow::OnKeyDown(wxKeyEvent &event)
 {

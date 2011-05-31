@@ -40,6 +40,8 @@ public:
     virtual void UpdateTimeCompressorPanel(bool attach = true);
     virtual void UpdateClockSettingsPanel(bool attach = true);
 
+    virtual void Update();
+
 public:
     // common methods
     wxInt32 GetTickFromPosition(const wxPoint &pos);
@@ -51,6 +53,7 @@ protected:
     bool IsSignalInClipboard();
     void AddSignal(Signal *sig);
     void PasteSignalFromClipboard();
+    bool IsReadOnly();
 
 
     TimingView          *m_view;

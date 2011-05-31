@@ -86,7 +86,10 @@ void ActiveSignalTask::AxisKey(const wxKeyEvent &event, bool down)
 void ActiveSignalTask::OnKey(const wxKeyEvent &event, bool down)
 {
     if ( down && event.GetKeyCode() == WXK_DELETE)
+    {
         Delete();
+        return;
+    }
     if ( down && event.GetKeyCode() == WXK_ESCAPE)
         EndTask();
 }
@@ -142,10 +145,7 @@ void ActiveSignalTask::OnMouse(const wxMouseEvent &event)
 {
     //::wxLogMessage(_T("ActiveSignalTask::OnMouse"));
     if (event.ButtonDown(wxMOUSE_BTN_ANY ))
-    {
-        //::wxLogMessage(_T("ActiveSignalTask::OnMouse endtask"));
         EndTask();
-    }
 }
 
 void ActiveSignalTask::Delete()
@@ -153,7 +153,7 @@ void ActiveSignalTask::Delete()
     wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
     if (cmdproc)
         cmdproc->Submit(new DeleteSignalCommand((TimingDocument *)m_view->GetDocument(), m_sig));
-    EndTask();
+    //EndTask();
 }
 bool ActiveSignalTask::CanCopy()
 {
@@ -171,7 +171,7 @@ void ActiveSignalTask::Copy()
                 Signal *sig = new Signal;
                 *sig = doc->signals[m_sig];
                 // This data objects are held by the clipboard,
-                // so do not delete them here the app.
+                // so do not delete them here in.
                 wxTheClipboard->SetData( new TimingEditorSignalDataObject(sig) );
             }
         }
@@ -193,4 +193,21 @@ bool ActiveSignalTask::CanPaste()
     return IsSignalInClipboard();
 }
 
+void ActiveSignalTask::Update()
+{
+    TimingDocument *doc = (TimingDocument*)m_view->GetDocument();
+    if ( doc )
+    {
+        unsigned int k = doc->signals.size();
+        if ( k == 0 )
+        {
+            EndTask();
+            return;
+        }
+        if ( (unsigned int)m_sig >= k )
+            m_sig = k-1;
+        SetDrawlets();
+        UpdateClockSettingsPanel();
 
+    }
+}

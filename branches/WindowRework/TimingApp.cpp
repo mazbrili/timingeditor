@@ -42,7 +42,7 @@
 
 #include <wx/image.h>
 
-IMPLEMENT_APP(TimingApp);
+IMPLEMENT_APP(TimingApp)
 
 bool TimingApp::OnInit()
 {

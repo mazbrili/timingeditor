@@ -43,7 +43,6 @@
 
 #include "TimingView.h"
 #include "dndfile.h"
-//#include "TimingWindow.h"
 #include "DiagramSplitterWindow.h"
 #include "ClockSettingsPanel.h"
 #include "TransitionSettingsPanel.h"

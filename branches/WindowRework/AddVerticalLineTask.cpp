@@ -19,6 +19,10 @@ Task(task)
 //    m_axisWin->RemoveDrawlet();
 //    m_waveWin->RemoveDrawlet();
 //    m_labelsWin->RemoveDrawlet();
+    Init();
+}
+void AddVerticalLineTask::Init()
+{
     state = waitingFirstPoint;
 
     wxBitmap cursBitmap(ruler_cur_xpm);
@@ -275,4 +279,10 @@ void AddVerticalLineTask::SetDrawlet()
             new HoverLine(start, stop, *wxLIGHT_GREY)
         )
     );
+}
+void AddVerticalLineTask::Update()
+{
+
+    m_waveWin->RemoveDrawlet();
+    Init();
 }
