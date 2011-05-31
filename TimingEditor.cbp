@@ -120,6 +120,8 @@
 			<Add library="libodbc32.a" />
 			<Add library="libgdiplus.a" />
 		</Linker>
+		<Unit filename="ActiveSignalTask.cpp" />
+		<Unit filename="ActiveSignalTask.h" />
 		<Unit filename="AddDiscontinuityTask.cpp" />
 		<Unit filename="AddDiscontinuityTask.h" />
 		<Unit filename="AddVerticalLineTask.cpp" />
@@ -144,6 +146,8 @@
 		<Unit filename="DiagramWavesWindow.h" />
 		<Unit filename="EditTextTask.cpp" />
 		<Unit filename="EditTextTask.h" />
+		<Unit filename="EditTimeCompressorTask.cpp" />
+		<Unit filename="EditTimeCompressorTask.h" />
 		<Unit filename="GraphBusSignal.cpp" />
 		<Unit filename="GraphBusSignal.h" />
 		<Unit filename="GraphClockSignal.cpp" />
@@ -164,6 +168,8 @@
 		<Unit filename="HoverDrawlet.h" />
 		<Unit filename="HoverGraphCaret.cpp" />
 		<Unit filename="HoverGraphCaret.h" />
+		<Unit filename="HoverHatch.cpp" />
+		<Unit filename="HoverHatch.h" />
 		<Unit filename="HoverLine.cpp" />
 		<Unit filename="HoverLine.h" />
 		<Unit filename="HoverText.cpp" />
