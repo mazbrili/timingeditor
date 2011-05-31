@@ -73,6 +73,7 @@ void DiagramAxisWindow::PaintBackground(wxDC &dc)
 
 void DiagramAxisWindow::Update()
 {
+    RemoveDrawlet();
     Refresh();
 }
 void DiagramAxisWindow::Draw(wxDC & dc)

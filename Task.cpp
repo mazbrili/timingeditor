@@ -145,10 +145,14 @@ bool Task::CanCopy()
 }
 bool Task::CanCut()
 {
+    return CanCopy() & !IsReadOnly();
+}
+bool Task::IsReadOnly()
+{
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
     if (doc)
-        return ( CanCopy() & !doc->IsReadOnly() );
-    return false;
+        return doc->IsReadOnly();
+    return true;
 }
 wxInt32 Task::GetTickFromPosition(const wxPoint &pos)
 {
@@ -226,3 +230,4 @@ void Task::PasteSignalFromClipboard()
         wxTheClipboard->Close();
     }
 }
+void Task::Update(){}

@@ -26,9 +26,11 @@ public:
     //virtual bool CanPaste();
     //virtual bool CanDelete();
     //virtual bool CanEditText(){return false;}
+    virtual void Update();
 
 private:
     void EndTask();
+    void Init();
 
     typedef enum{
         waitingFirstPoint,

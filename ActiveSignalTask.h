@@ -24,6 +24,7 @@ public:
     virtual void Delete();
     virtual void Paste();
     virtual bool CanPaste();
+    virtual void Update();
 
     int GetSelectedSignalNumber();
 

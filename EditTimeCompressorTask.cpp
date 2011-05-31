@@ -27,7 +27,14 @@ bool EditTimeCompressorTask::CanDelete()
 }
 void EditTimeCompressorTask::Delete()
 {
-    #warning not yet implemented!!
+    wxCommand *cmd = new RemoveDiscontCommand((TimingDocument *) m_view->GetDocument(), m_tick);
+    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
+    if ( doc )
+        doc->GetCommandProcessor()->Submit( cmd );
+    else
+        delete cmd;
+
+    EndTask();
 }
 
 wxInt32 EditTimeCompressorTask::GetSelectedDiscontinuity()
@@ -66,9 +73,7 @@ void EditTimeCompressorTask::AxisMouse(const wxMouseEvent &event, const wxPoint 
             m_axisWin->Refresh();
         }
         else
-        {
             EndTask();
-        }
     }
 
     if(event.ButtonDown(wxMOUSE_BTN_RIGHT))
@@ -110,6 +115,11 @@ void EditTimeCompressorTask::AxisKey(const wxKeyEvent &event, bool down)
 
 void EditTimeCompressorTask::OnKey(const wxKeyEvent &event, bool down)
 {
+    if ( down && event.GetKeyCode() == WXK_DELETE)
+    {
+        Delete();
+        return;
+    }
     if ( down && event.GetKeyCode() == WXK_ESCAPE)
         EndTask();
 }
