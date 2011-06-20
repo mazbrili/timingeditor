@@ -119,6 +119,7 @@
 		<Unit filename="TimingTextCtrl.h" />
 		<Unit filename="TimingView.cpp" />
 		<Unit filename="TimingView.h" />
+		<Unit filename="ToDo.txt" />
 		<Unit filename="TransitionSettingsPanel.cpp" />
 		<Unit filename="TransitionSettingsPanel.h" />
 		<Unit filename="art/busedge.xpm" />
@@ -145,8 +146,6 @@
 		<Unit filename="cmd.h" />
 		<Unit filename="dndfile.cpp" />
 		<Unit filename="dndfile.h" />
-		<Unit filename="dndtarget.cpp" />
-		<Unit filename="dndtarget.h" />
 		<Unit filename="enumers.h" />
 		<Unit filename="myTipProvider.cpp" />
 		<Unit filename="myTipProvider.h" />

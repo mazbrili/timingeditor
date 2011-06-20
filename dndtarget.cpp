@@ -39,21 +39,17 @@
 //#include "TimingWindow.h"
 #include "DiagramSplitterWindow.h"
 
-DragnDropTextTarget::DragnDropTextTarget(DiagramSplitterWindow *owner):
-    wxDropTarget(new wxTextDataObject()),
+DropTextTarget::DropTextTarget()DiagramSplitterWindow *owner):
+    wxDropTarget(new wxTextDataObject())
     m_owner(owner)
 {
 }
-wxDragResult DragnDropTextTarget::OnEnter(wxCoord x, wxCoord y, wxDragResult def)
+wxDragResult DropTextTarget::OnEnter(wxCoord x, wxCoord y, wxDragResult def)
 {
     m_owner->OnDragEnter();
     return OnDragOver(x, y, def);
 }
-void DragnDropTextTarget::OnLeave()
-{
-    m_owner->OnDragLeave();
-}
-wxDragResult DragnDropTextTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
+wxDragResult DropTextTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
 {
     if ( !GetData() )
     {
@@ -68,9 +64,13 @@ wxDragResult DragnDropTextTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
     else
         return wxDragNone;
 }
-wxDragResult DragnDropTextTarget::OnDragOver(wxCoord x, wxCoord y, wxDragResult def)
+wxDragResult DropTextTarget::OnDragOver(wxCoord x, wxCoord y, wxDragResult def)
 {
     return( m_owner->OnDragOver(wxPoint(x, y), def) );
+}
+void DropTextTarget::OnLeave()
+{
+    m_owner->OnDragLeave();
 }
 
 

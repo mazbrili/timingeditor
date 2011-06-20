@@ -41,9 +41,9 @@ m_labels(labels),
 m_view(view),
 m_drawlet(NULL)
 {
-    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text I"), wxPoint(0,100), wxSize(80,25), wxBORDER_NONE ));
-    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text II"), wxPoint(0,150), wxSize(80,25), wxBORDER_NONE ));
-    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text III"), wxPoint(0,200), wxSize(80,25), wxBORDER_NONE ));
+//    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text I"), wxPoint(0,100), wxSize(80,25), wxBORDER_NONE ));
+//    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text II"), wxPoint(0,150), wxSize(80,25), wxBORDER_NONE ));
+//    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text III"), wxPoint(0,200), wxSize(80,25), wxBORDER_NONE ));
 }
 DiagramWavesWindow::DiagramWavesWindow(){}
 DiagramWavesWindow::~DiagramWavesWindow(){}
