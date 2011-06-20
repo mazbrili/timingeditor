@@ -48,17 +48,29 @@ private:
 };*/
 
 
-class DragnDropTextTarget : public wxDropTarget
+class DropTextTarget : public wxDropTarget
 {
 public:
-    DragnDropTextTarget(DiagramSplitterWindow *owner);
-    ~DragnDropTextTarget(){}
+    DropTextTarget(DiagramSplitterWindow *owner);
+    ~DropTextTarget(){}
     virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-    virtual void         OnLeave();
     virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
     virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    virtual void         OnLeave();
 private:
     DiagramSplitterWindow *m_owner;
+};
+
+class DropSignalTarget: public wxDropTarget
+{
+public:
+    DropSignalTarget();
+    ~DropSignalTarget(){}
+    virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
+    virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
+    virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
+    virtual void         OnLeave();
+
 };
 
 #endif

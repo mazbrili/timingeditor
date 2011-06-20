@@ -1,6 +1,7 @@
 #include "ActiveSignalTask.h"
 
 #include <wx/clipbrd.h>
+//#include <wx/dnd.h>
 
 #include "ClockSettingsPanel.h"
 #include "TimingDoc.h"
@@ -9,12 +10,15 @@
 #include "cmd.h"
 
 #include "HoverHatch.h"
+#include "HoverCombo.h"
+#include "HoverLine.h"
 #include "DiagramWavesWindow.h"
 #include "DiagramLabelsWindow.h"
 
 ActiveSignalTask::ActiveSignalTask(const Task *task, int sig):
 Task(task),
-m_sig(sig)
+m_sig(sig),
+state(idleState)
 {
     //ctor
     //::wxLogMessage(_T("ActiveSignalTask::ActiveSignalTask"));
@@ -29,12 +33,17 @@ m_sig(sig)
     SetDrawlets();
 }
 
-void ActiveSignalTask::SetDrawlets()
+void ActiveSignalTask::SetDrawlets(int targetpos)
 {
     wxCoord y = m_view->heightOffsets[m_sig];
     wxCoord h = -y + m_view->heightOffsets[m_sig + 1];
     m_waveWin->SetDrawlet(new HoverHatch(wxPoint(0,y), wxSize(0,h), wxColour(32, 32, 0), HoverHatch::expand_x));
-    m_labelsWin->SetDrawlet(new HoverHatch(wxPoint(0,y), wxSize(0,h), wxColour(32, 32, 0),HoverHatch::expand_x));
+
+    HoverDrawlet *drawlet = new HoverHatch(wxPoint(0,y), wxSize(0,h), wxColour(32, 32, 0),HoverHatch::expand_x);
+    if (targetpos >= 0)
+        drawlet = new HoverCombo(drawlet, new HoverLine(-1, m_view->heightOffsets[targetpos], wxColour(32, 32, 0), 3));
+
+    m_labelsWin->SetDrawlet(drawlet);
 }
 
 ActiveSignalTask::~ActiveSignalTask()
@@ -51,6 +60,7 @@ void ActiveSignalTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos
     }
     if ( event.ButtonDown(wxMOUSE_BTN_LEFT) )
     {
+        state = idleState;
         int k = GetSignalFromPosition(pos);
         if ( k == -1 )
         {
@@ -60,6 +70,63 @@ void ActiveSignalTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos
         m_sig = k;
         SetDrawlets();
         UpdateClockSettingsPanel();
+        return;
+    }
+
+    if (event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_LEFT))
+    {
+        if (state == idleState )
+        {
+        //wxLogMessage(_T("DoDragDrop"));
+            state = movingSignal;
+        }
+        else // state == movingSignal
+        {
+            int k = GetSignalFromPosition(pos);
+            if ( k != -1 )
+            {
+                if ( 2*pos.y > (m_view->heightOffsets[k] + m_view->heightOffsets[k+1]))
+                    k++;
+                if ( k == m_sig || k == m_sig+1)
+                    k = -1;
+            }
+            SetDrawlets(k);
+        }
+        return;
+    }
+    if (state == movingSignal && event.ButtonUp(wxMOUSE_BTN_LEFT))
+    {
+        int k = GetSignalFromPosition(pos);
+        if ( k != -1 )
+        {
+            if ( 2*pos.y > (m_view->heightOffsets[k] + m_view->heightOffsets[k+1]))
+                k++;
+            if ( k == m_sig || k == m_sig+1)
+                k = -1;
+        }
+        if ( k == -1 )
+        {
+            state = idleState;
+            SetDrawlets();
+        }
+        else
+        {
+            wxCommand *cmd;
+            TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
+            if (! event.ControlDown())
+            {
+                cmd = new MoveSignalPosCommand(doc, m_sig, k);
+            }
+            else
+            {
+                //copy
+                Signal sig = doc->signals[m_sig];
+                cmd = new AddSignalCommand(doc, k, sig);
+            }
+            wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+            if (cmdproc)
+                cmdproc->Submit(cmd);
+        }
     }
 }
 void ActiveSignalTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
@@ -70,6 +137,14 @@ void ActiveSignalTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     OnMouse(event);
 }
+
+void ActiveSignalTask::OnMouse(const wxMouseEvent &event)
+{
+    //::wxLogMessage(_T("ActiveSignalTask::OnMouse"));
+    if (event.ButtonDown(wxMOUSE_BTN_ANY ))
+        EndTask();
+}
+
 void ActiveSignalTask::LabelsKey(const wxKeyEvent &event, bool down)
 {
     OnKey(event, down);
@@ -97,7 +172,6 @@ void ActiveSignalTask::EndTask()
 {
     m_sig = -1;
     UpdateClockSettingsPanel(false);
-    //m_axisWin->Refresh();
     m_view->SetTask(NULL);
 }
 void ActiveSignalTask::UpdateClockSettingsPanel(bool attach)
@@ -141,15 +215,9 @@ int ActiveSignalTask::GetSelectedSignalNumber()
     return m_sig;
 }
 
-void ActiveSignalTask::OnMouse(const wxMouseEvent &event)
-{
-    //::wxLogMessage(_T("ActiveSignalTask::OnMouse"));
-    if (event.ButtonDown(wxMOUSE_BTN_ANY ))
-        EndTask();
-}
-
 void ActiveSignalTask::Delete()
 {
+    state = idleState;
     wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
     if (cmdproc)
         cmdproc->Submit(new DeleteSignalCommand((TimingDocument *)m_view->GetDocument(), m_sig));

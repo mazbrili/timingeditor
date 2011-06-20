@@ -17,7 +17,8 @@
 class HoverLine : public HoverDrawlet
 {
 public:
-    HoverLine(wxPoint start, wxPoint stop, wxColour colour);
+    HoverLine(wxPoint start, wxPoint stop, wxColour colour, int width = 1);
+    HoverLine(int x, int y, wxColour colour, int width = 1);
     virtual ~HoverLine();
 
 
@@ -27,6 +28,13 @@ public:
 private:
     wxPoint m_a, m_b;
     wxColour m_colour;
+    int m_width;
+    enum expandDirection{
+        expand_x,
+        expand_y,
+        expand_none
+    };
+    expandDirection m_dir;
 };
 
 #endif

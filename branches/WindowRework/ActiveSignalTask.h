@@ -30,12 +30,18 @@ public:
 
 protected:
 private:
-    void SetDrawlets();
+    void SetDrawlets(int targetpos = -1);
     void EndTask();
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
 private:
     int m_sig;
+private:
+    enum states{
+        idleState,
+        movingSignal
+    };
+    states state;
 };
 
 #endif // ACTIVESIGNALTASK_H
