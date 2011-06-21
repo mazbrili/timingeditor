@@ -15,6 +15,9 @@
 #include "DiagramWavesWindow.h"
 #include "DiagramLabelsWindow.h"
 
+#include "art/MoveSig.xpm"
+#include "art/CopySig.xpm"
+
 ActiveSignalTask::ActiveSignalTask(const Task *task, int sig):
 Task(task),
 m_sig(sig),
@@ -91,6 +94,22 @@ void ActiveSignalTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos
                     k = -1;
             }
             SetDrawlets(k);
+            if (! event.ControlDown())
+            {
+                wxBitmap cursBitmap(MoveSig_xpm);
+                wxImage cursImage = cursBitmap.ConvertToImage();
+                cursImage.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, 5);
+                cursImage.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, 7);
+                m_labelsWin->SetCursor(wxCursor(cursImage));
+            }
+            else
+            {
+                wxBitmap cursBitmap(CopySig_xpm);
+                wxImage cursImage = cursBitmap.ConvertToImage();
+                cursImage.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, 5);
+                cursImage.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, 7);
+                m_labelsWin->SetCursor(wxCursor(cursImage));
+            }
         }
         return;
     }
@@ -127,6 +146,7 @@ void ActiveSignalTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos
             if (cmdproc)
                 cmdproc->Submit(cmd);
         }
+        m_labelsWin->SetCursor(wxNullCursor);
     }
 }
 void ActiveSignalTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
