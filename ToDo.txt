@@ -2,6 +2,5 @@ drop text into text fields
 add, move and remove arrows
 move arrow-text
 change signal values
-show that ctrl will copy the dragged signal
 
 and a lot more
