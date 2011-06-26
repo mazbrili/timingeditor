@@ -13,7 +13,7 @@
 #include "EditTextTask.h"
 #include "EditTimeCompressorTask.h"
 #include "ActiveSignalTask.h"
-#include "ChangeSignalHeightTask.h"
+#include "ChangeSignalSpacerTask.h"
 #include "cmd.h"
 
 
@@ -54,7 +54,7 @@ void MainTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
         if (resize == -1)
             m_view->SetTask(new ActiveSignalTask(this, k));
         else
-            m_view->SetTask(new ChangeSignalHeightTask(this, resize));
+            m_view->SetTask(new ChangeSignalSpacerTask(this, resize));
         return;
     }
 
