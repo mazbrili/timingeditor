@@ -148,6 +148,11 @@ void ActiveSignalTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos
         }
         m_labelsWin->SetCursor(wxNullCursor);
     }
+    if (state == movingSignal && event.Leaving())
+    {
+        state = idleState;
+        SetDrawlets();
+    }
 }
 void ActiveSignalTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {

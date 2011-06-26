@@ -13,6 +13,7 @@
 #include "EditTextTask.h"
 #include "EditTimeCompressorTask.h"
 #include "ActiveSignalTask.h"
+#include "ChangeSignalHeightTask.h"
 #include "cmd.h"
 
 
@@ -33,13 +34,10 @@ MainTask::~MainTask()
 {}
 void MainTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
-    const int CatchWidth = 5;
-    int k = GetSignalFromPosition(pos);
 
     if ( event.Moving() )
     {
-        if ( k != -1 && ((pos.y > m_view->heightOffsets[k+1] - CatchWidth-1 && pos.y < m_view->heightOffsets[k+1]-1) ||
-            ( pos.y > m_view->heightOffsets[k]+1 && pos.y < m_view->heightOffsets[k] + CatchWidth+1)))
+        if ( IsOnResizeHeightPos(pos) != -1)
             m_labelsWin->SetCursor(wxCursor(wxCURSOR_SIZENS));
         else
             m_labelsWin->SetCursor(wxNullCursor);
@@ -48,11 +46,30 @@ void MainTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
         m_waveWin->RemoveDrawlet();
         return;
     }
+
+    int k = GetSignalFromPosition(pos);
     if ( k != -1 && event.ButtonDown(wxMOUSE_BTN_LEFT) )
     {
-        m_view->SetTask(new ActiveSignalTask(this, k));
+        int resize = IsOnResizeHeightPos(pos);
+        if (resize == -1)
+            m_view->SetTask(new ActiveSignalTask(this, k));
+        else
+            m_view->SetTask(new ChangeSignalHeightTask(this, resize));
+        return;
     }
 
+}
+int MainTask::IsOnResizeHeightPos(const wxPoint &pos)
+{
+    const int CatchWidth = 5;
+    int k = GetSignalFromPosition(pos);
+    if ( k == -1)
+        return -1;
+    if ( pos.y > m_view->heightOffsets[k]+1 && pos.y < m_view->heightOffsets[k] + CatchWidth+1)
+        return 2*k;
+    if (pos.y > m_view->heightOffsets[k+1] - CatchWidth-1 && pos.y < m_view->heightOffsets[k+1]-1)
+        return 2*k+1;
+    return -1;
 }
 void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
