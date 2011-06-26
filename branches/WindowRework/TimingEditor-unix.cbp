@@ -55,8 +55,8 @@
 		<Unit filename="AxisSettingsPanel.h" />
 		<Unit filename="BusWidthText.cpp" />
 		<Unit filename="BusWidthText.h" />
-		<Unit filename="ChangeSignalHeightTask.cpp" />
-		<Unit filename="ChangeSignalHeightTask.h" />
+		<Unit filename="ChangeSignalSpacerTask.cpp" />
+		<Unit filename="ChangeSignalSpacerTask.h" />
 		<Unit filename="ClockSettingsPanel.cpp" />
 		<Unit filename="ClockSettingsPanel.h" />
 		<Unit filename="DataObject.cpp" />
