@@ -40,6 +40,8 @@ public:
 private:
     void AddSignal(Signal *sig);
 
+    int IsOnResizeHeightPos(const wxPoint &pos);
+
 };
 
 #endif // MAINTASK_H
