@@ -60,12 +60,12 @@ void DiagramLabelsWindow::Update()
 
 
     wxCoord width = 0;
-    wxCoord w, h;
     // draw the text to show the signal names
     //dc.SetPen(wxPen(GetTextColour(), 1));
     //dc.SetFont(m_view->GetFont());
     for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
     {
+        wxCoord w, h;
         Signal &sig = doc->signals[k];
         wxString str = sig.name;
 
@@ -79,7 +79,7 @@ void DiagramLabelsWindow::Update()
         //dc.DrawText(str, 10, m_view->heightOffsets[k] + additionaloffset);
         LabelText *label = new LabelText(this, m_view, str,
                                          wxPoint(GetOffsetToLabelTextCtrl(), m_view->heightOffsets[k] + additionaloffset),
-                                         wxSize(w+10,h+5), k);
+                                         wxSize(w+5,h+5), k);
         label->SetBackgroundColour(this->GetBackgroundColour());
         textctrls.push_back( label );
 
@@ -91,8 +91,8 @@ void DiagramLabelsWindow::Update()
             GetTextExtent(str+_("["), &wadd, &h);
 
             BusWidthText *bwidth = new BusWidthText(this, m_view, str,
-                                                    wxPoint(GetOffsetToLabelTextCtrl()+ w+10, m_view->heightOffsets[k] + additionaloffset ),
-                                                    wxSize(wadd+10,h+5), k);
+                                                    wxPoint(GetOffsetToLabelTextCtrl()+ w+10+5, m_view->heightOffsets[k] + additionaloffset ),
+                                                    wxSize(wadd+5,h+5), k);
             bwidth->SetBackgroundColour(this->GetBackgroundColour());
             label->SetBuswidthField(bwidth);
             bwidthctrls.push_back(bwidth);
@@ -218,6 +218,26 @@ void DiagramLabelsWindow::Draw(wxDC &dc)
     for ( unsigned int k = 0 ; k < m_view->heightOffsets.size() ; ++k )
         dc.DrawLine(0, m_view->heightOffsets[k], width+m_view->GetScrollPixelsPerUnit()+20, m_view->heightOffsets[k]);
     dc.SetPen(wxNullPen);
+
+    unsigned int k = 0;
+    for (unsigned int n = 0; n < doc->signals.size() ; n++)
+    {
+        Signal sig = doc->signals[n];
+        if ( sig.IsBus )
+        {
+
+            LabelText *label = textctrls[n];
+            BusWidthText *bwidth = bwidthctrls[k++];
+
+            wxPoint pos = label->GetPosition();
+
+            pos.x += label->GetSize().x;
+            dc.DrawText(_T("["),pos.x, pos.y);
+            pos.x += bwidth->GetSize().x+10;
+            dc.DrawText(_T("]"),pos.x, pos.y);
+
+        }
+    }
 
     if (m_drawlet)
         m_drawlet->Draw(dc);

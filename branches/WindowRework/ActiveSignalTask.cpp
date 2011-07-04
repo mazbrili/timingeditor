@@ -165,7 +165,6 @@ void ActiveSignalTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 
 void ActiveSignalTask::OnMouse(const wxMouseEvent &event)
 {
-    //::wxLogMessage(_T("ActiveSignalTask::OnMouse"));
     if (event.ButtonDown(wxMOUSE_BTN_ANY ))
         EndTask();
 }

@@ -16,7 +16,7 @@ TimingTextCtrl(parent, view, value, pos, size, wxTE_PROCESS_ENTER | wxBORDER_NON
 m_signalNumber(signalNumber)
 {
     //ctor
-    ChangeValue(_("[") + value + _("]"));
+    //ChangeValue(_("[") + value + _("]"));
 }
 
 BusWidthText::~BusWidthText()
@@ -37,20 +37,25 @@ void BusWidthText::OnKillFocus(wxFocusEvent &event)
 {
     ::wxLogMessage(wxString::Format(_T("BusWidthText::OnKillFocus %d"),m_signalNumber ));
 }
-wxCommand *BusWidthText::GetCommand()
+wxCommand *BusWidthText::GetEnterCommand()
 {
     return new ChangeSignalBuswidth((TimingDocument *)m_view->GetDocument(), GetValue(), m_signalNumber);
 }
-void BusWidthText::RestoreText()
+wxCommand *BusWidthText::GetChangedCommand()
 {
-    ChangeValue(_("[") + unchanged + _("]"));
-
-    //should not fail, because labels, axis and waves are panels
-    wxPanel *parentpanel = dynamic_cast<wxPanel *>( m_parent );
-    if ( parentpanel )
-        parentpanel->SetFocusIgnoringChildren();
-    else
-        m_parent->SetFocus();
-
-    edittask = NULL;
+    return new ChangeSignalBuswidth((TimingDocument *)m_view->GetDocument(), GetValue(), m_signalNumber);
 }
+//void BusWidthText::RestoreText()
+//{
+//    ChangeValue(_("[") + unchanged + _("]"));
+//    ChangeValue( unchanged );
+//
+//    should not fail, because labels, axis and waves are panels
+//    wxPanel *parentpanel = dynamic_cast<wxPanel *>( m_parent );
+//    if ( parentpanel )
+//        parentpanel->SetFocusIgnoringChildren();
+//    else
+//        m_parent->SetFocus();
+//
+//    edittask = NULL;
+//}

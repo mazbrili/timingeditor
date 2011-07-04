@@ -4,19 +4,21 @@
 // END Interface Dependencies -----------------------------------------
 
 
-HoverLine::HoverLine(wxPoint start, wxPoint stop, wxColour colour, int width)
+HoverLine::HoverLine(wxPoint start, wxPoint stop, wxColour colour, int width, int style)
 :HoverDrawlet(),
 m_a(start),
 m_b(stop),
 m_colour(colour),
-m_width(width)
+m_width(width),
+m_style(style)
 {
     m_dir = expand_none;
 }
-HoverLine::HoverLine(int x, int y, wxColour colour, int width)
+HoverLine::HoverLine(int x, int y, wxColour colour, int width, int style)
 :HoverDrawlet(),
 m_colour(colour),
-m_width(width)
+m_width(width),
+m_style(style)
 {
     if ( x < 0 )
         m_dir = expand_x;
@@ -36,7 +38,7 @@ bool HoverLine::Draw(wxDC &dc)
     dc.SetLogicalFunction(wxXOR);
 
     wxPen old_pen = dc.GetPen();
-    dc.SetPen(wxPen(m_colour, m_width));
+    dc.SetPen(wxPen(m_colour, m_width, m_style));
 
     if ( m_dir == expand_none )
         dc.DrawLine(m_a, m_b);

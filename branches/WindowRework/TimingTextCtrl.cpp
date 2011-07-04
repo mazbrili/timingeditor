@@ -2,8 +2,11 @@
 #include "TimingView.h"
 #include "EditTextTask.h"
 
+#include <wx/cmdproc.h>
+
 BEGIN_EVENT_TABLE(TimingTextCtrl, wxTextCtrl)
   EVT_TEXT_ENTER(wxID_ANY, TimingTextCtrl::OnEnterCommand)
+  EVT_TEXT(wxID_ANY,       TimingTextCtrl::OnText)
   //EVT_SET_FOCUS(           TimingTextCtrl::OnSetFocus)
   //EVT_KILL_FOCUS(          TimingTextCtrl::OnKillFocus)
 END_EVENT_TABLE()
@@ -15,11 +18,14 @@ unchanged(value),
 edittask(NULL)
 {
     //ctor
+    //SetDropTarget(new TimingTextDropTarget(this));
 }
 
 TimingTextCtrl::~TimingTextCtrl()
 {
     //dtor
+    // delete the drop targets
+    //SetDropTarget(NULL);
 }
 void TimingTextCtrl::RestoreText()
 {
@@ -37,7 +43,7 @@ void TimingTextCtrl::OnEnterCommand(wxCommandEvent &event)
         edittask = NULL;
     }
 }
-void TimingTextCtrl:: SetFocusToParent()
+void TimingTextCtrl::SetFocusToParent()
 {
     // should not fail or
     // can not fail
@@ -47,4 +53,31 @@ void TimingTextCtrl:: SetFocusToParent()
         parentpanel->SetFocusIgnoringChildren();
 //    else
 //        m_parent->SetFocus();
+}
+
+//void TimingTextCtrl::OnDrop(const wxString& data)
+//{
+//
+//    wxMessageBox(_T("dropped")+data);
+//}
+
+//bool TimingTextDropTarget::OnDropText(wxCoord x, wxCoord y, const wxString& data)
+//{
+//    //wxTextDropTarget::OnDropText(x,y, data);
+//    m_owner->OnDrop(data);
+//}
+
+void TimingTextCtrl::OnText(wxCommandEvent &event)
+{
+    //drop text is there a better solution?
+    if(!edittask)
+    {
+        m_view->SetTask(NULL);
+        ::wxLogMessage(wxString::Format(_T("TimingTextCtrl::OnText")  ));
+
+        wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
+        if (cmdproc)
+            cmdproc->Submit(GetChangedCommand());
+
+    }
 }
