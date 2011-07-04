@@ -184,7 +184,7 @@ wxColour TimingView::GetCompressorColour()const
     //return *wxGREY;
     return wxTheColourDatabase->Find(_T("GREY"));
 }
-wxColour TimingView::GetGraphCaretColour()const
+wxColour TimingView::GetActiveGraphCaretColour()const
 {
     return *wxBLUE;
 }

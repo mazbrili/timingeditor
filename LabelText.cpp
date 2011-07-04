@@ -38,7 +38,11 @@ void LabelText::OnKillFocus(wxFocusEvent &event)
 {
     ::wxLogMessage(_T("LabelText::OnKillFocus %d"), m_signalNumber);
 }
-wxCommand *LabelText::GetCommand()
+wxCommand *LabelText::GetEnterCommand()
+{
+    return new ChangeSignalName((TimingDocument *)m_view->GetDocument(), GetValue(), m_signalNumber);
+}
+wxCommand *LabelText::GetChangedCommand()
 {
     return new ChangeSignalName((TimingDocument *)m_view->GetDocument(), GetValue(), m_signalNumber);
 }
@@ -54,4 +58,7 @@ void LabelText::SetSize(int x, int y, int width, int height, int sizeFlags)
         buswidth->SetSize(x+width+10, y, wxDefaultCoord, wxDefaultCoord );
     }
 }
-
+void LabelText::OnDrop(const wxString& data)
+{
+    ::wxLogMessage(_T("LabelText::OnDrop %d"), m_signalNumber);
+}

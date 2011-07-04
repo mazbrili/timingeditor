@@ -1,6 +1,8 @@
-drop text into text fields
-add, move and remove arrows
-move arrow-text
 change signal values
+change length of vertical lines (check connected arrows)
+add, move, remove and delete arrows
+relink arrows
+move arrow-text
+add "time" into an exiting Diagram
 
 and a lot more

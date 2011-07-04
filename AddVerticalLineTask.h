@@ -1,9 +1,9 @@
 #ifndef ADDVERTICALLINETASK_H
 #define ADDVERTICALLINETASK_H
 
-#include "Task.h"
+#include "VerticalLineTask.h"
 
-class AddVerticalLineTask : public Task
+class AddVerticalLineTask : public VerticalLineTask
 {
 public:
     AddVerticalLineTask(const Task *task);
@@ -47,11 +47,6 @@ private:
     void DoCheckMoving(const wxPoint &pos);
     void DoCheckWhenMouseUp(const wxPoint &pos);
     void SetDrawlet();
-private:
-    wxInt32 yStartPos; // above signal number
-    wxInt32 yEndPos; // below signal number
-    wxInt32 xpos;
-    wxUint8 xposoffset;
 };
 
 #endif // ADDVERTICALLINETASK_H

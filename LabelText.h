@@ -9,7 +9,8 @@ public:
     LabelText(wxPanel *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber);
     virtual ~LabelText();
 
-    virtual wxCommand *GetCommand();
+    virtual wxCommand *GetEnterCommand();
+    virtual wxCommand *GetChangedCommand();
 
 public:
     virtual void SetSize(int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO);
@@ -24,6 +25,8 @@ private:
     void OnKillFocus(wxFocusEvent &event);
 private:
     TimingTextCtrl *buswidth;
+
+    virtual void OnDrop(const wxString& data);
 
 private:
 

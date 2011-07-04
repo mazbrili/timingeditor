@@ -9,7 +9,8 @@ public:
     BusWidthText(wxPanel *parent, TimingView *view, const wxString &value, const wxPoint& pos, const wxSize& size, unsigned int signalNumber);
     virtual ~BusWidthText();
 
-    virtual wxCommand *GetCommand();
+    virtual wxCommand *GetEnterCommand();
+    virtual wxCommand *GetChangedCommand();
 protected:
 private:
     BusWidthText(){}
@@ -19,7 +20,7 @@ private:
     void OnSetFocus(wxFocusEvent &event);
     void OnKillFocus(wxFocusEvent &event);
 
-    virtual void RestoreText();
+    //virtual void RestoreText();
 
 private:
 

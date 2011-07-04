@@ -47,6 +47,8 @@
 		</Linker>
 		<Unit filename="ActiveSignalTask.cpp" />
 		<Unit filename="ActiveSignalTask.h" />
+		<Unit filename="ActiveVerticalLineTask.cpp" />
+		<Unit filename="ActiveVerticalLineTask.h" />
 		<Unit filename="AddDiscontinuityTask.cpp" />
 		<Unit filename="AddDiscontinuityTask.h" />
 		<Unit filename="AddVerticalLineTask.cpp" />
@@ -124,6 +126,8 @@
 		<Unit filename="ToDo.txt" />
 		<Unit filename="TransitionSettingsPanel.cpp" />
 		<Unit filename="TransitionSettingsPanel.h" />
+		<Unit filename="VerticalLineTask.cpp" />
+		<Unit filename="VerticalLineTask.h" />
 		<Unit filename="art/busedge.xpm" />
 		<Unit filename="art/clockedge.xpm" />
 		<Unit filename="art/copy.xpm" />

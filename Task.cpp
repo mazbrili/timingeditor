@@ -12,6 +12,7 @@
 #include "HoverLine.h"
 #include "HoverCombo.h"
 
+#include "GraphVerticalLine.h"
 #include "TimingTextCtrl.h"
 
 #include "cmd.h"
@@ -175,6 +176,17 @@ bool Task::IsOverWaves(const wxPoint &pos)
          pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1) &&
          //pos.y > m_view->heightOffsets[0]-5 &&
          pos.y < m_view->heightOffsets[m_view->heightOffsets.size()-1]+5;
+}
+int Task::IsOverVerticalLine(const wxPoint &pos)
+{
+    const VerticalLines vlines = m_view->GetVerticalLines();
+    for (unsigned int i = 0 ; i < vlines.size() ; i++ )
+    {
+        if (vlines[i].HasPoint(pos, GetVerticalLineSnapTolerance()))
+            return i;
+    }
+
+    return -1;
 }
 void Task::TextHasFocus(TimingTextCtrl *ctrl)
 {

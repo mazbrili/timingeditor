@@ -47,6 +47,8 @@ public:
     wxInt32 GetTickFromPosition(const wxPoint &pos);
     wxInt32 GetSignalFromPosition(const wxPoint &pos);
     bool IsOverWaves(const wxPoint &pos);
+    int IsOverVerticalLine(const wxPoint &pos);
+    const int GetVerticalLineSnapTolerance(){return 4;}
 
 protected:
     void Init();

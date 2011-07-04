@@ -3,7 +3,7 @@
 
 #include "GraphObject.h"
 
-
+class HoverDrawlet;
 class GraphVerticalLine : public GraphObject
 {
 public:
@@ -11,6 +11,15 @@ public:
     virtual ~GraphVerticalLine();
 
     virtual void Draw(wxDC &dc)const;
+
+
+    bool HasPoint(const wxPoint &pos, const unsigned char tolerance)const;
+    bool IsStartPoint(const wxPoint &pos, const unsigned char tolerance)const;
+    bool IsStopPoint(const wxPoint &pos, const unsigned char tolerance)const;
+
+    HoverDrawlet *GetActiveDrawlet(const wxColour &colour)const;
+    HoverDrawlet *GetLineDrawlet(const wxColour &colour, int style)const;
+
 protected:
 private:
     bool m_visible;

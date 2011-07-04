@@ -135,7 +135,7 @@ void EditTextTask::SendCommandToProcessor()
     // create command and send to commandProcessor
     wxCommandProcessor *cmdprc = m_view->GetDocument()->GetCommandProcessor();
     if  (cmdprc)
-        cmdprc->Submit(m_txtctrl->GetCommand());
+        cmdprc->Submit(m_txtctrl->GetEnterCommand());
     editdone = true;
 }
 

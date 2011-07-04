@@ -13,6 +13,7 @@
 #include "EditTextTask.h"
 #include "EditTimeCompressorTask.h"
 #include "ActiveSignalTask.h"
+#include "ActiveVerticalLineTask.h"
 #include "ChangeSignalSpacerTask.h"
 #include "cmd.h"
 
@@ -73,6 +74,17 @@ int MainTask::IsOnResizeHeightPos(const wxPoint &pos)
 }
 void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
+    if ( event.ButtonDown(wxMOUSE_BTN_LEFT) )
+    {
+        int lineidx = IsOverVerticalLine(pos);
+        if ( lineidx != -1 )
+        {
+            ::wxLogMessage(wxString::Format(_T("MainTask::WavesMouse IsOverVerticalLine %d"), lineidx ));
+            m_view->SetTask(new ActiveVerticalLineTask(this, lineidx));
+            return;
+        }
+    }
+
     Task::WavesMouse(event, pos);
 }
 void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)

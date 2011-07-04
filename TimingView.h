@@ -89,7 +89,7 @@ public:
     wxColour GetLabelsTextColour()const;
     wxColour GetLabelsLineColour()const;
     wxColour GetCompressorColour()const;
-    wxColour GetGraphCaretColour()const;
+    wxColour GetActiveGraphCaretColour()const;
     wxCoord GetHeightOfAxisWindow()const;
 
     const int GetScrollPixelsPerUnit()const{return 10;}
