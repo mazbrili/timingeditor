@@ -1,8 +1,8 @@
 change signal values
-change length of vertical lines (check connected arrows)
 add, move, remove and delete arrows
 relink arrows
 move arrow-text
 add "time" into an exiting Diagram
+activation by clicking on the tab seems not to work. ()
 
 and a lot more
