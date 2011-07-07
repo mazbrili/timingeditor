@@ -3,7 +3,7 @@
 
 #include "VerticalLineTask.h"
 
-
+class TimingDocument;
 class ActiveVerticalLineTask : public VerticalLineTask
 {
 public:
@@ -34,6 +34,8 @@ private:
     void OnKey(const wxKeyEvent &event, bool down);
 private:
     int m_vlineidx;
+
+     TimingDocument *m_doc;
 private:
     enum states{
         activeLine,
@@ -46,6 +48,9 @@ private:
 
     wxInt32 old_xpos;
     wxUint8 old_xposoffset;
+    wxInt32 old_yStart;
+    wxInt32 old_yStop;
+
 };
 
 #endif // ACTIVEVERTICALLINETASK_H
