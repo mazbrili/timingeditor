@@ -3,6 +3,6 @@ add, move, remove and delete arrows
 relink arrows
 move arrow-text
 add "time" into an exiting Diagram
-activation by clicking on the tab seems not to work. ()
+MDI ok on msw but not on gtk! after closing a child it is not possible to activate any other.
 
 and a lot more

@@ -710,6 +710,8 @@ void TimingView::OnHArrowTool(wxCommandEvent& event)
 
 void TimingView::OnEditTool(wxCommandEvent& event)
 {
+    // set the default task:
+    SetTask(NULL);
 }
 
 ///  ///////////////////////////////////////////////////////// zooming
