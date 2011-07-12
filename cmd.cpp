@@ -235,21 +235,20 @@ bool DeleteSignalCommand::Do(void)
 //            m_doc->vertlines[n].EndPos --;
     }
 
-    harrows = m_doc->harrows;
-    for ( std::vector<HArrow>::iterator it = m_doc->harrows.begin();
-        it != m_doc->harrows.end();)
+    horizontalArrows = m_doc->horizontalArrows;
+    for ( std::vector<HorizontalArrow>::iterator it = m_doc->horizontalArrows.begin();
+        it != m_doc->horizontalArrows.end();)
     {
-        //HArrow &ha = *it;
         if ( it->signalnmbr == m_deletedSigNr )
         {
-            m_doc->harrows.erase(it);
-            it = m_doc->harrows.begin();
+            m_doc->horizontalArrows.erase(it);
+            it = m_doc->horizontalArrows.begin();
             continue;
         }
         it++;
     }
-    for ( std::vector<HArrow>::iterator it = m_doc->harrows.begin();
-        it != m_doc->harrows.end();
+    for ( std::vector<HorizontalArrow>::iterator it = m_doc->horizontalArrows.begin();
+        it != m_doc->horizontalArrows.end();
         it++)
     {
         if ( it->signalnmbr > m_deletedSigNr )
@@ -273,7 +272,7 @@ bool DeleteSignalCommand::Undo(void)
 
     m_doc->vertlines = vlines;
 
-    m_doc->harrows = harrows;
+    m_doc->horizontalArrows = horizontalArrows;
 
     while ( delVlineCom.size() )
     {
@@ -342,7 +341,7 @@ bool AddSignalCommand::Do(void)
 {
     vlines.clear();
     vlines = m_doc->vertlines;
-    harrows = m_doc->harrows;
+    horizontalArrows = m_doc->horizontalArrows;
 
     wxInt32 last = m_sig.values.size() - 1;
     for ( wxInt32 k = m_sig.values.size() ; k <= m_doc->length && !(m_sig.IsClock) ; ++k )
@@ -365,10 +364,10 @@ bool AddSignalCommand::Do(void)
                 m_doc->vertlines[n].EndPos++;
         }
 
-        for ( wxUint32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+        for ( wxUint32 n = 0 ; n < m_doc->horizontalArrows.size() ; ++n )
         {
-            if ( m_doc->harrows[n].signalnmbr >= m_selectedSigNr)
-                m_doc->harrows[n].signalnmbr++;
+            if ( m_doc->horizontalArrows[n].signalnmbr >= m_selectedSigNr)
+                m_doc->horizontalArrows[n].signalnmbr++;
         }
     }
 
@@ -390,7 +389,7 @@ bool AddSignalCommand::Undo(void)
 
 
     m_doc->vertlines = vlines;
-    m_doc->harrows = harrows;
+    m_doc->horizontalArrows = horizontalArrows;
 
 
     m_doc->Modify(true);
@@ -516,7 +515,7 @@ bool MoveSignalPosCommand::Do(void)
 
     vlines.clear();
     vlines = m_doc->vertlines;
-    harrows = m_doc->harrows;
+    horizontalArrows = m_doc->horizontalArrows;
 
     /// prepare vertlines
     for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
@@ -580,55 +579,55 @@ bool MoveSignalPosCommand::Do(void)
         }
     }
 
-    /// prepare harrows;
-    for ( wxUint32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+    /// prepare horizontalArrows;
+    for ( wxUint32 n = 0 ; n < m_doc->horizontalArrows.size() ; ++n )
     {
-        if ( m_doc->harrows[n].signalnmbr == m_selectedSigNr )
+        if ( m_doc->horizontalArrows[n].signalnmbr == m_selectedSigNr )
         {
             if ( m_selectedSigNr > m_targetPos )
-                m_doc->harrows[n].signalnmbr = m_targetPos;
+                m_doc->horizontalArrows[n].signalnmbr = m_targetPos;
             else
-                m_doc->harrows[n].signalnmbr = m_targetPos-1;
+                m_doc->horizontalArrows[n].signalnmbr = m_targetPos-1;
         }
         else
         {
-            if ( m_doc->harrows[n].signalnmbr < m_selectedSigNr &&
-                m_doc->harrows[n].signalnmbr >= m_targetPos )
+            if ( m_doc->horizontalArrows[n].signalnmbr < m_selectedSigNr &&
+                m_doc->horizontalArrows[n].signalnmbr >= m_targetPos )
             {
-                m_doc->harrows[n].signalnmbr++;
+                m_doc->horizontalArrows[n].signalnmbr++;
             }
             else
             {
-                if ( m_doc->harrows[n].signalnmbr > m_selectedSigNr &&
-                    m_doc->harrows[n].signalnmbr < m_targetPos )
+                if ( m_doc->horizontalArrows[n].signalnmbr > m_selectedSigNr &&
+                    m_doc->horizontalArrows[n].signalnmbr < m_targetPos )
                 {
-                    m_doc->harrows[n].signalnmbr--;
+                    m_doc->horizontalArrows[n].signalnmbr--;
                 }
             }
         }
         /// check that arrow is not pointing alongside a vertical line (on the left end)
-        if ( m_doc->vertlines[m_doc->harrows[n].fromVLine].StartPos > m_doc->harrows[n].signalnmbr ||
-            m_doc->vertlines[m_doc->harrows[n].fromVLine].EndPos < m_doc->harrows[n].signalnmbr )
+        if ( m_doc->vertlines[m_doc->horizontalArrows[n].fromVLine].StartPos > m_doc->horizontalArrows[n].signalnmbr ||
+            m_doc->vertlines[m_doc->horizontalArrows[n].fromVLine].EndPos < m_doc->horizontalArrows[n].signalnmbr )
         {
             //add a vline for the arrow
             VLine vl;
-            vl.EndPos = m_doc->harrows[n].signalnmbr;
-            vl.StartPos = m_doc->harrows[n].signalnmbr;
-            vl.vpos = m_doc->vertlines[m_doc->harrows[n].fromVLine].vpos;
+            vl.EndPos = m_doc->horizontalArrows[n].signalnmbr;
+            vl.StartPos = m_doc->horizontalArrows[n].signalnmbr;
+            vl.vpos = m_doc->vertlines[m_doc->horizontalArrows[n].fromVLine].vpos;
             m_doc->vertlines.push_back(vl);
-            m_doc->harrows[n].fromVLine = m_doc->vertlines.size()-1;
+            m_doc->horizontalArrows[n].fromVLine = m_doc->vertlines.size()-1;
         }
         /// check that arrow is not pointing alongside a vertical line (on the right end)
-        if ( m_doc->vertlines[m_doc->harrows[n].toVLine].StartPos > m_doc->harrows[n].signalnmbr ||
-            m_doc->vertlines[m_doc->harrows[n].toVLine].EndPos < m_doc->harrows[n].signalnmbr )
+        if ( m_doc->vertlines[m_doc->horizontalArrows[n].toVLine].StartPos > m_doc->horizontalArrows[n].signalnmbr ||
+            m_doc->vertlines[m_doc->horizontalArrows[n].toVLine].EndPos < m_doc->horizontalArrows[n].signalnmbr )
         {
             //add a vline for the arrow
             VLine vl;
-            vl.EndPos = m_doc->harrows[n].signalnmbr;
-            vl.StartPos = m_doc->harrows[n].signalnmbr;
-            vl.vpos = m_doc->vertlines[m_doc->harrows[n].toVLine].vpos;
+            vl.EndPos = m_doc->horizontalArrows[n].signalnmbr;
+            vl.StartPos = m_doc->horizontalArrows[n].signalnmbr;
+            vl.vpos = m_doc->vertlines[m_doc->horizontalArrows[n].toVLine].vpos;
             m_doc->vertlines.push_back(vl);
-            m_doc->harrows[n].toVLine = m_doc->vertlines.size()-1;
+            m_doc->horizontalArrows[n].toVLine = m_doc->vertlines.size()-1;
         }
     }
 
@@ -646,7 +645,7 @@ bool MoveSignalPosCommand::Undo(void)
 
     DoMove();
     m_doc->vertlines = vlines;
-    m_doc->harrows = harrows;
+    m_doc->horizontalArrows = horizontalArrows;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -664,36 +663,32 @@ ChangeSpaceCommand::ChangeSpaceCommand(TimingDocument *doc, wxInt32 selectedSign
 ChangeSpaceCommand::~ChangeSpaceCommand(){}
 bool ChangeSpaceCommand::Do(void)
 {
-    harrows.clear();
-    harrows = m_doc->harrows;
+    horizontalArrows.clear();
+    horizontalArrows = m_doc->horizontalArrows;
 
-    for ( wxUint32 n = 0 ; n < m_doc->harrows.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < m_doc->horizontalArrows.size() ; ++n )
     {
-        if ( m_doc->harrows[n].signalnmbr == m_selectedSignal )
+        if ( m_doc->horizontalArrows[n].signalnmbr == m_selectedSignal )
         {
             if ( m_upper )
             {
-                //if ( m_doc->signals[m_selectedSignal].prespace > m_newLength )
-                //    m_doc->harrows[n].pos -= (m_doc->signals[m_selectedSignal].prespace - m_newLength);
                 if ( m_doc->signals[m_selectedSignal].prespace < m_newLength )
-                    m_doc->harrows[n].pos += (-m_doc->signals[m_selectedSignal].prespace + m_newLength);
+                    m_doc->horizontalArrows[n].pos += (-m_doc->signals[m_selectedSignal].prespace + m_newLength);
                 else
                 {
-                    m_doc->harrows[n].pos -= (m_doc->signals[m_selectedSignal].prespace - m_newLength);
-                    if ( m_doc->harrows[n].pos < 0 ) m_doc->harrows[n].pos = 0;
+                    m_doc->horizontalArrows[n].pos -= (m_doc->signals[m_selectedSignal].prespace - m_newLength);
+                    if ( m_doc->horizontalArrows[n].pos < 0 ) m_doc->horizontalArrows[n].pos = 0;
                 }
 
             }
             else
             {
-                //if ( m_doc->signals[m_selectedSignal].space > m_newLength )
-                //    m_doc->harrows[n].pos -= (m_doc->signals[m_selectedSignal].space - m_newLength);
                 wxInt32 p = m_doc->signals[m_selectedSignal].prespace +
                             m_doc->SignalHeight +
                             m_doc->MinimumSignalDistance +
                             m_newLength;
-                if ( m_doc->harrows[n].pos > p )
-                    m_doc->harrows[n].pos = p;
+                if ( m_doc->horizontalArrows[n].pos > p )
+                    m_doc->horizontalArrows[n].pos = p;
 
             }
         }
@@ -728,7 +723,7 @@ bool ChangeSpaceCommand::Undo(void)
 
     DoChangeSpace();
 
-    m_doc->harrows = harrows;
+    m_doc->horizontalArrows = horizontalArrows;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -983,7 +978,7 @@ bool ChangeVLineCommand::Undo(void)
 }
 
 
-ChangeHArrowCommand::ChangeHArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 sigindex, wxInt32 newLeft, wxInt32 newRight)
+ChangeHorizontalArrowCommand::ChangeHorizontalArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 sigindex, wxInt32 newLeft, wxInt32 newRight)
     : wxCommand(true, _T("change horizontal Arrow")),
     m_doc(doc),
     m_nmbr(nmbr),
@@ -992,67 +987,67 @@ ChangeHArrowCommand::ChangeHArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxIn
     m_newRight(newRight),
     m_newPosIndex(sigindex)
 {}
-ChangeHArrowCommand::~ChangeHArrowCommand(){}
-bool ChangeHArrowCommand::Do(void)
+ChangeHorizontalArrowCommand::~ChangeHorizontalArrowCommand(){}
+bool ChangeHorizontalArrowCommand::Do(void)
 {
     wxInt32 tmp;
     // swap the index to fromvline
-    tmp = m_doc->harrows[m_nmbr].fromVLine;
-    m_doc->harrows[m_nmbr].fromVLine = m_newLeft;
+    tmp = m_doc->horizontalArrows[m_nmbr].fromVLine;
+    m_doc->horizontalArrows[m_nmbr].fromVLine = m_newLeft;
     m_newLeft = tmp;
 
     // swap the inde to toVLine
-    tmp = m_doc->harrows[m_nmbr].toVLine;
-    m_doc->harrows[m_nmbr].toVLine = m_newRight;
+    tmp = m_doc->horizontalArrows[m_nmbr].toVLine;
+    m_doc->horizontalArrows[m_nmbr].toVLine = m_newRight;
     m_newRight = tmp;
 
     // swap the position
-    tmp = m_doc->harrows[m_nmbr].pos;
-    m_doc->harrows[m_nmbr].pos = m_newPos;
+    tmp = m_doc->horizontalArrows[m_nmbr].pos;
+    m_doc->horizontalArrows[m_nmbr].pos = m_newPos;
     m_newPos = tmp;
 
-    tmp = m_doc->harrows[m_nmbr].signalnmbr;
-    m_doc->harrows[m_nmbr].signalnmbr = m_newPosIndex;
+    tmp = m_doc->horizontalArrows[m_nmbr].signalnmbr;
+    m_doc->horizontalArrows[m_nmbr].signalnmbr = m_newPosIndex;
     m_newPosIndex = tmp;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
 }
-bool ChangeHArrowCommand::Undo(void)
+bool ChangeHorizontalArrowCommand::Undo(void)
 {
     return Do();
 }
 
-DeleteHArrowCommand::DeleteHArrowCommand(TimingDocument *doc, wxInt32 nmbr)
+DeleteHorizontalArrowCommand::DeleteHorizontalArrowCommand(TimingDocument *doc, wxInt32 nmbr)
     : wxCommand(true, _T("delete a horizontal arrow")),
     m_doc(doc),
     m_nmbr(nmbr)
 {}
-DeleteHArrowCommand::~DeleteHArrowCommand(){}
-bool DeleteHArrowCommand::Do(void)
+DeleteHorizontalArrowCommand::~DeleteHorizontalArrowCommand(){}
+bool DeleteHorizontalArrowCommand::Do(void)
 {
-    m_harrow = m_doc->harrows[m_nmbr];
-    std::vector<HArrow>::iterator it = m_doc->harrows.begin();
+    m_horizontalArrow = m_doc->horizontalArrows[m_nmbr];
+    std::vector<HorizontalArrow>::iterator it = m_doc->horizontalArrows.begin();
     wxInt32 k = 0;
-    for ( ; it != m_doc->harrows.end() && k < m_nmbr ;
+    for ( ; it != m_doc->horizontalArrows.end() && k < m_nmbr ;
         it++, ++k)
     {}
-    m_doc->harrows.erase(it);
+    m_doc->horizontalArrows.erase(it);
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
 }
-bool DeleteHArrowCommand::Undo(void)
+bool DeleteHorizontalArrowCommand::Undo(void)
 {
-    std::vector<HArrow> harrows;
+    std::vector<HorizontalArrow> horizontalArrows;
     for ( wxInt32 k = 0 ; k < m_nmbr ; ++k )
-        harrows.push_back(m_doc->harrows[k]);
-    harrows.push_back(m_harrow);
-    for ( wxUint32 k = m_nmbr ; k < m_doc->harrows.size() ; ++k )
-        harrows.push_back(m_doc->harrows[k]);
-    m_doc->harrows = harrows;
+        horizontalArrows.push_back(m_doc->horizontalArrows[k]);
+    horizontalArrows.push_back(m_horizontalArrow);
+    for ( wxUint32 k = m_nmbr ; k < m_doc->horizontalArrows.size() ; ++k )
+        horizontalArrows.push_back(m_doc->horizontalArrows[k]);
+    m_doc->horizontalArrows = horizontalArrows;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -1084,25 +1079,25 @@ bool DeleteVLineCommand::Do(void)
     }
 
     // clear all connected horizontal arrows
-    m_harrows.clear();
-    std::vector<HArrow>::iterator it;
-    it = m_doc->harrows.begin();
-    while ( it != m_doc->harrows.end() )
+    m_horizontalArrows.clear();
+    std::vector<HorizontalArrow>::iterator it;
+    it = m_doc->horizontalArrows.begin();
+    while ( it != m_doc->horizontalArrows.end() )
     {
-        HArrow &ha = *it;
+        HorizontalArrow &ha = *it;
         if ( ha.fromVLine == m_nmbr ||
              ha.toVLine == m_nmbr )
         {
-            m_harrows.push_back(ha);
-            m_doc->harrows.erase(it);
-            it = m_doc->harrows.begin();
+            m_horizontalArrows.push_back(ha);
+            m_doc->horizontalArrows.erase(it);
+            it = m_doc->horizontalArrows.begin();
             continue;
         }
         it++;
     }
-    for ( it = m_doc->harrows.begin() ; it != m_doc->harrows.end() ; it++ )
+    for ( it = m_doc->horizontalArrows.begin() ; it != m_doc->horizontalArrows.end() ; it++ )
     {
-        HArrow &ha = *it;
+        HorizontalArrow &ha = *it;
         if ( ha.fromVLine > m_nmbr )
             ha.fromVLine = ha.fromVLine-1;
         if ( ha.toVLine > m_nmbr )
@@ -1125,10 +1120,10 @@ bool DeleteVLineCommand::Undo(void)
         vlines.push_back(m_doc->vertlines[k]);
     m_doc->vertlines = vlines;
 
-    std::vector<HArrow>::iterator it;
-    for ( it = m_doc->harrows.begin() ; it != m_doc->harrows.end() ; it++ )
+    std::vector<HorizontalArrow>::iterator it;
+    for ( it = m_doc->horizontalArrows.begin() ; it != m_doc->horizontalArrows.end() ; it++ )
     {
-        HArrow &ha = *it;
+        HorizontalArrow &ha = *it;
         if ( ha.fromVLine >= m_nmbr )
             ha.fromVLine = ha.fromVLine+1;
         if ( ha.toVLine >= m_nmbr )
@@ -1136,8 +1131,8 @@ bool DeleteVLineCommand::Undo(void)
     }
 
 
-    for ( wxUint32 k = 0 ; k < m_harrows.size() ; ++k)
-        m_doc->harrows.push_back(m_harrows[k]);
+    for ( wxUint32 k = 0 ; k < m_horizontalArrows.size() ; ++k)
+        m_doc->horizontalArrows.push_back(m_horizontalArrows[k]);
 
 
 
@@ -1149,23 +1144,23 @@ bool DeleteVLineCommand::Undo(void)
 
 
 
-AddHArrowCommand::AddHArrowCommand(TimingDocument *doc, HArrow newha)
+AddHorizonalArrowCommand::AddHorizonalArrowCommand(TimingDocument *doc, HorizontalArrow newha)
     : wxCommand(true, _T("added a horizontal  arrow")),
     m_doc(doc),
     m_newha(newha)
 {}
-AddHArrowCommand::~AddHArrowCommand(){}
-bool AddHArrowCommand::Do(void)
+AddHorizonalArrowCommand::~AddHorizonalArrowCommand(){}
+bool AddHorizonalArrowCommand::Do(void)
 {
-    m_doc->harrows.push_back(m_newha);
+    m_doc->horizontalArrows.push_back(m_newha);
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
 }
-bool AddHArrowCommand::Undo(void)
+bool AddHorizonalArrowCommand::Undo(void)
 {
-    m_doc->harrows.pop_back();
+    m_doc->horizontalArrows.pop_back();
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
@@ -1173,29 +1168,29 @@ bool AddHArrowCommand::Undo(void)
 }
 
 
-ChangeHArrowTextPosCommand::ChangeHArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff, wxInt32 gridoff)
+ChangeHorizontalArrowTextPosCommand::ChangeHorizontalArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff, wxInt32 gridoff)
     : wxCommand(true, _("change position of text")),
     m_doc(doc),
     m_nmbr(editingNumber),
     m_off(xoff, yoff),
     m_gridoff(gridoff)
 {}
-ChangeHArrowTextPosCommand::~ChangeHArrowTextPosCommand(){}
-bool ChangeHArrowTextPosCommand::Do(void)
+ChangeHorizontalArrowTextPosCommand::~ChangeHorizontalArrowTextPosCommand(){}
+bool ChangeHorizontalArrowTextPosCommand::Do(void)
 {
-    wxPoint tmp = m_doc->harrows[m_nmbr].textoffset;
-    m_doc->harrows[m_nmbr].textoffset = m_off;
+    wxPoint tmp = m_doc->horizontalArrows[m_nmbr].textoffset;
+    m_doc->horizontalArrows[m_nmbr].textoffset = m_off;
     m_off = tmp;
 
-    wxInt32 tempc = m_doc->harrows[m_nmbr].textgridoffset;
-    m_doc->harrows[m_nmbr].textgridoffset = m_gridoff;
+    wxInt32 tempc = m_doc->horizontalArrows[m_nmbr].textgridoffset;
+    m_doc->horizontalArrows[m_nmbr].textgridoffset = m_gridoff;
     m_gridoff = tempc;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
 }
-bool ChangeHArrowTextPosCommand::Undo(void)
+bool ChangeHorizontalArrowTextPosCommand::Undo(void)
 {
     return Do();
 }

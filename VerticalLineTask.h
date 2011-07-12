@@ -9,6 +9,7 @@ class VerticalLineTask : public Task
 public:
     VerticalLineTask(const Task *task);
     virtual ~VerticalLineTask();
+    virtual void Update()=0;
 protected:
     void CalcXPos(const wxPoint &pos);
     unsigned int GetYPos(const wxPoint &pos);

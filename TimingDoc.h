@@ -74,7 +74,7 @@ public:
     bool deserialize(wxInputStream &load);
 };
 //class VLine;
-class HArrow
+class HorizontalArrow
 {
 public:
     wxInt32 fromVLine;
@@ -95,7 +95,6 @@ public:
     wxInt32 EndPos; // below signal number
     wxInt32 vpos;
     wxUint8 vposoffset;
-    //std::vector<HArrow *> referencedByHArrows;
     bool serialize(wxDataOutputStream &store);
     bool deserialize(wxDataInputStream &load);
 };
@@ -137,7 +136,7 @@ class TimingDocument: public wxDocument
         wxInt32 length;
         std::vector<Signal> signals;
         std::vector<VLine> vertlines;
-        std::vector<HArrow> harrows;
+        std::vector<HorizontalArrow> horizontalArrows;
         std::map<wxInt32, TimeCompressor> compressors;
 
         wxInt32 SignalHeight;

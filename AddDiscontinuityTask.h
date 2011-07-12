@@ -22,7 +22,6 @@ public:
     //virtual void Cut();
 
 private:
-    void EndTask();
 
 protected:
 private:

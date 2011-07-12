@@ -29,7 +29,6 @@ public:
 protected:
 private:
     void SetDrawlets();
-    void EndTask();
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
 private:

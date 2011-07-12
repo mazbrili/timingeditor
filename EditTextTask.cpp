@@ -59,7 +59,7 @@ void EditTextTask::OnMouse(const wxMouseEvent &event)
 void EditTextTask::EndTask()
 {
     SendCommandToProcessor();
-    m_view->SetTask(NULL);
+    Task::EndTask();
 }
 void EditTextTask::Paste()
 {

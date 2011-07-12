@@ -182,14 +182,14 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
         if ( state == movingStartPos )
         {
             yStartPos = GetYPos(pos);
-            for ( unsigned int arrowidx = 0 ; arrowidx < m_doc->harrows.size() ; arrowidx++ )
+            for ( unsigned int arrowidx = 0 ; arrowidx < m_doc->horizontalArrows.size() ; arrowidx++ )
             {
                 //check if the indexed line is connected by an arrow
-                if ( m_vlineidx == m_doc->harrows[arrowidx].fromVLine ||
-                     m_vlineidx == m_doc->harrows[arrowidx].toVLine )
+                if ( m_vlineidx == m_doc->horizontalArrows[arrowidx].fromVLine ||
+                     m_vlineidx == m_doc->horizontalArrows[arrowidx].toVLine )
                 {
-                    if (m_doc->harrows[arrowidx].signalnmbr > yStartPos)
-                        yStartPos = m_doc->harrows[arrowidx].signalnmbr;
+                    if (m_doc->horizontalArrows[arrowidx].signalnmbr > yStartPos)
+                        yStartPos = m_doc->horizontalArrows[arrowidx].signalnmbr;
                 }
             }
             if ( yStartPos == m_doc->vertlines[m_vlineidx].EndPos+1)
@@ -200,14 +200,14 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
         if ( state == movingEndPos)
         {
             yEndPos = GetYPos(pos);
-            for ( unsigned int arrowidx = 0 ; arrowidx < m_doc->harrows.size() ; arrowidx++ )
+            for ( unsigned int arrowidx = 0 ; arrowidx < m_doc->horizontalArrows.size() ; arrowidx++ )
             {
                 //check if the indexed line is connected by an arrow
-                if ( m_vlineidx == m_doc->harrows[arrowidx].fromVLine ||
-                     m_vlineidx == m_doc->harrows[arrowidx].toVLine )
+                if ( m_vlineidx == m_doc->horizontalArrows[arrowidx].fromVLine ||
+                     m_vlineidx == m_doc->horizontalArrows[arrowidx].toVLine )
                 {
-                    if ( m_doc->harrows[arrowidx].signalnmbr > yEndPos)
-                        yEndPos = m_doc->harrows[arrowidx].signalnmbr;
+                    if ( m_doc->horizontalArrows[arrowidx].signalnmbr > yEndPos)
+                        yEndPos = m_doc->horizontalArrows[arrowidx].signalnmbr;
                 }
             }
             if ( yEndPos ==  m_doc->vertlines[m_vlineidx].StartPos)
@@ -298,10 +298,6 @@ void ActiveVerticalLineTask::Update()
     }
 }
 
-void ActiveVerticalLineTask::EndTask()
-{
-    m_view->SetTask(NULL);
-}
 void ActiveVerticalLineTask::OnMouse(const wxMouseEvent &event)
 {
     //::wxLogMessage(_T("ActiveSignalTask::OnMouse"));

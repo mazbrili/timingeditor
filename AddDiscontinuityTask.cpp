@@ -102,8 +102,4 @@ void AddDiscontinuityTask::HandleKey(const wxKeyEvent &event, bool down)
         EndTask();
 }
 
-void AddDiscontinuityTask::EndTask()
-{
-    m_view->SetTask(NULL);
-}
 

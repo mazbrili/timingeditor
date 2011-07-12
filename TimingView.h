@@ -46,7 +46,7 @@ class MainTask;
 class TimingTextCtrl;
 
 typedef std::vector<GraphVerticalLine> VerticalLines;
-typedef std::vector<GraphHorizontalArrow> HorizontalArrows;
+typedef std::vector<GraphHorizontalArrow> GraphHorizontalArrows;
 typedef std::vector<GraphSignal*> GraphSignals;
 
 class TimingView: public wxView
@@ -74,7 +74,7 @@ public:
     int GetWavesLeftSpace()const;
 
     const VerticalLines &GetVerticalLines()const;
-    const HorizontalArrows &GetHorizontalArrows()const;
+    const GraphHorizontalArrows &GetHorizontalArrows()const;
     const GraphSignals &GetGraphSignals()const;
 
     wxColour GetShadowColour()const;
@@ -118,7 +118,7 @@ private:
     void UpdateSignals();
 
     VerticalLines m_vertlines;
-    HorizontalArrows m_horizontalarrows;
+    GraphHorizontalArrows m_graphHorizontalArrows;
     GraphSignals m_graphsignals;
 
 
@@ -179,7 +179,7 @@ private:
     //void OnEditClock(wxCommandEvent& event);
     void OnDiscontinuityTool(wxCommandEvent& event);
     void OnRulerTool(wxCommandEvent& event);
-    void OnHArrowTool(wxCommandEvent& event);
+    void OnHorizontalArrowTool(wxCommandEvent& event);
     //void OnTextTool(wxCommandEvent& event);
     void OnEditTool(wxCommandEvent& event);
 

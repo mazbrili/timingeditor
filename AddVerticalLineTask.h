@@ -29,7 +29,6 @@ public:
     virtual void Update();
 
 private:
-    void EndTask();
     void Init();
 
     typedef enum{

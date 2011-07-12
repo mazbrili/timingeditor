@@ -55,8 +55,9 @@
 #include "GraphNormalSignal.h"
 
 #include "MainTask.h"
-#include "AddVerticalLineTask.h"
 #include "AddDiscontinuityTask.h"
+#include "AddVerticalLineTask.h"
+#include "AddHorizontalArrowTask.h"
 #include "EditTextTask.h"
 
 
@@ -78,7 +79,7 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
 
     EVT_MENU(TIMING_ID_DISCONTINUITY,   TimingView::OnDiscontinuityTool)
     EVT_MENU(TIMING_ID_RULER,           TimingView::OnRulerTool)
-    EVT_MENU(TIMING_ID_HARROW,          TimingView::OnHArrowTool)
+    EVT_MENU(TIMING_ID_HORIZONTALARROW, TimingView::OnHorizontalArrowTool)
     EVT_MENU(TIMING_ID_EDIT,            TimingView::OnEditTool)
     //EVT_MENU(TIMING_ID_EDITTEXT,        TimingView::OnSelectTextTool)
     EVT_MENU(TIMING_ID_EXPORT_BITMAP,   TimingView::OnExportBitmap)
@@ -459,17 +460,15 @@ void TimingView::UpdateHorizontalArrows()
 {
     TimingDocument *doc = (TimingDocument *)m_viewDocument;
 
-    m_horizontalarrows.clear();
+    m_graphHorizontalArrows.clear();
 
 
     wxCoord leftSpace = GetWavesLeftSpace();
 
     /// drawing the horizontal arrows
-    //HArrowOffsets.clear();
-    //HArrowToOffset.clear();
-    for ( wxUint32 n = 0 ; n < doc->harrows.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < doc->horizontalArrows.size() ; ++n )
     {
-        HArrow &ha = doc->harrows[n];
+        HorizontalArrow &ha = doc->horizontalArrows[n];
         bool fromVlineVisible = false, toVlineVisible = false;
         wxInt32 fromvpos = doc->vertlines[ha.fromVLine].vpos;
         wxInt32 fromvposoffset = doc->vertlines[ha.fromVLine].vposoffset;
@@ -500,7 +499,7 @@ void TimingView::UpdateHorizontalArrows()
             else if ( doc->en90 && fromvposoffset == 2 )
                 offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
-            /// calc offset based on vline where harrow will end
+            /// calc offset based on vertical line where the horizontalArrow will end
             wxPoint tooffset(leftSpace + tovpos * GridStepWidth,
                 offset.y);
             if ( doc->en50 && tovposoffset == 1 )
@@ -584,7 +583,7 @@ void TimingView::UpdateHorizontalArrows()
                 }
                 text.Replace( _T("$t$"), str);
             }
-            m_horizontalarrows.push_back(GraphHorizontalArrow(offset, tooffset, text, textoff));
+            m_graphHorizontalArrows.push_back(GraphHorizontalArrow(offset, tooffset, text, textoff));
         }
     }
 }
@@ -611,9 +610,9 @@ const VerticalLines &TimingView::GetVerticalLines()const
 {
     return m_vertlines;
 }
-const HorizontalArrows &TimingView::GetHorizontalArrows()const
+const GraphHorizontalArrows &TimingView::GetHorizontalArrows()const
 {
-    return m_horizontalarrows;
+    return m_graphHorizontalArrows;
 }
 const GraphSignals &TimingView::GetGraphSignals()const
 {
@@ -694,17 +693,17 @@ void TimingView::OnAddBus(wxCommandEvent& event)
 void TimingView::OnDiscontinuityTool(wxCommandEvent& event)
 {
     AddDiscontinuityTask *newtask = new AddDiscontinuityTask(defaultTask);
-
     SetTask(newtask);
 }
 void TimingView::OnRulerTool(wxCommandEvent& event)
 {
     AddVerticalLineTask *newtask = new AddVerticalLineTask(defaultTask);
-
     SetTask(newtask);
 }
-void TimingView::OnHArrowTool(wxCommandEvent& event)
+void TimingView::OnHorizontalArrowTool(wxCommandEvent& event)
 {
+    AddHorizontalArrowTask *newtask = new AddHorizontalArrowTask(defaultTask);
+    SetTask(newtask);
 }
 //void TimingView::OnSelectTextTool(wxCommandEvent& event)
 

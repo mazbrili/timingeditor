@@ -86,7 +86,7 @@ void EditTimeCompressorTask::EndTask()
     m_tick = -1;
     UpdateTimeCompressorPanel();
     m_axisWin->Refresh();
-    m_view->SetTask(NULL);
+    Task::EndTask();
 }
 void EditTimeCompressorTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {

@@ -39,7 +39,7 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_nmbr;
     VLine m_vline;
-    std::vector<HArrow> m_harrows;
+    std::vector<HorizontalArrow> m_horizontalArrows;
     bool first;
 };
 class ChangeLength : public wxCommand
@@ -97,7 +97,7 @@ protected:
     wxInt32 m_deletedSigNr;
     Signal m_sig;
     std::vector<VLine> vlines;
-    std::vector<HArrow> harrows;
+    std::vector<HorizontalArrow> horizontalArrows;
     std::vector<DeleteVLineCommand*> delVlineCom;
 };
 class ChangeClockParamCommand : public wxCommand
@@ -127,7 +127,7 @@ protected:
     wxInt32 m_selectedSigNr;
     wxInt32 m_targetPos;
     std::vector<VLine> vlines;
-    std::vector<HArrow> harrows;
+    std::vector<HorizontalArrow> horizontalArrows;
     bool DoMove(void);
 };
 class AddSignalCommand : public wxCommand
@@ -142,7 +142,7 @@ protected:
     wxInt32 m_selectedSigNr;
     Signal m_sig;
     std::vector<VLine> vlines;
-    std::vector<HArrow> harrows;
+    std::vector<HorizontalArrow> horizontalArrows;
 };
 class AddDiscontCommand : public wxCommand
 {
@@ -179,7 +179,7 @@ protected:
     wxInt32 m_selectedSignal;
     wxInt32 m_newLength;
     bool m_upper;
-    std::vector<HArrow> harrows;
+    std::vector<HorizontalArrow> horizontalArrows;
     bool DoChangeSpace(void);
 };
 class AddVLineCommand : public wxCommand
@@ -193,16 +193,16 @@ protected:
     TimingDocument *m_doc;
     VLine m_newline;
 };
-class AddHArrowCommand : public wxCommand
+class AddHorizonalArrowCommand : public wxCommand
 {
 public:
-    AddHArrowCommand(TimingDocument *doc, HArrow newha);
-    ~AddHArrowCommand();
+    AddHorizonalArrowCommand(TimingDocument *doc, HorizontalArrow newha);
+    ~AddHorizonalArrowCommand();
     bool Do(void);
     bool Undo(void);
 protected:
     TimingDocument *m_doc;
-    HArrow m_newha;
+    HorizontalArrow m_newha;
 };
 class ChangeVLineCommand : public wxCommand
 {
@@ -219,11 +219,11 @@ protected:
     wxInt32 m_newLower;
     wxInt32 m_newVposoff;
 };
-class ChangeHArrowCommand : public wxCommand
+class ChangeHorizontalArrowCommand : public wxCommand
 {
 public:
-    ChangeHArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 sigindex, wxInt32 newLeft, wxInt32 newRight);
-    ~ChangeHArrowCommand();
+    ChangeHorizontalArrowCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 pos, wxInt32 sigindex, wxInt32 newLeft, wxInt32 newRight);
+    ~ChangeHorizontalArrowCommand();
     bool Do(void);
     bool Undo(void);
 protected:
@@ -234,24 +234,24 @@ protected:
     wxInt32 m_newRight;
     wxInt32 m_newPosIndex;
 };
-class DeleteHArrowCommand : public wxCommand
+class DeleteHorizontalArrowCommand : public wxCommand
 {
 public:
-    DeleteHArrowCommand(TimingDocument *doc, wxInt32 nmbr);
-    ~DeleteHArrowCommand();
+    DeleteHorizontalArrowCommand(TimingDocument *doc, wxInt32 nmbr);
+    ~DeleteHorizontalArrowCommand();
     bool Do(void);
     bool Undo(void);
 protected:
     TimingDocument *m_doc;
     wxInt32 m_nmbr;
-    HArrow m_harrow;
+    HorizontalArrow m_horizontalArrow;
 };
 
-class ChangeHArrowTextPosCommand : public wxCommand
+class ChangeHorizontalArrowTextPosCommand : public wxCommand
 {
 public:
-    ChangeHArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff, wxInt32 gridoff);
-    ~ChangeHArrowTextPosCommand();
+    ChangeHorizontalArrowTextPosCommand(TimingDocument *doc, wxInt32 editingNumber, wxInt32 xoff, wxInt32 yoff, wxInt32 gridoff);
+    ~ChangeHorizontalArrowTextPosCommand();
     bool Do(void);
     bool Undo(void);
 protected:

@@ -199,7 +199,7 @@ void DiagramWavesWindow::DrawHorizontalArrows(wxDC &dc)
 
     dc.SetPen(wxPen(m_view->GetLineColour(),1));
 
-    HorizontalArrows arrows = m_view->GetHorizontalArrows();
+    GraphHorizontalArrows arrows = m_view->GetHorizontalArrows();
 
     for ( unsigned int i = 0 ; i <  arrows.size() ; ++i )
         arrows[i].Draw(dc);

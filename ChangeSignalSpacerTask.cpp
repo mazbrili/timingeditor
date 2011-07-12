@@ -168,10 +168,7 @@ void ChangeSignalSpacerTask::OnKey(const wxKeyEvent &event, bool down)
     if ( down && event.GetKeyCode() == WXK_ESCAPE)
         EndTask();
 }
-void ChangeSignalSpacerTask::EndTask()
-{
-    m_view->SetTask(NULL);
-}
+
 
 void ChangeSignalSpacerTask::Update()
 {

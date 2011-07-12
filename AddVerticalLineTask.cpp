@@ -83,7 +83,7 @@ void AddVerticalLineTask::AxisKey(const wxKeyEvent &event, bool down)
 }
 void AddVerticalLineTask::HandleKey(const wxKeyEvent &event, bool down)
 {
-    if ( down && event.GetKeyCode() == WXK_ESCAPE)
+    if ( /*down &&*/ event.GetKeyCode() == WXK_ESCAPE)
         EndTask();
 }
 void AddVerticalLineTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
@@ -104,10 +104,6 @@ void AddVerticalLineTask::NonInvolvedWindowMouse(const wxMouseEvent &event)
         m_waveWin->RemoveDrawlet();
     else if ( event.RightDown() )
         EndTask();
-}
-void AddVerticalLineTask::EndTask()
-{
-    m_view->SetTask(NULL);
 }
 void AddVerticalLineTask::DoCheckWhenMouseDown(const wxPoint &pos)
 {

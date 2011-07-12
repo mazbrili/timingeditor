@@ -28,7 +28,6 @@ public:
 protected:
 private:
     void SetDrawlets(int targetpos = -1);
-    void EndTask();
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
 private:
