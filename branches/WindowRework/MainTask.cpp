@@ -79,7 +79,7 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         int lineidx = IsOverVerticalLine(pos);
         if ( lineidx != -1 )
         {
-            ::wxLogMessage(wxString::Format(_T("MainTask::WavesMouse IsOverVerticalLine %d"), lineidx ));
+            //::wxLogMessage(wxString::Format(_T("MainTask::WavesMouse IsOverVerticalLine %d"), lineidx ));
             m_view->SetTask(new ActiveVerticalLineTask(this, lineidx));
             return;
         }

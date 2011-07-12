@@ -183,7 +183,7 @@ bool Task::IsOverWaves(const wxPoint &pos)
 }
 int Task::IsOverVerticalLine(const wxPoint &pos)
 {
-    const VerticalLines vlines = m_view->GetVerticalLines();
+    const GraphVerticalLines vlines = m_view->GetGraphVerticalLines();
     for (unsigned int i = 0 ; i < vlines.size() ; i++ )
     {
         if (vlines[i].HasPoint(pos, GetVerticalLineSnapTolerance()))

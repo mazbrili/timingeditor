@@ -16,9 +16,9 @@
 //#include "DiagramLabelsWindow.h"
 
 
-ActiveVerticalLineTask::ActiveVerticalLineTask(const Task *task, int vlineidx):
+ActiveVerticalLineTask::ActiveVerticalLineTask(const Task *task, int verticalLineIdx):
 VerticalLineTask(task),
-m_vlineidx(vlineidx),
+m_verticalLineIdx(verticalLineIdx),
 state(activeLine)
 {
     SetDrawlets();
@@ -31,7 +31,7 @@ void ActiveVerticalLineTask::SetDrawlets()
 {
     if ( state == activeLine )
     {
-        GraphVerticalLine gvline = m_view->GetVerticalLines()[m_vlineidx];
+        GraphVerticalLine gvline = m_view->GetGraphVerticalLines()[m_verticalLineIdx];
         HoverDrawlet *drawlet =
         gvline.GetActiveDrawlet( m_view->GetActiveGraphCaretColour() );
         m_waveWin->SetDrawlet(drawlet);
@@ -52,12 +52,12 @@ void ActiveVerticalLineTask::SetDrawlets()
             stop.x = start.x;
 
             start.y = m_view->heightOffsets[yStartPos];
-            stop.y = m_view->heightOffsets[m_doc->vertlines[m_vlineidx].EndPos+1];
+            stop.y = m_view->heightOffsets[m_doc->verticalLines[m_verticalLineIdx].EndPos+1];
 
             m_waveWin->SetDrawlet(
                 new HoverCombo(
                     GetDrawlet(start, stop),
-                    m_view->GetVerticalLines()[m_vlineidx].GetLineDrawlet(*wxLIGHT_GREY, wxSHORT_DASH)
+                    m_view->GetGraphVerticalLines()[m_verticalLineIdx].GetLineDrawlet(*wxLIGHT_GREY, wxSHORT_DASH)
                 )
             );
         }
@@ -77,13 +77,13 @@ void ActiveVerticalLineTask::SetDrawlets()
                 start.x += m_view->GridStepWidth*m_doc->TransitWidth/100;
             stop.x = start.x;
 
-            start.y = m_view->heightOffsets[m_doc->vertlines[m_vlineidx].StartPos];
+            start.y = m_view->heightOffsets[m_doc->verticalLines[m_verticalLineIdx].StartPos];
             stop.y = m_view->heightOffsets[yEndPos];
 
             m_waveWin->SetDrawlet(
                 new HoverCombo(
                     GetDrawlet(start, stop),
-                    m_view->GetVerticalLines()[m_vlineidx].GetLineDrawlet(*wxLIGHT_GREY, wxSHORT_DASH)
+                    m_view->GetGraphVerticalLines()[m_verticalLineIdx].GetLineDrawlet(*wxLIGHT_GREY, wxSHORT_DASH)
                 )
             );
         }
@@ -106,13 +106,13 @@ void ActiveVerticalLineTask::SetDrawlets()
                 start.x += m_view->GridStepWidth*m_doc->TransitWidth/100;
             stop.x = start.x;
 
-            start.y = m_view->heightOffsets[m_doc->vertlines[m_vlineidx].StartPos];
-            stop.y = m_view->heightOffsets[m_doc->vertlines[m_vlineidx].EndPos+1];
+            start.y = m_view->heightOffsets[m_doc->verticalLines[m_verticalLineIdx].StartPos];
+            stop.y = m_view->heightOffsets[m_doc->verticalLines[m_verticalLineIdx].EndPos+1];
 
             m_waveWin->SetDrawlet(
                 new HoverCombo(
                     GetDrawlet(start, stop),
-                    m_view->GetVerticalLines()[m_vlineidx].GetLineDrawlet(*wxLIGHT_GREY, wxSHORT_DASH)
+                    m_view->GetGraphVerticalLines()[m_verticalLineIdx].GetLineDrawlet(*wxLIGHT_GREY, wxSHORT_DASH)
                 )
             );
         }
@@ -135,16 +135,16 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
             EndTask();
             return;
         }
-        if ( m_vlineidx == k )
+        if ( m_verticalLineIdx == k )
         {
-            GraphVerticalLine gvline = m_view->GetVerticalLines()[m_vlineidx];
+            GraphVerticalLine gvline = m_view->GetGraphVerticalLines()[m_verticalLineIdx];
             if ( gvline.IsStartPoint(pos, GetVerticalLineSnapTolerance()))
             {
                 state = movingStartPos;
                 yStartPos = GetYPos(pos);
                 old_yStart = yStartPos;
-                xpos = m_doc->vertlines[m_vlineidx].vpos;
-                xposoffset = m_doc->vertlines[m_vlineidx].vposoffset;
+                xpos = m_doc->verticalLines[m_verticalLineIdx].vpos;
+                xposoffset = m_doc->verticalLines[m_verticalLineIdx].vposoffset;
                 SetDrawlets();
                 return;
             }
@@ -153,8 +153,8 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
                 state = movingEndPos;
                 yEndPos = GetYPos(pos);
                 old_yStop = yEndPos;
-                xpos = m_doc->vertlines[m_vlineidx].vpos;
-                xposoffset = m_doc->vertlines[m_vlineidx].vposoffset;
+                xpos = m_doc->verticalLines[m_verticalLineIdx].vpos;
+                xposoffset = m_doc->verticalLines[m_verticalLineIdx].vposoffset;
                 SetDrawlets();
                 return;
             }
@@ -166,7 +166,7 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
             return;
         }
         state = activeLine;
-        m_vlineidx = k;
+        m_verticalLineIdx = k;
         SetDrawlets();
         return;
     }
@@ -185,15 +185,15 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
             for ( unsigned int arrowidx = 0 ; arrowidx < m_doc->horizontalArrows.size() ; arrowidx++ )
             {
                 //check if the indexed line is connected by an arrow
-                if ( m_vlineidx == m_doc->horizontalArrows[arrowidx].fromVLine ||
-                     m_vlineidx == m_doc->horizontalArrows[arrowidx].toVLine )
+                if ( m_verticalLineIdx == m_doc->horizontalArrows[arrowidx].fromVerticalLine ||
+                     m_verticalLineIdx == m_doc->horizontalArrows[arrowidx].toVerticalLine )
                 {
                     if (m_doc->horizontalArrows[arrowidx].signalnmbr > yStartPos)
                         yStartPos = m_doc->horizontalArrows[arrowidx].signalnmbr;
                 }
             }
-            if ( yStartPos == m_doc->vertlines[m_vlineidx].EndPos+1)
-                yStartPos = m_doc->vertlines[m_vlineidx].StartPos;
+            if ( yStartPos == m_doc->verticalLines[m_verticalLineIdx].EndPos+1)
+                yStartPos = m_doc->verticalLines[m_verticalLineIdx].StartPos;
             SetDrawlets();
             return;
         }
@@ -203,15 +203,15 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
             for ( unsigned int arrowidx = 0 ; arrowidx < m_doc->horizontalArrows.size() ; arrowidx++ )
             {
                 //check if the indexed line is connected by an arrow
-                if ( m_vlineidx == m_doc->horizontalArrows[arrowidx].fromVLine ||
-                     m_vlineidx == m_doc->horizontalArrows[arrowidx].toVLine )
+                if ( m_verticalLineIdx == m_doc->horizontalArrows[arrowidx].fromVerticalLine ||
+                     m_verticalLineIdx == m_doc->horizontalArrows[arrowidx].toVerticalLine )
                 {
                     if ( m_doc->horizontalArrows[arrowidx].signalnmbr > yEndPos)
                         yEndPos = m_doc->horizontalArrows[arrowidx].signalnmbr;
                 }
             }
-            if ( yEndPos ==  m_doc->vertlines[m_vlineidx].StartPos)
-                yEndPos = m_doc->vertlines[m_vlineidx].EndPos;
+            if ( yEndPos ==  m_doc->verticalLines[m_verticalLineIdx].StartPos)
+                yEndPos = m_doc->verticalLines[m_verticalLineIdx].EndPos;
             SetDrawlets();
             return;
         }
@@ -222,11 +222,11 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
         if ( state == movingLine )
         {
             CalcXPos(pos);
-            if ( m_doc->vertlines[m_vlineidx].vpos != xpos || m_doc->vertlines[m_vlineidx].vposoffset != xposoffset)
+            if ( m_doc->verticalLines[m_verticalLineIdx].vpos != xpos || m_doc->verticalLines[m_verticalLineIdx].vposoffset != xposoffset)
             {
                 m_doc->GetCommandProcessor()->Submit(
-                    new ChangeVLineCommand(m_doc, m_vlineidx, xpos, m_doc->vertlines[m_vlineidx].StartPos,
-                                           m_doc->vertlines[m_vlineidx].EndPos, xposoffset));
+                    new ChangeVerticalLineCommand(m_doc, m_verticalLineIdx, xpos, m_doc->verticalLines[m_verticalLineIdx].StartPos,
+                                           m_doc->verticalLines[m_verticalLineIdx].EndPos, xposoffset));
             }
             else
                 state = activeLine;
@@ -235,13 +235,13 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
         }
         if ( state == movingStartPos )
         {
-            if (yStartPos != m_doc->vertlines[m_vlineidx].StartPos)
+            if (yStartPos != m_doc->verticalLines[m_verticalLineIdx].StartPos)
             {
                 m_doc->GetCommandProcessor()->Submit(
-                    new ChangeVLineCommand(m_doc, m_vlineidx, m_doc->vertlines[m_vlineidx].vpos,
+                    new ChangeVerticalLineCommand(m_doc, m_verticalLineIdx, m_doc->verticalLines[m_verticalLineIdx].vpos,
                                            yStartPos,
-                                           m_doc->vertlines[m_vlineidx].EndPos,
-                                           m_doc->vertlines[m_vlineidx].vposoffset));
+                                           m_doc->verticalLines[m_verticalLineIdx].EndPos,
+                                           m_doc->verticalLines[m_verticalLineIdx].vposoffset));
             }
             else
                 state = activeLine;
@@ -249,13 +249,13 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
         }
         if ( state == movingEndPos)
         {
-            if ( yEndPos != m_doc->vertlines[m_vlineidx].EndPos)
+            if ( yEndPos != m_doc->verticalLines[m_verticalLineIdx].EndPos)
             {
                 m_doc->GetCommandProcessor()->Submit(
-                    new ChangeVLineCommand(m_doc, m_vlineidx, m_doc->vertlines[m_vlineidx].vpos,
-                                           m_doc->vertlines[m_vlineidx].StartPos,
+                    new ChangeVerticalLineCommand(m_doc, m_verticalLineIdx, m_doc->verticalLines[m_verticalLineIdx].vpos,
+                                           m_doc->verticalLines[m_verticalLineIdx].StartPos,
                                            yEndPos-1,
-                                           m_doc->vertlines[m_vlineidx].vposoffset));
+                                           m_doc->verticalLines[m_verticalLineIdx].vposoffset));
             }
             else
                 state = activeLine;
@@ -277,7 +277,7 @@ void ActiveVerticalLineTask::Delete()
         state = deleting;
         wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
         if (cmdproc)
-            cmdproc->Submit(new DeleteVLineCommand((TimingDocument *)m_view->GetDocument(), m_vlineidx));
+            cmdproc->Submit(new DeleteVerticalLineCommand((TimingDocument *)m_view->GetDocument(), m_verticalLineIdx));
     }
 }
 bool ActiveVerticalLineTask::CanDelete()

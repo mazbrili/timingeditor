@@ -184,7 +184,7 @@ void DiagramWavesWindow::DrawVerticalLines(wxDC &dc)
 
     dc.SetPen(wxPen(m_view->GetLineColour(),1));
 
-    VerticalLines vls = m_view->GetVerticalLines();
+    GraphVerticalLines vls = m_view->GetGraphVerticalLines();
 
     for (unsigned int i = 0;i < vls.size(); ++i)
         vls[i].Draw(dc);
