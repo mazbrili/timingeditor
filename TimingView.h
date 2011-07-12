@@ -45,7 +45,7 @@ class MainTask;
 
 class TimingTextCtrl;
 
-typedef std::vector<GraphVerticalLine> VerticalLines;
+typedef std::vector<GraphVerticalLine> GraphVerticalLines;
 typedef std::vector<GraphHorizontalArrow> GraphHorizontalArrows;
 typedef std::vector<GraphSignal*> GraphSignals;
 
@@ -73,7 +73,7 @@ public:
     wxFont GetFont() const;
     int GetWavesLeftSpace()const;
 
-    const VerticalLines &GetVerticalLines()const;
+    const GraphVerticalLines &GetGraphVerticalLines()const;
     const GraphHorizontalArrows &GetHorizontalArrows()const;
     const GraphSignals &GetGraphSignals()const;
 
@@ -117,7 +117,7 @@ private:
     void UpdateAxisPanel();
     void UpdateSignals();
 
-    VerticalLines m_vertlines;
+    GraphVerticalLines m_vertlines;
     GraphHorizontalArrows m_graphHorizontalArrows;
     GraphSignals m_graphsignals;
 

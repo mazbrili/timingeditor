@@ -424,13 +424,13 @@ void TimingView::UpdateVerticalLines()
 
     m_vertlines.clear();
 
-    for ( wxUint32 k = 0 ; k < doc->vertlines.size() ; ++k)
+    for ( wxUint32 k = 0 ; k < doc->verticalLines.size() ; ++k)
     {
         bool found = false;
         wxInt32 vpos;
         for ( wxUint32 i = 0 ; i < VisibleTicks.size() ; ++i)
         {
-            if (VisibleTicks[i] == doc->vertlines[k].vpos)
+            if (VisibleTicks[i] == doc->verticalLines[k].vpos)
             {
                 found = true;
                 vpos = i;
@@ -441,18 +441,18 @@ void TimingView::UpdateVerticalLines()
             continue;
 
         wxPoint offset(GetWavesLeftSpace() + vpos * GridStepWidth,
-                       heightOffsets[doc->vertlines[k].StartPos]);
+                       heightOffsets[doc->verticalLines[k].StartPos]);
 
-        if ( doc->en50 && doc->vertlines[k].vposoffset == 1 )
+        if ( doc->en50 && doc->verticalLines[k].vposoffset == 1 )
             offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
-        if ( doc->en90 && doc->vertlines[k].vposoffset == 2 )
+        if ( doc->en90 && doc->verticalLines[k].vposoffset == 2 )
             offset.x +=  GridStepWidth/(100.0/(doc->TransitWidth));
 
 //        dc.DrawLine(
 //            offset.x, offset.y,
-//            offset.x,  heightOffsets[doc->vertlines[k].EndPos + 1]
+//            offset.x,  heightOffsets[doc->verticalLines[k].EndPos + 1]
 //        );
-        m_vertlines.push_back(GraphVerticalLine(offset, wxPoint(offset.x,  heightOffsets[doc->vertlines[k].EndPos + 1])));
+        m_vertlines.push_back(GraphVerticalLine(offset, wxPoint(offset.x,  heightOffsets[doc->verticalLines[k].EndPos + 1])));
     }
 
 }
@@ -469,29 +469,29 @@ void TimingView::UpdateHorizontalArrows()
     for ( wxUint32 n = 0 ; n < doc->horizontalArrows.size() ; ++n )
     {
         HorizontalArrow &ha = doc->horizontalArrows[n];
-        bool fromVlineVisible = false, toVlineVisible = false;
-        wxInt32 fromvpos = doc->vertlines[ha.fromVLine].vpos;
-        wxInt32 fromvposoffset = doc->vertlines[ha.fromVLine].vposoffset;
-        wxInt32 tovpos = doc->vertlines[ha.toVLine].vpos;
-        wxInt32 tovposoffset = doc->vertlines[ha.toVLine].vposoffset;
+        bool fromVisibleVerticalLine = false, toVisibleVerticalLine = false;
+        wxInt32 fromvpos = doc->verticalLines[ha.fromVerticalLine].vpos;
+        wxInt32 fromvposoffset = doc->verticalLines[ha.fromVerticalLine].vposoffset;
+        wxInt32 tovpos = doc->verticalLines[ha.toVerticalLine].vpos;
+        wxInt32 tovposoffset = doc->verticalLines[ha.toVerticalLine].vposoffset;
 
         for ( wxUint32 i = 0 ; i < VisibleTicks.size() ; ++i)
         {
-            if ( !fromVlineVisible && VisibleTicks[i] == fromvpos )
+            if ( !fromVisibleVerticalLine && VisibleTicks[i] == fromvpos )
             {
                 fromvpos = i;
-                fromVlineVisible = true;
+                fromVisibleVerticalLine = true;
                 //break;
             }
-            if ( !toVlineVisible && VisibleTicks[i] == tovpos )
+            if ( !toVisibleVerticalLine && VisibleTicks[i] == tovpos )
             {
                 tovpos = i;
-                toVlineVisible = true;
+                toVisibleVerticalLine = true;
             }
         }
-        if ( fromVlineVisible && toVlineVisible)
+        if ( fromVisibleVerticalLine && toVisibleVerticalLine)
         {
-            /// calc offset based on vline to start from
+            /// calc offset based on vertical line to start from
             wxPoint offset(leftSpace + fromvpos * GridStepWidth,
                     ha.pos + heightOffsets[ha.signalnmbr]);
             if ( doc->en50 && fromvposoffset == 1 )
@@ -532,30 +532,30 @@ void TimingView::UpdateHorizontalArrows()
                 wxInt32 l = 0;
                 wxInt32 s = 0;
 
-                if ( doc->vertlines[ha.fromVLine].vpos < doc->vertlines[ha.toVLine].vpos )
+                if ( doc->verticalLines[ha.fromVerticalLine].vpos < doc->verticalLines[ha.toVerticalLine].vpos )
                 {
-                    l = doc->vertlines[ha.toVLine].vpos - doc->vertlines[ha.fromVLine].vpos;
-                    if ( doc->en50 && doc->vertlines[ha.fromVLine].vposoffset == 1)
+                    l = doc->verticalLines[ha.toVerticalLine].vpos - doc->verticalLines[ha.fromVerticalLine].vpos;
+                    if ( doc->en50 && doc->verticalLines[ha.fromVerticalLine].vposoffset == 1)
                         s -= 50;
-                    if ( doc->en90 && doc->vertlines[ha.fromVLine].vposoffset == 2)
+                    if ( doc->en90 && doc->verticalLines[ha.fromVerticalLine].vposoffset == 2)
                         s -= 100;
 
-                    if ( doc->en50 && doc->vertlines[ha.toVLine].vposoffset == 1)
+                    if ( doc->en50 && doc->verticalLines[ha.toVerticalLine].vposoffset == 1)
                         s += 50;
-                    if ( doc->en90 && doc->vertlines[ha.toVLine].vposoffset == 2)
+                    if ( doc->en90 && doc->verticalLines[ha.toVerticalLine].vposoffset == 2)
                         s += 100;
                 }
                 else
                 {
-                    l = doc->vertlines[ha.fromVLine].vpos - doc->vertlines[ha.toVLine].vpos;
-                    if ( doc->en50 && doc->vertlines[ha.fromVLine].vposoffset == 1)
+                    l = doc->verticalLines[ha.fromVerticalLine].vpos - doc->verticalLines[ha.toVerticalLine].vpos;
+                    if ( doc->en50 && doc->verticalLines[ha.fromVerticalLine].vposoffset == 1)
                         s += 50;
-                    if ( doc->en90 && doc->vertlines[ha.fromVLine].vposoffset == 2)
+                    if ( doc->en90 && doc->verticalLines[ha.fromVerticalLine].vposoffset == 2)
                         s += 100;
 
-                    if ( doc->en50 && doc->vertlines[ha.toVLine].vposoffset == 1)
+                    if ( doc->en50 && doc->verticalLines[ha.toVerticalLine].vposoffset == 1)
                         s -= 50;
-                    if ( doc->en90 && doc->vertlines[ha.toVLine].vposoffset == 2)
+                    if ( doc->en90 && doc->verticalLines[ha.toVerticalLine].vposoffset == 2)
                         s -= 100;
                 }
 
@@ -606,7 +606,7 @@ void TimingView::UpdateSignals()
 }
 
 /// //////////////////////////////////////////////////////////  make internal structures accessible for the windows
-const VerticalLines &TimingView::GetVerticalLines()const
+const GraphVerticalLines &TimingView::GetGraphVerticalLines()const
 {
     return m_vertlines;
 }

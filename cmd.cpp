@@ -48,10 +48,10 @@ ChangeLength::ChangeLength(TimingDocument *doc, wxInt32 newLength)
 }
 ChangeLength::~ChangeLength()
 {
-    DeleteVLineCommand *dvlc;
-    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
+    DeleteVerticalLineCommand *dvlc;
+    for (wxUint32 k = 0 ; k < deleteVerticalLineCommands.size() ; ++k )
     {
-        dvlc = delVlineCom[k];
+        dvlc = deleteVerticalLineCommands[k];
         if ( dvlc ) delete dvlc;
     }
 }
@@ -92,18 +92,18 @@ bool ChangeLength::Do(void)
         }
     }
 
-    delVlineCom.clear();
+    deleteVerticalLineCommands.clear();
     if ( m_newLength < m_doc->length)
     {
-        //std::vector<VLine>::iterator it;
+        //std::vector<VerticalLine>::iterator it;
         wxUint32 k;
-        //it = m_doc->vertlines.begin();
-        for (  k = 0 ; k < m_doc->vertlines.size(); ++k )
+        //it = m_doc->verticalLines.begin();
+        for (  k = 0 ; k < m_doc->verticalLines.size(); ++k )
         {
-            if ( m_doc->vertlines[k].vpos > m_newLength )
+            if ( m_doc->verticalLines[k].vpos > m_newLength )
             {
-                DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
-                delVlineCom.push_back(cmd);
+                DeleteVerticalLineCommand *cmd = new DeleteVerticalLineCommand(m_doc, k);
+                deleteVerticalLineCommands.push_back(cmd);
                 cmd->Do();
                 break;
             }
@@ -127,12 +127,12 @@ bool ChangeLength::Undo(void)
     //m_doc->signals.clear();
     m_doc->signals = signals;
 
-    while ( delVlineCom.size() )
+    while ( deleteVerticalLineCommands.size() )
     {
-        DeleteVLineCommand *cmd = delVlineCom.back();
+        DeleteVerticalLineCommand *cmd = deleteVerticalLineCommands.back();
         cmd->Undo();
         delete cmd;
-        delVlineCom.pop_back();
+        deleteVerticalLineCommands.pop_back();
 
     }
 
@@ -189,25 +189,24 @@ DeleteSignalCommand::DeleteSignalCommand(TimingDocument *doc, wxInt32 deletedSig
 }
 DeleteSignalCommand::~DeleteSignalCommand()
 {
-    DeleteVLineCommand *dvlc;
-    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
+    DeleteVerticalLineCommand *dvlc;
+    for (wxUint32 k = 0 ; k < deleteVerticalLineCommands.size() ; ++k )
     {
-        dvlc = delVlineCom[k];
+        dvlc = deleteVerticalLineCommands[k];
         if ( dvlc ) delete dvlc;
     }
 }
 bool DeleteSignalCommand::Do(void)
 {
     // delete vertical lines which are only connected to the deleted signal
-    delVlineCom.clear();
-    for (wxUint32  k = 0 ; k < m_doc->vertlines.size(); ++k )
+    deleteVerticalLineCommands.clear();
+    for (wxUint32  k = 0 ; k < m_doc->verticalLines.size(); ++k )
     {
-        if ( m_doc->vertlines[k].EndPos == m_deletedSigNr &&
-            m_doc->vertlines[k].StartPos == m_deletedSigNr )
+        if ( m_doc->verticalLines[k].EndPos == m_deletedSigNr &&
+            m_doc->verticalLines[k].StartPos == m_deletedSigNr )
         {
-            //std::vector<DeleteVLineCommand*> delVlineCom;
-            DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
-            delVlineCom.push_back(cmd);
+            DeleteVerticalLineCommand *cmd = new DeleteVerticalLineCommand(m_doc, k);
+            deleteVerticalLineCommands.push_back(cmd);
             cmd->Do();
             break;
         }
@@ -222,17 +221,13 @@ bool DeleteSignalCommand::Do(void)
 
 
     // change the vertical lines connected to this signal
-    vlines = m_doc->vertlines;
-    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    verticalLines = m_doc->verticalLines;
+    for ( wxUint32 n = 0 ; n < m_doc->verticalLines.size() ; ++n )
     {
-        if ( m_doc->vertlines[n].StartPos > m_deletedSigNr)
-            m_doc->vertlines[n].StartPos = m_doc->vertlines[n].StartPos-1;
-        if ( m_doc->vertlines[n].EndPos >= m_deletedSigNr)
-            m_doc->vertlines[n].EndPos = m_doc->vertlines[n].EndPos-1;
-
-//        else if (m_deletedSigNr == m_doc->signals.size() -1 &&
-//         m_doc->vertlines[n].EndPos == m_deletedSigNr + 1 )
-//            m_doc->vertlines[n].EndPos --;
+        if ( m_doc->verticalLines[n].StartPos > m_deletedSigNr)
+            m_doc->verticalLines[n].StartPos = m_doc->verticalLines[n].StartPos-1;
+        if ( m_doc->verticalLines[n].EndPos >= m_deletedSigNr)
+            m_doc->verticalLines[n].EndPos = m_doc->verticalLines[n].EndPos-1;
     }
 
     horizontalArrows = m_doc->horizontalArrows;
@@ -270,16 +265,16 @@ bool DeleteSignalCommand::Undo(void)
         it++;
     m_doc->signals.insert(it, 1, m_sig);
 
-    m_doc->vertlines = vlines;
+    m_doc->verticalLines = verticalLines;
 
     m_doc->horizontalArrows = horizontalArrows;
 
-    while ( delVlineCom.size() )
+    while ( deleteVerticalLineCommands.size() )
     {
-        DeleteVLineCommand *cmd = delVlineCom.back();
+        DeleteVerticalLineCommand *cmd = deleteVerticalLineCommands.back();
         cmd->Undo();
         delete cmd;
-        delVlineCom.pop_back();
+        deleteVerticalLineCommands.pop_back();
 
     }
 
@@ -339,8 +334,8 @@ AddSignalCommand::AddSignalCommand(TimingDocument *doc, wxInt32 selectedSigNr, S
 AddSignalCommand::~AddSignalCommand(){}
 bool AddSignalCommand::Do(void)
 {
-    vlines.clear();
-    vlines = m_doc->vertlines;
+    verticalLines.clear();
+    verticalLines = m_doc->verticalLines;
     horizontalArrows = m_doc->horizontalArrows;
 
     wxInt32 last = m_sig.values.size() - 1;
@@ -356,12 +351,12 @@ bool AddSignalCommand::Do(void)
             it++;
         m_doc->signals.insert(it, 1, m_sig);
 
-        for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+        for ( wxUint32 n = 0 ; n < m_doc->verticalLines.size() ; ++n )
         {
-            if ( m_doc->vertlines[n].StartPos >= m_selectedSigNr )
-                 m_doc->vertlines[n].StartPos++;
-            if ( m_doc->vertlines[n].EndPos >= m_selectedSigNr )
-                m_doc->vertlines[n].EndPos++;
+            if ( m_doc->verticalLines[n].StartPos >= m_selectedSigNr )
+                 m_doc->verticalLines[n].StartPos++;
+            if ( m_doc->verticalLines[n].EndPos >= m_selectedSigNr )
+                m_doc->verticalLines[n].EndPos++;
         }
 
         for ( wxUint32 n = 0 ; n < m_doc->horizontalArrows.size() ; ++n )
@@ -388,7 +383,7 @@ bool AddSignalCommand::Undo(void)
     }
 
 
-    m_doc->vertlines = vlines;
+    m_doc->verticalLines = verticalLines;
     m_doc->horizontalArrows = horizontalArrows;
 
 
@@ -513,69 +508,69 @@ bool MoveSignalPosCommand::Do(void)
 {
 
 
-    vlines.clear();
-    vlines = m_doc->vertlines;
+    verticalLines.clear();
+    verticalLines = m_doc->verticalLines;
     horizontalArrows = m_doc->horizontalArrows;
 
-    /// prepare vertlines
-    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    /// prepare verticalLines
+    for ( wxUint32 n = 0 ; n < m_doc->verticalLines.size() ; ++n )
     {
-        if ( m_doc->vertlines[n].StartPos == m_selectedSigNr)
+        if ( m_doc->verticalLines[n].StartPos == m_selectedSigNr)
         {
             if (m_selectedSigNr > m_targetPos )
-                m_doc->vertlines[n].StartPos = m_targetPos;
+                m_doc->verticalLines[n].StartPos = m_targetPos;
             else
-                m_doc->vertlines[n].StartPos = m_targetPos-1;
+                m_doc->verticalLines[n].StartPos = m_targetPos-1;
         }
         else
         {
-            if (m_doc->vertlines[n].StartPos < m_selectedSigNr &&
-                m_doc->vertlines[n].StartPos >= m_targetPos )
+            if (m_doc->verticalLines[n].StartPos < m_selectedSigNr &&
+                m_doc->verticalLines[n].StartPos >= m_targetPos )
             {
-                m_doc->vertlines[n].StartPos++;
+                m_doc->verticalLines[n].StartPos++;
             }
             else
             {
-                if (m_doc->vertlines[n].StartPos > m_selectedSigNr &&
-                    m_doc->vertlines[n].StartPos < m_targetPos )
+                if (m_doc->verticalLines[n].StartPos > m_selectedSigNr &&
+                    m_doc->verticalLines[n].StartPos < m_targetPos )
                 {
-                    m_doc->vertlines[n].StartPos--;
+                    m_doc->verticalLines[n].StartPos--;
                 }
             }
         }
 
 
 
-        if ( m_doc->vertlines[n].EndPos == m_selectedSigNr )
+        if ( m_doc->verticalLines[n].EndPos == m_selectedSigNr )
         {
             if (m_selectedSigNr < m_targetPos )
-                m_doc->vertlines[n].EndPos = m_targetPos-1;
+                m_doc->verticalLines[n].EndPos = m_targetPos-1;
             else
-                m_doc->vertlines[n].EndPos = m_targetPos;
+                m_doc->verticalLines[n].EndPos = m_targetPos;
 
         }
         else
         {
-            if (m_doc->vertlines[n].EndPos > m_selectedSigNr &&
-                m_doc->vertlines[n].EndPos < m_targetPos)
+            if (m_doc->verticalLines[n].EndPos > m_selectedSigNr &&
+                m_doc->verticalLines[n].EndPos < m_targetPos)
             {
-                m_doc->vertlines[n].EndPos--;
+                m_doc->verticalLines[n].EndPos--;
             }
             else
             {
-                if (m_doc->vertlines[n].EndPos < m_selectedSigNr &&
-                    m_doc->vertlines[n].EndPos >= m_targetPos)
+                if (m_doc->verticalLines[n].EndPos < m_selectedSigNr &&
+                    m_doc->verticalLines[n].EndPos >= m_targetPos)
                 {
-                    m_doc->vertlines[n].EndPos++;
+                    m_doc->verticalLines[n].EndPos++;
                 }
             }
         }
 
-        if ( m_doc->vertlines[n].EndPos < m_doc->vertlines[n].StartPos )
+        if ( m_doc->verticalLines[n].EndPos < m_doc->verticalLines[n].StartPos )
         {
-            wxInt32 t = m_doc->vertlines[n].EndPos;
-            m_doc->vertlines[n].EndPos = m_doc->vertlines[n].StartPos;
-            m_doc->vertlines[n].StartPos = t;
+            wxInt32 t = m_doc->verticalLines[n].EndPos;
+            m_doc->verticalLines[n].EndPos = m_doc->verticalLines[n].StartPos;
+            m_doc->verticalLines[n].StartPos = t;
         }
     }
 
@@ -606,28 +601,28 @@ bool MoveSignalPosCommand::Do(void)
             }
         }
         /// check that arrow is not pointing alongside a vertical line (on the left end)
-        if ( m_doc->vertlines[m_doc->horizontalArrows[n].fromVLine].StartPos > m_doc->horizontalArrows[n].signalnmbr ||
-            m_doc->vertlines[m_doc->horizontalArrows[n].fromVLine].EndPos < m_doc->horizontalArrows[n].signalnmbr )
+        if ( m_doc->verticalLines[m_doc->horizontalArrows[n].fromVerticalLine].StartPos > m_doc->horizontalArrows[n].signalnmbr ||
+            m_doc->verticalLines[m_doc->horizontalArrows[n].fromVerticalLine].EndPos < m_doc->horizontalArrows[n].signalnmbr )
         {
-            //add a vline for the arrow
-            VLine vl;
+            //add a vertical line for the arrow
+            VerticalLine vl;
             vl.EndPos = m_doc->horizontalArrows[n].signalnmbr;
             vl.StartPos = m_doc->horizontalArrows[n].signalnmbr;
-            vl.vpos = m_doc->vertlines[m_doc->horizontalArrows[n].fromVLine].vpos;
-            m_doc->vertlines.push_back(vl);
-            m_doc->horizontalArrows[n].fromVLine = m_doc->vertlines.size()-1;
+            vl.vpos = m_doc->verticalLines[m_doc->horizontalArrows[n].fromVerticalLine].vpos;
+            m_doc->verticalLines.push_back(vl);
+            m_doc->horizontalArrows[n].fromVerticalLine = m_doc->verticalLines.size()-1;
         }
         /// check that arrow is not pointing alongside a vertical line (on the right end)
-        if ( m_doc->vertlines[m_doc->horizontalArrows[n].toVLine].StartPos > m_doc->horizontalArrows[n].signalnmbr ||
-            m_doc->vertlines[m_doc->horizontalArrows[n].toVLine].EndPos < m_doc->horizontalArrows[n].signalnmbr )
+        if ( m_doc->verticalLines[m_doc->horizontalArrows[n].toVerticalLine].StartPos > m_doc->horizontalArrows[n].signalnmbr ||
+            m_doc->verticalLines[m_doc->horizontalArrows[n].toVerticalLine].EndPos < m_doc->horizontalArrows[n].signalnmbr )
         {
-            //add a vline for the arrow
-            VLine vl;
+            //add a vertical line for the arrow
+            VerticalLine vl;
             vl.EndPos = m_doc->horizontalArrows[n].signalnmbr;
             vl.StartPos = m_doc->horizontalArrows[n].signalnmbr;
-            vl.vpos = m_doc->vertlines[m_doc->horizontalArrows[n].toVLine].vpos;
-            m_doc->vertlines.push_back(vl);
-            m_doc->horizontalArrows[n].toVLine = m_doc->vertlines.size()-1;
+            vl.vpos = m_doc->verticalLines[m_doc->horizontalArrows[n].toVerticalLine].vpos;
+            m_doc->verticalLines.push_back(vl);
+            m_doc->horizontalArrows[n].toVerticalLine = m_doc->verticalLines.size()-1;
         }
     }
 
@@ -644,7 +639,7 @@ bool MoveSignalPosCommand::Undo(void)
     //return Do();
 
     DoMove();
-    m_doc->vertlines = vlines;
+    m_doc->verticalLines = verticalLines;
     m_doc->horizontalArrows = horizontalArrows;
 
     m_doc->Modify(true);
@@ -737,10 +732,10 @@ ChangeLengthLeft::ChangeLengthLeft(TimingDocument *doc, wxInt32 newLength)
 {}
 ChangeLengthLeft::~ChangeLengthLeft()
 {
-    DeleteVLineCommand *dvlc;
-    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
+    DeleteVerticalLineCommand *dvlc;
+    for (wxUint32 k = 0 ; k < deleteVerticalLineCommands.size() ; ++k )
     {
-        dvlc = delVlineCom[k];
+        dvlc = deleteVerticalLineCommands[k];
         if ( dvlc ) delete dvlc;
     }
 }
@@ -842,19 +837,19 @@ bool ChangeLengthLeft::Do(void)
 
     /// change positoin of vertical lines or remove them
     wxInt32 diff = m_newLength - m_doc->length;
-    delVlineCom.clear();
-    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
+    deleteVerticalLineCommands.clear();
+    for ( wxUint32 k = 0 ; k < m_doc->verticalLines.size() ; ++k )
     {
-        if ( m_doc->vertlines[k].vpos + diff < 0 )
+        if ( m_doc->verticalLines[k].vpos + diff < 0 )
         {
-            DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
-            delVlineCom.push_back(cmd);
+            DeleteVerticalLineCommand *cmd = new DeleteVerticalLineCommand(m_doc, k);
+            deleteVerticalLineCommands.push_back(cmd);
             cmd->Do();
             break;
         }
     }
-    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
-        m_doc->vertlines[k].vpos += diff;
+    for ( wxUint32 k = 0 ; k < m_doc->verticalLines.size() ; ++k )
+        m_doc->verticalLines[k].vpos += diff;
 
     m_doc->timeOffset -= diff;
 
@@ -874,14 +869,14 @@ bool ChangeLengthLeft::Undo(void)
     m_doc->signals = signals;
 
     wxInt32 diff = m_newLength - m_doc->length;
-    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size(); ++k )
-        m_doc->vertlines[k].vpos += diff;
-    while ( delVlineCom.size() )
+    for ( wxUint32 k = 0 ; k < m_doc->verticalLines.size(); ++k )
+        m_doc->verticalLines[k].vpos += diff;
+    while ( deleteVerticalLineCommands.size() )
     {
-        DeleteVLineCommand *cmd = delVlineCom.back();
+        DeleteVerticalLineCommand *cmd = deleteVerticalLineCommands.back();
         cmd->Undo();
         delete cmd;
-        delVlineCom.pop_back();
+        deleteVerticalLineCommands.pop_back();
     }
 
     m_doc->timeOffset -= diff;
@@ -895,30 +890,30 @@ bool ChangeLengthLeft::Undo(void)
     return true;
 }
 
-AddVLineCommand::AddVLineCommand(TimingDocument *doc, VLine newline)
+AddVerticalLineCommand::AddVerticalLineCommand(TimingDocument *doc, VerticalLine newline)
     : wxCommand(true, _T("added a vertical line")),
     m_doc(doc),
     m_newline(newline)
 {}
-    AddVLineCommand::~AddVLineCommand(){}
-bool AddVLineCommand::Do(void)
+AddVerticalLineCommand::~AddVerticalLineCommand(){}
+bool AddVerticalLineCommand::Do(void)
 {
-    m_doc->vertlines.push_back(m_newline);
+    m_doc->verticalLines.push_back(m_newline);
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
 }
-bool AddVLineCommand::Undo(void)
+bool AddVerticalLineCommand::Undo(void)
 {
-    m_doc->vertlines.pop_back();
+    m_doc->verticalLines.pop_back();
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
 }
 
-ChangeVLineCommand::ChangeVLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower, wxInt32 newVposoffset)
+ChangeVerticalLineCommand::ChangeVerticalLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower, wxInt32 newVposoffset)
     : wxCommand(true, _T("change a vertical line")),
     m_doc(doc),
     m_nmbr(nmbr),
@@ -936,43 +931,43 @@ ChangeVLineCommand::ChangeVLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt3
         m_newLower = newUpper-1;
     }
 }
-ChangeVLineCommand::~ChangeVLineCommand(){}
-bool ChangeVLineCommand::Do(void)
+ChangeVerticalLineCommand::~ChangeVerticalLineCommand(){}
+bool ChangeVerticalLineCommand::Do(void)
 {
     wxInt32 tmp;
 
     // swap the startpos and the new startpos
-    tmp = m_doc->vertlines[m_nmbr].StartPos;
+    tmp = m_doc->verticalLines[m_nmbr].StartPos;
 //    if ( tmp != m_newUpper) // check varrow if they need a new position
 //    {
-//        for ( k = k ; k < m_doc->vertlines
+//        for ( k = k ; k < m_doc->verticalLines
 //    }
-    m_doc->vertlines[m_nmbr].StartPos = m_newUpper;
+    m_doc->verticalLines[m_nmbr].StartPos = m_newUpper;
     m_newUpper = tmp;
 
 
     // swap the endpos and the new endpos
-    tmp = m_doc->vertlines[m_nmbr].EndPos;
-    m_doc->vertlines[m_nmbr].EndPos = m_newLower;
+    tmp = m_doc->verticalLines[m_nmbr].EndPos;
+    m_doc->verticalLines[m_nmbr].EndPos = m_newLower;
     m_newLower = tmp;
 
 
     // swap the vertical position with the new vpos
-    tmp = m_doc->vertlines[m_nmbr].vpos;
-    m_doc->vertlines[m_nmbr].vpos = m_newVpos;
+    tmp = m_doc->verticalLines[m_nmbr].vpos;
+    m_doc->verticalLines[m_nmbr].vpos = m_newVpos;
     m_newVpos = tmp;
 
 
 
-    tmp = m_doc->vertlines[m_nmbr].vposoffset;
-    m_doc->vertlines[m_nmbr].vposoffset = m_newVposoff;
+    tmp = m_doc->verticalLines[m_nmbr].vposoffset;
+    m_doc->verticalLines[m_nmbr].vposoffset = m_newVposoff;
     m_newVposoff = tmp;
 
     m_doc->Modify(true);
     m_doc->UpdateAllViews();
     return true;
 }
-bool ChangeVLineCommand::Undo(void)
+bool ChangeVerticalLineCommand::Undo(void)
 {
     return Do();
 }
@@ -991,14 +986,14 @@ ChangeHorizontalArrowCommand::~ChangeHorizontalArrowCommand(){}
 bool ChangeHorizontalArrowCommand::Do(void)
 {
     wxInt32 tmp;
-    // swap the index to fromvline
-    tmp = m_doc->horizontalArrows[m_nmbr].fromVLine;
-    m_doc->horizontalArrows[m_nmbr].fromVLine = m_newLeft;
+    // swap the index to fromVerticalLine
+    tmp = m_doc->horizontalArrows[m_nmbr].fromVerticalLine;
+    m_doc->horizontalArrows[m_nmbr].fromVerticalLine = m_newLeft;
     m_newLeft = tmp;
 
-    // swap the inde to toVLine
-    tmp = m_doc->horizontalArrows[m_nmbr].toVLine;
-    m_doc->horizontalArrows[m_nmbr].toVLine = m_newRight;
+    // swap the inde to toVerticalLine
+    tmp = m_doc->horizontalArrows[m_nmbr].toVerticalLine;
+    m_doc->horizontalArrows[m_nmbr].toVerticalLine = m_newRight;
     m_newRight = tmp;
 
     // swap the position
@@ -1054,28 +1049,28 @@ bool DeleteHorizontalArrowCommand::Undo(void)
     return true;
 }
 
-DeleteVLineCommand::DeleteVLineCommand(TimingDocument *doc, wxInt32 nmbr)
+DeleteVerticalLineCommand::DeleteVerticalLineCommand(TimingDocument *doc, wxInt32 nmbr)
     : wxCommand(true, _T("delete a vertical line")),
     m_doc(doc),
     m_nmbr(nmbr),
     first(true)
 {}
 
-DeleteVLineCommand::~DeleteVLineCommand(){}
+DeleteVerticalLineCommand::~DeleteVerticalLineCommand(){}
 
-bool DeleteVLineCommand::Do(void)
+bool DeleteVerticalLineCommand::Do(void)
 {
     // clear the vertical line
     {
-        m_vline = m_doc->vertlines[m_nmbr];
+        m_verticalLine = m_doc->verticalLines[m_nmbr];
 
-        std::vector<VLine>::iterator it = m_doc->vertlines.begin();
+        std::vector<VerticalLine>::iterator it = m_doc->verticalLines.begin();
         wxInt32 k = 0;
         for ( ;
-            it != m_doc->vertlines.end() && k < m_nmbr ;
+            it != m_doc->verticalLines.end() && k < m_nmbr ;
             it++, k++)
         {}
-        m_doc->vertlines.erase(it);
+        m_doc->verticalLines.erase(it);
     }
 
     // clear all connected horizontal arrows
@@ -1085,8 +1080,8 @@ bool DeleteVLineCommand::Do(void)
     while ( it != m_doc->horizontalArrows.end() )
     {
         HorizontalArrow &ha = *it;
-        if ( ha.fromVLine == m_nmbr ||
-             ha.toVLine == m_nmbr )
+        if ( ha.fromVerticalLine == m_nmbr ||
+             ha.toVerticalLine == m_nmbr )
         {
             m_horizontalArrows.push_back(ha);
             m_doc->horizontalArrows.erase(it);
@@ -1098,10 +1093,10 @@ bool DeleteVLineCommand::Do(void)
     for ( it = m_doc->horizontalArrows.begin() ; it != m_doc->horizontalArrows.end() ; it++ )
     {
         HorizontalArrow &ha = *it;
-        if ( ha.fromVLine > m_nmbr )
-            ha.fromVLine = ha.fromVLine-1;
-        if ( ha.toVLine > m_nmbr )
-            ha.toVLine = ha.toVLine - 1;
+        if ( ha.fromVerticalLine > m_nmbr )
+            ha.fromVerticalLine = ha.fromVerticalLine-1;
+        if ( ha.toVerticalLine > m_nmbr )
+            ha.toVerticalLine = ha.toVerticalLine - 1;
     }
 
     m_doc->Modify(true);
@@ -1109,25 +1104,24 @@ bool DeleteVLineCommand::Do(void)
     return true;
 }
 
-bool DeleteVLineCommand::Undo(void)
+bool DeleteVerticalLineCommand::Undo(void)
 {
-    //m_doc->vertlines.push_back(m_vline);
-    std::vector<VLine> vlines;
+    std::vector<VerticalLine> verticalLines;
     for ( wxInt32 k = 0 ; k < m_nmbr ; ++k )
-        vlines.push_back(m_doc->vertlines[k]);
-    vlines.push_back(m_vline);
-    for ( wxUint32 k = m_nmbr ; k < m_doc->vertlines.size() ; ++k )
-        vlines.push_back(m_doc->vertlines[k]);
-    m_doc->vertlines = vlines;
+        verticalLines.push_back(m_doc->verticalLines[k]);
+    verticalLines.push_back(m_verticalLine);
+    for ( wxUint32 k = m_nmbr ; k < m_doc->verticalLines.size() ; ++k )
+        verticalLines.push_back(m_doc->verticalLines[k]);
+    m_doc->verticalLines = verticalLines;
 
     std::vector<HorizontalArrow>::iterator it;
     for ( it = m_doc->horizontalArrows.begin() ; it != m_doc->horizontalArrows.end() ; it++ )
     {
         HorizontalArrow &ha = *it;
-        if ( ha.fromVLine >= m_nmbr )
-            ha.fromVLine = ha.fromVLine+1;
-        if ( ha.toVLine >= m_nmbr )
-            ha.toVLine = ha.toVLine + 1;
+        if ( ha.fromVerticalLine >= m_nmbr )
+            ha.fromVerticalLine = ha.fromVerticalLine+1;
+        if ( ha.toVerticalLine >= m_nmbr )
+            ha.toVerticalLine = ha.toVerticalLine + 1;
     }
 
 
@@ -1419,10 +1413,10 @@ AddTimeCommand::~AddTimeCommand(){}
 bool AddTimeCommand::Do(void)
 {
     // move vertical lines
-    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < m_doc->verticalLines.size() ; ++n )
     {
-        if ( m_doc->vertlines[n].vpos > m_pos )
-             m_doc->vertlines[n].vpos += m_len;
+        if ( m_doc->verticalLines[n].vpos > m_pos )
+             m_doc->verticalLines[n].vpos += m_len;
     }
 
     // move time compressors
@@ -1473,10 +1467,10 @@ bool AddTimeCommand::Do(void)
 bool AddTimeCommand::Undo(void)
 {
     // move vertical lines
-    for ( wxUint32 n = 0 ; n < m_doc->vertlines.size() ; ++n )
+    for ( wxUint32 n = 0 ; n < m_doc->verticalLines.size() ; ++n )
     {
-        if ( m_doc->vertlines[n].vpos > m_pos )
-             m_doc->vertlines[n].vpos -= m_len;
+        if ( m_doc->verticalLines[n].vpos > m_pos )
+             m_doc->verticalLines[n].vpos -= m_len;
     }
 
     // move time compressors back
@@ -1539,10 +1533,10 @@ RemoveTimeCommand::RemoveTimeCommand(TimingDocument *doc, wxInt32 beg, wxInt32 e
 
 RemoveTimeCommand::~RemoveTimeCommand()
 {
-    DeleteVLineCommand *dvlc;
-    for (wxUint32 k = 0 ; k < delVlineCom.size() ; ++k )
+    DeleteVerticalLineCommand *dvlc;
+    for (wxUint32 k = 0 ; k < deleteVerticalLineCommands.size() ; ++k )
     {
-        dvlc = delVlineCom[k];
+        dvlc = deleteVerticalLineCommands[k];
         if ( dvlc ) delete dvlc;
     }
 }
@@ -1582,20 +1576,20 @@ bool RemoveTimeCommand::Do(void)
 
     //vertical lines
     /// change positoin of vertical lines or remove them
-    delVlineCom.clear();
-    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
+    deleteVerticalLineCommands.clear();
+    for ( wxUint32 k = 0 ; k < m_doc->verticalLines.size() ; ++k )
     {
-        if ( m_doc->vertlines[k].vpos >= m_beg && m_doc->vertlines[k].vpos < m_end )
+        if ( m_doc->verticalLines[k].vpos >= m_beg && m_doc->verticalLines[k].vpos < m_end )
         {
-            DeleteVLineCommand *cmd = new DeleteVLineCommand(m_doc, k);
-            delVlineCom.push_back(cmd);
+            DeleteVerticalLineCommand *cmd = new DeleteVerticalLineCommand(m_doc, k);
+            deleteVerticalLineCommands.push_back(cmd);
             cmd->Do();
             break;
         }
     }
-    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size() ; ++k )
-        if ( m_doc->vertlines[k].vpos >= m_end )
-            m_doc->vertlines[k].vpos -= ( m_end - m_beg );
+    for ( wxUint32 k = 0 ; k < m_doc->verticalLines.size() ; ++k )
+        if ( m_doc->verticalLines[k].vpos >= m_end )
+            m_doc->verticalLines[k].vpos -= ( m_end - m_beg );
 
     //length
     m_doc->length -= (m_end - m_beg);
@@ -1614,15 +1608,15 @@ bool RemoveTimeCommand::Undo(void)
     m_doc->compressors = m_compressors;
 
     //vertical lines
-    for ( wxUint32 k = 0 ; k < m_doc->vertlines.size(); ++k )
-        if ( m_doc->vertlines[k].vpos >= m_beg )
-            m_doc->vertlines[k].vpos += (m_end -m_beg);
-    while ( delVlineCom.size() )
+    for ( wxUint32 k = 0 ; k < m_doc->verticalLines.size(); ++k )
+        if ( m_doc->verticalLines[k].vpos >= m_beg )
+            m_doc->verticalLines[k].vpos += (m_end -m_beg);
+    while ( deleteVerticalLineCommands.size() )
     {
-        DeleteVLineCommand *cmd = delVlineCom.back();
+        DeleteVerticalLineCommand *cmd = deleteVerticalLineCommands.back();
         cmd->Undo();
         delete cmd;
-        delVlineCom.pop_back();
+        deleteVerticalLineCommands.pop_back();
     }
 
     //length

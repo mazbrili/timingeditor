@@ -99,11 +99,11 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
             return false;
     }
 
-    ui = vertlines.size();
+    ui = verticalLines.size();
     store << ui;
     for ( wxUint32 n = 0 ; n < ui ; ++n )
     {
-        if ( !(vertlines[n].serialize(store)) )
+        if ( !(verticalLines[n].serialize(store)) )
             return false;
     }
 
@@ -189,14 +189,14 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
             signals.push_back(sig);
         }
 
-        vertlines.clear();
+        verticalLines.clear();
         load >> ui;
         for ( wxUint32 n = 0 ; n < ui ; ++n )
         {
-            VLine vln;
+            VerticalLine vln;
             if ( !(vln.deserialize( load )) )
                 return false;
-            vertlines.push_back(vln);
+            verticalLines.push_back(vln);
         }
 
 
@@ -513,7 +513,7 @@ bool Signal::deserialize(wxInputStream &inp)
 
     return true;
 }
-bool VLine::serialize(wxDataOutputStream &store)
+bool VerticalLine::serialize(wxDataOutputStream &store)
 {
     wxInt32 i;
 
@@ -527,7 +527,7 @@ bool VLine::serialize(wxDataOutputStream &store)
     store << vposoffset;
     return true;
 }
-bool VLine::deserialize(wxDataInputStream &load)
+bool VerticalLine::deserialize(wxDataInputStream &load)
 {
     wxInt32 ver;
 
@@ -560,8 +560,8 @@ bool HorizontalArrow::serialize(wxDataOutputStream &store)
     i = 3;
     store << i;
 
-    store << fromVLine;
-    store << toVLine;
+    store << fromVerticalLine;
+    store << toVerticalLine;
     store << pos;
     store << text;
 
@@ -585,8 +585,8 @@ bool HorizontalArrow::deserialize(wxDataInputStream &load)
     if ( ver >= 1 )
     {
         wxInt32 k;
-        load >> fromVLine;
-        load >> toVLine;
+        load >> fromVerticalLine;
+        load >> toVerticalLine;
         load >> pos;
         load >> text;
         load >> k;

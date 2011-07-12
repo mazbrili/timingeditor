@@ -7,7 +7,7 @@ class TimingDocument;
 class ActiveVerticalLineTask : public VerticalLineTask
 {
 public:
-    ActiveVerticalLineTask(const Task *task, int vlineidx);
+    ActiveVerticalLineTask(const Task *task, int verticalLineIdx);
     virtual ~ActiveVerticalLineTask();
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
     virtual void WavesMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -32,7 +32,7 @@ private:
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
 private:
-    int m_vlineidx;
+    int m_verticalLineIdx;
 
      TimingDocument *m_doc;
 private:

@@ -152,7 +152,7 @@ void AddVerticalLineTask::DoCheckWhenMouseUp(const wxPoint &pos)
 
     if ( yEndPos != yStartPos )
     {
-        VLine newline;
+        VerticalLine newline;
         wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
         if ( yStartPos < yEndPos )
         {
@@ -167,7 +167,7 @@ void AddVerticalLineTask::DoCheckWhenMouseUp(const wxPoint &pos)
         newline.vpos = m_view->VisibleTicks[xpos];
         newline.vposoffset = xposoffset;
 
-        cmdproc->Submit(new AddVLineCommand(
+        cmdproc->Submit(new AddVerticalLineCommand(
             doc, newline)
         );
     }

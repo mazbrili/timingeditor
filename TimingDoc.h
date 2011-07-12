@@ -73,12 +73,12 @@ public:
     bool serialize(wxOutputStream &store);
     bool deserialize(wxInputStream &load);
 };
-//class VLine;
+
 class HorizontalArrow
 {
 public:
-    wxInt32 fromVLine;
-    wxInt32 toVLine;
+    wxInt32 fromVerticalLine;
+    wxInt32 toVerticalLine;
     wxInt32 pos;
     wxInt32 signalnmbr;
     wxString text;
@@ -88,7 +88,7 @@ public:
     bool serialize(wxDataOutputStream &store);
     bool deserialize(wxDataInputStream &load);
 };
-class VLine
+class VerticalLine
 {
 public:
     wxInt32 StartPos; // above signal number
@@ -135,7 +135,7 @@ class TimingDocument: public wxDocument
         //std::vector<SplArrow> splarrows;
         wxInt32 length;
         std::vector<Signal> signals;
-        std::vector<VLine> vertlines;
+        std::vector<VerticalLine> verticalLines;
         std::vector<HorizontalArrow> horizontalArrows;
         std::map<wxInt32, TimeCompressor> compressors;
 

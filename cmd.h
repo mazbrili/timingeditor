@@ -28,17 +28,17 @@
 
 #include "TimingDoc.h"
 
-class DeleteVLineCommand : public wxCommand
+class DeleteVerticalLineCommand : public wxCommand
 {
 public:
-    DeleteVLineCommand(TimingDocument *doc, wxInt32 nmbr);
-    ~DeleteVLineCommand();
+    DeleteVerticalLineCommand(TimingDocument *doc, wxInt32 nmbr);
+    ~DeleteVerticalLineCommand();
     bool Do(void);
     bool Undo(void);
 protected:
     TimingDocument *m_doc;
     wxInt32 m_nmbr;
-    VLine m_vline;
+    VerticalLine m_verticalLine;
     std::vector<HorizontalArrow> m_horizontalArrows;
     bool first;
 };
@@ -55,7 +55,7 @@ protected:
     wxInt32 m_newLength;
     std::vector< Signal > signals;
     std::map<wxInt32, TimeCompressor > compressors;
-    std::vector<DeleteVLineCommand*> delVlineCom;
+    std::vector<DeleteVerticalLineCommand*> deleteVerticalLineCommands;
 };
 class ChangeLengthLeft : public wxCommand
 {
@@ -71,7 +71,7 @@ protected:
     std::vector< Signal > signals;
     std::map<wxInt32, TimeCompressor > compressors;
 
-    std::vector<DeleteVLineCommand*> delVlineCom;
+    std::vector<DeleteVerticalLineCommand*> deleteVerticalLineCommands;
 };
 class ChangeSignal : public wxCommand
 {
@@ -96,9 +96,9 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_deletedSigNr;
     Signal m_sig;
-    std::vector<VLine> vlines;
+    std::vector<VerticalLine> verticalLines;
     std::vector<HorizontalArrow> horizontalArrows;
-    std::vector<DeleteVLineCommand*> delVlineCom;
+    std::vector<DeleteVerticalLineCommand*> deleteVerticalLineCommands;
 };
 class ChangeClockParamCommand : public wxCommand
 {
@@ -126,7 +126,7 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_selectedSigNr;
     wxInt32 m_targetPos;
-    std::vector<VLine> vlines;
+    std::vector<VerticalLine> verticalLines;
     std::vector<HorizontalArrow> horizontalArrows;
     bool DoMove(void);
 };
@@ -141,7 +141,7 @@ protected:
     TimingDocument *m_doc;
     wxInt32 m_selectedSigNr;
     Signal m_sig;
-    std::vector<VLine> vlines;
+    std::vector<VerticalLine> verticalLines;
     std::vector<HorizontalArrow> horizontalArrows;
 };
 class AddDiscontCommand : public wxCommand
@@ -182,16 +182,16 @@ protected:
     std::vector<HorizontalArrow> horizontalArrows;
     bool DoChangeSpace(void);
 };
-class AddVLineCommand : public wxCommand
+class AddVerticalLineCommand : public wxCommand
 {
 public:
-    AddVLineCommand(TimingDocument *doc, VLine newline);
-    ~AddVLineCommand();
+    AddVerticalLineCommand(TimingDocument *doc, VerticalLine newline);
+    ~AddVerticalLineCommand();
     bool Do(void);
     bool Undo(void);
 protected:
     TimingDocument *m_doc;
-    VLine m_newline;
+    VerticalLine m_newline;
 };
 class AddHorizonalArrowCommand : public wxCommand
 {
@@ -204,11 +204,11 @@ protected:
     TimingDocument *m_doc;
     HorizontalArrow m_newha;
 };
-class ChangeVLineCommand : public wxCommand
+class ChangeVerticalLineCommand : public wxCommand
 {
 public:
-    ChangeVLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower, wxInt32 newVposoffset);
-    ~ChangeVLineCommand();
+    ChangeVerticalLineCommand(TimingDocument *doc, wxInt32 nmbr, wxInt32 newVpos, wxInt32 newUpper, wxInt32 newLower, wxInt32 newVposoffset);
+    ~ChangeVerticalLineCommand();
     bool Do(void);
     bool Undo(void);
 protected:
@@ -358,6 +358,6 @@ protected:
     std::vector<Signal> m_signals;
     std::map<wxInt32, TimeCompressor> m_compressors;
 
-    std::vector<DeleteVLineCommand*> delVlineCom;
+    std::vector<DeleteVerticalLineCommand*> deleteVerticalLineCommands;
 };
 #endif //__CMD__
