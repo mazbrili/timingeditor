@@ -107,11 +107,11 @@ bool TimingDocument::DoSaveDocument(const wxString& file)
             return false;
     }
 
-    ui = harrows.size();
+    ui = horizontalArrows.size();
     store << ui;
     for ( wxUint32 n = 0 ; n < ui ; ++n )
     {
-        if ( !(harrows[n].serialize(store)) )
+        if ( !(horizontalArrows[n].serialize(store)) )
             return false;
     }
 
@@ -200,14 +200,14 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
         }
 
 
-        harrows.clear();
+        horizontalArrows.clear();
         load >> ui;
         for ( wxUint32 n = 0 ; n < ui ; ++n )
         {
-            HArrow har;
+            HorizontalArrow har;
             if ( !(har.deserialize( load )) )
                 return false;
-            harrows.push_back(har);
+            horizontalArrows.push_back(har);
         }
 
         //discontinuities.clear();
@@ -552,7 +552,7 @@ bool VLine::deserialize(wxDataInputStream &load)
 
     return true;
 }
-bool HArrow::serialize(wxDataOutputStream &store)
+bool HorizontalArrow::serialize(wxDataOutputStream &store)
 {
     wxInt32 i;
 
@@ -577,7 +577,7 @@ bool HArrow::serialize(wxDataOutputStream &store)
 
     return true;
 }
-bool HArrow::deserialize(wxDataInputStream &load)
+bool HorizontalArrow::deserialize(wxDataInputStream &load)
 {
     wxInt32 ver;
 
@@ -645,9 +645,9 @@ wxString TimingDocument::GetText(wxInt32 number)
                             return signals[k].TextValues[i];
                         ++n;
                     }
-    for ( wxUint32 k = 0 ; k < harrows.size() ; ++k, n++ )
+    for ( wxUint32 k = 0 ; k < horizontalArrows.size() ; ++k, n++ )
         if ( n == number )
-            return harrows[k].text;
+            return horizontalArrows[k].text;
 
     return wxEmptyString;
 }
@@ -686,10 +686,10 @@ void TimingDocument::SetText(wxInt32 number, wxString text)
                         }
                         ++n;
                     }
-    for ( wxUint32 k = 0 ; k < harrows.size() ; ++k, n++ )
+    for ( wxUint32 k = 0 ; k < horizontalArrows.size() ; ++k, n++ )
         if ( n == number )
         {
-            harrows[k].text = text;
+            horizontalArrows[k].text = text;
             return;
         }
 }

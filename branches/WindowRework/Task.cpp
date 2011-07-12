@@ -34,7 +34,6 @@ m_axisWin(task->m_axisWin),
 m_waveWin(task->m_waveWin)
 {
     Init();
-
 }
 
 void Task::Init()
@@ -53,6 +52,11 @@ Task::~Task()
 {
     //dtor
 }
+void Task::EndTask()
+{
+    m_view->SetTask(NULL);
+}
+
 void Task::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos){}
 void Task::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {

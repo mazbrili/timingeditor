@@ -51,6 +51,7 @@ public:
     const int GetVerticalLineSnapTolerance(){return 4;}
 
 protected:
+    virtual void EndTask();
     void Init();
     bool IsSignalInClipboard();
     void AddSignal(Signal *sig);

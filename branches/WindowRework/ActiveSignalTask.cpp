@@ -196,7 +196,7 @@ void ActiveSignalTask::EndTask()
 {
     m_sig = -1;
     UpdateClockSettingsPanel(false);
-    m_view->SetTask(NULL);
+    Task::EndTask();
 }
 void ActiveSignalTask::UpdateClockSettingsPanel(bool attach)
 {
