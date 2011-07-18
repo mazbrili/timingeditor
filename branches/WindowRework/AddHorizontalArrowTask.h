@@ -39,6 +39,7 @@ private:
 protected:
 private:
     states state;
+    int m_secondVerticalLine;
 
     void NonInvolvedWindowMouse(const wxMouseEvent &event);
     void HandleKey(const wxKeyEvent &event, bool down);
@@ -46,7 +47,7 @@ private:
     void DoCheckWhenMouseDown(const wxPoint &pos);
     void DoCheckMoving(const wxPoint &pos);
     void DoCheckWhenMouseUp(const wxPoint &pos);
-    void SetDrawlet();
+    void SetInsertingDrawlet(const wxPoint &pos);
 };
 
 #endif // ADDHORIZONTALARROWTASK_H

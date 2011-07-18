@@ -107,10 +107,6 @@ void AddVerticalLineTask::NonInvolvedWindowMouse(const wxMouseEvent &event)
 }
 void AddVerticalLineTask::DoCheckWhenMouseDown(const wxPoint &pos)
 {
-    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
-
-    if ( !doc || !doc->signals.size() )return;
-
     if (!IsOverWaves(pos) ) return;
 
     CalcXPos(pos);
@@ -145,6 +141,7 @@ void AddVerticalLineTask::DoCheckWhenMouseUp(const wxPoint &pos)
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
 
     if ( !doc || !doc->signals.size() )return;
+    if (state != waitingSecondPoint ) return;
 
     if (!IsOverWaves(pos) ) return;
 
@@ -167,9 +164,7 @@ void AddVerticalLineTask::DoCheckWhenMouseUp(const wxPoint &pos)
         newline.vpos = m_view->VisibleTicks[xpos];
         newline.vposoffset = xposoffset;
 
-        cmdproc->Submit(new AddVerticalLineCommand(
-            doc, newline)
-        );
+        cmdproc->Submit(new AddVerticalLineCommand(doc, newline));
     }
     state = waitingFirstPoint;
 }

@@ -26,7 +26,10 @@ void GraphVerticalLine::Draw(wxDC &dc)const
     dc.DrawLine( m_start.x, m_start.y, m_stop.x, m_stop.y );
 
 }
-
+const wxPoint &GraphVerticalLine::GetStartPoint()const
+{
+    return m_start;
+}
 //void GraphVerticalLine::Erase(wxDC &dc)const
 //{
 //    if (!m_visible)
@@ -60,7 +63,7 @@ bool GraphVerticalLine::HasPoint(const wxPoint &pos, const unsigned char toleran
     y_bot += tolerance;
 
     if ( pos.y > y_top && pos.y < y_bot &&
-        pos.x > m_start.x-tolerance && pos.x < m_start.x+tolerance )
+        pos.x >= m_start.x-tolerance && pos.x <= m_start.x+tolerance )
     {
         return true;
     }
@@ -68,8 +71,8 @@ bool GraphVerticalLine::HasPoint(const wxPoint &pos, const unsigned char toleran
 }
 bool GraphVerticalLine::IsStartPoint(const wxPoint &pos, const unsigned char tolerance)const
 {
-    if ( pos.x > m_start.x-tolerance && pos.x < m_start.x+tolerance &&
-         pos.y > m_start.y-tolerance && pos.y < m_start.y+tolerance )
+    if ( pos.x >= m_start.x-tolerance && pos.x <= m_start.x+tolerance &&
+         pos.y >= m_start.y-tolerance && pos.y <= m_start.y+tolerance )
     {
         return true;
     }
@@ -78,8 +81,8 @@ bool GraphVerticalLine::IsStartPoint(const wxPoint &pos, const unsigned char tol
 }
 bool GraphVerticalLine::IsStopPoint(const wxPoint &pos, const unsigned char tolerance)const
 {
-    if ( pos.x > m_stop.x-tolerance && pos.x < m_stop.x+tolerance &&
-         pos.y > m_stop.y-tolerance && pos.y < m_stop.y+tolerance )
+    if ( pos.x >= m_stop.x-tolerance && pos.x <= m_stop.x+tolerance &&
+         pos.y >= m_stop.y-tolerance && pos.y <= m_stop.y+tolerance )
     {
         return true;
     }

@@ -19,6 +19,7 @@ public:
 
     HoverDrawlet *GetActiveDrawlet(const wxColour &colour)const;
     HoverDrawlet *GetLineDrawlet(const wxColour &colour, int style)const;
+    const wxPoint &GetStartPoint()const;
 
 protected:
 private:

@@ -137,8 +137,9 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
         }
         if ( m_verticalLineIdx == k )
         {
+            const int verticalLineSnapTolerance = GetVerticalLineSnapTolerance();
             GraphVerticalLine gvline = m_view->GetGraphVerticalLines()[m_verticalLineIdx];
-            if ( gvline.IsStartPoint(pos, GetVerticalLineSnapTolerance()))
+            if ( gvline.IsStartPoint(pos, verticalLineSnapTolerance))
             {
                 state = movingStartPos;
                 yStartPos = GetYPos(pos);
@@ -148,7 +149,7 @@ void ActiveVerticalLineTask::WavesMouse(const wxMouseEvent &event, const wxPoint
                 SetDrawlets();
                 return;
             }
-            if ( gvline.IsStopPoint(pos, GetVerticalLineSnapTolerance()))
+            if ( gvline.IsStopPoint(pos, verticalLineSnapTolerance))
             {
                 state = movingEndPos;
                 yEndPos = GetYPos(pos);
