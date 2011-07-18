@@ -6,6 +6,7 @@
 #include "DiagramWavesWindow.h"
 #include "TimingView.h"
 #include "TimingDoc.h"
+#include "cmd.h"
 
 #include "art/harrow_cur.xpm"
 
@@ -78,8 +79,9 @@ void AddHorizontalArrowTask::NonInvolvedWindowMouse(const wxMouseEvent &event)
 
 void AddHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
-    if (event.Moving() && state == waitingFirstPoint )
+    if (( event.Moving() || event.Dragging() )&& state == waitingFirstPoint )
     {
+        ::wxLogMessage(_T("AddHorizontalArrowTask::WavesMouse Task::WavesMouse"));
         Task::WavesMouse(event, pos);
     }
     else if ( event.Dragging() && state == waitingSecondPoint )
@@ -108,19 +110,78 @@ void AddHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPoint
 
 void AddHorizontalArrowTask::DoCheckWhenMouseDown(const wxPoint &pos)
 {
+    if (!IsOverWaves(pos) ) return;
+
+    int verticalLine = IsOverVerticalLine(pos);
+    if (verticalLine != -1)
+    {
+        CalcYPos(pos);
+        m_verticalLine = verticalLine;
+        m_axisWin->RemoveDrawlet();
+        state = waitingSecondPoint;
+        m_secondVerticalLine = -1;
+        SetInsertingDrawlet(pos);
+    }
 }
 
 void AddHorizontalArrowTask::DoCheckMoving(const wxPoint &pos)
 {
+    //if (!IsOverWaves(pos) ) return;
+
+    int old_secondVerticalLine = m_secondVerticalLine;
+    m_secondVerticalLine = IsOverVerticalLine(wxPoint(pos.x, m_view->heightOffsets[m_ypos] + m_yposoffset ));
+
+    if (m_secondVerticalLine == m_verticalLine)
+    {
+        m_waveWin->RemoveDrawlet();
+        return;
+    }
+
+    if (m_secondVerticalLine == -1 || old_secondVerticalLine != m_secondVerticalLine)
+        SetInsertingDrawlet(pos);
+    return;
 }
 
 void AddHorizontalArrowTask::DoCheckWhenMouseUp(const wxPoint &pos)
 {
-}
-void AddHorizontalArrowTask::SetDrawlet()
-{
+    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
 
+    if ( !doc )return;
+
+    if (state != waitingSecondPoint ) return;
+
+    if (m_secondVerticalLine != m_verticalLine && m_secondVerticalLine != -1)
+    {
+        HorizontalArrow newha;
+        wxCommandProcessor *cmdproc = doc->GetCommandProcessor();
+
+        newha.fromVerticalLine = m_verticalLine;
+        newha.toVerticalLine = m_secondVerticalLine;
+        newha.text = _("$t$");
+        newha.textoffset.x = 0;
+        newha.textoffset.y = -10;
+        newha.pos = m_yposoffset;
+        newha.signalnmbr = m_ypos;
+        cmdproc->Submit(new AddHorizonalArrowCommand(doc, newha));
+    }
+
+    state = waitingFirstPoint;
 }
+void AddHorizontalArrowTask::SetInsertingDrawlet(const wxPoint &pos)
+{
+    //::wxLogMessage(_T("AddHorizontalArrowTask::SetInsertingDrawlet"));
+    wxPoint start, stop;
+    start.y = m_view->heightOffsets[m_ypos] + m_yposoffset;
+    start.x = m_view->GetGraphVerticalLines()[m_verticalLine].GetStartPoint().x;
+    stop.y = start.y;
+    if ( m_secondVerticalLine == -1)
+        stop.x = pos.x;
+    else
+        stop.x = m_view->GetGraphVerticalLines()[m_secondVerticalLine].GetStartPoint().x;
+
+    m_waveWin->SetDrawlet(GetDrawlet(start, stop, m_secondVerticalLine != -1 ? wxSOLID : wxSHORT_DASH ));
+}
+
 void AddHorizontalArrowTask::Update()
 {
     m_waveWin->RemoveDrawlet();

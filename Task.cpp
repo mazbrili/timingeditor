@@ -60,7 +60,7 @@ void Task::EndTask()
 void Task::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos){}
 void Task::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
-    if ( event.Moving() )
+    if ( event.Moving() || event.Dragging() )
     {
         if ( IsOverWaves(pos) )
         {
@@ -186,8 +186,9 @@ int Task::IsOverVerticalLine(const wxPoint &pos)
     const GraphVerticalLines vlines = m_view->GetGraphVerticalLines();
     for (unsigned int i = 0 ; i < vlines.size() ; i++ )
     {
-        if (vlines[i].HasPoint(pos, GetVerticalLineSnapTolerance()))
-            return i;
+        for ( int snapTolerance = 0 ;  snapTolerance <= GetVerticalLineSnapTolerance();snapTolerance++)
+            if (vlines[i].HasPoint(pos, snapTolerance))
+                return i;
     }
 
     return -1;

@@ -48,7 +48,7 @@ public:
     wxInt32 GetSignalFromPosition(const wxPoint &pos);
     bool IsOverWaves(const wxPoint &pos);
     int IsOverVerticalLine(const wxPoint &pos);
-    const int GetVerticalLineSnapTolerance(){return 4;}
+    const int GetVerticalLineSnapTolerance(){return 3;}
 
 protected:
     virtual void EndTask();
