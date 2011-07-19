@@ -230,11 +230,11 @@ void ActiveSignalTask::UpdateClockSettingsPanel(bool attach)
     }
 }
 
-bool ActiveSignalTask::CanDelete()
+bool ActiveSignalTask::CanDelete()const
 {
     return m_sig != -1;
 }
-int ActiveSignalTask::GetSelectedSignalNumber()
+int ActiveSignalTask::GetSelectedSignalNumber()const
 {
     return m_sig;
 }
@@ -247,7 +247,7 @@ void ActiveSignalTask::Delete()
         cmdproc->Submit(new DeleteSignalCommand((TimingDocument *)m_view->GetDocument(), m_sig));
     //EndTask();
 }
-bool ActiveSignalTask::CanCopy()
+bool ActiveSignalTask::CanCopy()const
 {
     return m_sig != -1;
 }
@@ -280,7 +280,7 @@ void ActiveSignalTask::Paste()
 {
     PasteSignalFromClipboard();
 }
-bool ActiveSignalTask::CanPaste()
+bool ActiveSignalTask::CanPaste()const
 {
     return IsSignalInClipboard();
 }

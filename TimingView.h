@@ -74,12 +74,12 @@ public:
     int GetWavesLeftSpace()const;
 
     const GraphVerticalLines &GetGraphVerticalLines()const;
-    const GraphHorizontalArrows &GetHorizontalArrows()const;
+    const GraphHorizontalArrows &GetGraphHorizontalArrows()const;
     const GraphSignals &GetGraphSignals()const;
 
     wxColour GetShadowColour()const;
     wxColour GetWaveSeparatorColour()const;
-    wxColour GetBackgroundColour()const;
+    wxColour GetWavesBackgroundColour()const;
     wxColour GetLineColour()const;
     wxColour GetTextColour()const;
     wxColour GetUndefinedSignalColour()const;
@@ -136,17 +136,16 @@ public:
 
 /// ///////////////////////////////////////////////////////////////////////////
 public:
-    bool CanZoomIn(void);
-    bool CanZoomOut(void);
-    bool CanPAste(void);
-    bool CanDelete(void);
-    bool CanCopy(void);
-    bool CanPaste(void);
-    bool CanCut(void);
+    bool CanZoomIn(void)const;
+    bool CanZoomOut(void)const;
+    bool CanDelete(void)const;
+    bool CanCopy(void)const;
+    bool CanPaste(void)const;
+    bool CanCut(void)const;
     //bool IsTextSelected(void);
-    bool IsSignalSelected(void);
-    bool IsClockSelected(void);
-    bool IsDiscontinuitySelected(void);
+    bool IsSignalSelected(void)const;
+    bool IsClockSelected(void)const;
+    bool IsDiscontinuitySelected(void)const;
     //bool CanEditText();
 
     void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -162,8 +161,8 @@ private:
     Task *task;
     MainTask *defaultTask;
 public:
-    wxInt32 GetSelectedSignalNumber();
-    wxInt32 GetSelectedDiscontinuity();
+    wxInt32 GetSelectedSignalNumber()const;
+    wxInt32 GetSelectedDiscontinuity()const;
 
 private:
     virtual void OnActivateView(bool activate, wxView *activeView, wxView *deactiveView);

@@ -160,6 +160,7 @@ void AddHorizontalArrowTask::DoCheckWhenMouseUp(const wxPoint &pos)
         newha.text = _("$t$");
         newha.textoffset.x = 0;
         newha.textoffset.y = -10;
+        newha.textgridoffset = 0;
         newha.pos = m_yposoffset;
         newha.signalnmbr = m_ypos;
         cmdproc->Submit(new AddHorizonalArrowCommand(doc, newha));

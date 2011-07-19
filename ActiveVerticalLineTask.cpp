@@ -278,10 +278,10 @@ void ActiveVerticalLineTask::Delete()
         state = deleting;
         wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
         if (cmdproc)
-            cmdproc->Submit(new DeleteVerticalLineCommand((TimingDocument *)m_view->GetDocument(), m_verticalLineIdx));
+            cmdproc->Submit(new DeleteVerticalLineCommand(m_doc, m_verticalLineIdx));
     }
 }
-bool ActiveVerticalLineTask::CanDelete()
+bool ActiveVerticalLineTask::CanDelete()const
 {
     return state == activeLine;
 }

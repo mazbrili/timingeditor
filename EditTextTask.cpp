@@ -65,7 +65,7 @@ void EditTextTask::Paste()
 {
     m_txtctrl->Paste();
 }
-bool EditTextTask::CanPaste()
+bool EditTextTask::CanPaste()const
 {
     bool ret;
     if (wxTheClipboard->Open())
@@ -104,19 +104,19 @@ void EditTextTask::SelectAll()
 {
     m_txtctrl->SetSelection(-1, -1);
 }
-bool EditTextTask::IsTextSelected()
+bool EditTextTask::IsTextSelected()const
 {
     return !(m_txtctrl->GetStringSelection().IsEmpty());
 }
-bool EditTextTask::CanDelete()
+bool EditTextTask::CanDelete()const
 {
     return IsTextSelected() & !IsReadOnly();
 }
-bool EditTextTask::CanCopy()
+bool EditTextTask::CanCopy()const
 {
     return IsTextSelected();
 }
-bool EditTextTask::CanCut()
+bool EditTextTask::CanCut()const
 {
     return IsTextSelected() & !IsReadOnly();
 }

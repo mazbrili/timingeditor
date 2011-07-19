@@ -158,7 +158,7 @@ bool TimingView::OnClose(bool deleteWindow)
 //}
 
 /// ///////////////////////////////////////////////////////////////// colours fonts spaces
-wxColour TimingView::GetBackgroundColour() const
+wxColour TimingView::GetWavesBackgroundColour() const
 {
     //return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
     return *wxWHITE;
@@ -168,11 +168,14 @@ wxColour TimingView::GetTextColour() const{return *wxBLACK;}
 wxColour TimingView::GetShadowColour() const{return wxColour(0xf0,0xf0,0xf0);}
 wxColour TimingView::GetWaveSeparatorColour() const{return wxColour(0xe0, 0xe0, 0xe0);}
 wxColour TimingView::GetAxisBackgroundColour()const{
-    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );}
-wxColour TimingView::GetAxisLineColour()const{return *wxBLACK;}
+    //return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
+    return *wxWHITE;
+}
+wxColour TimingView::GetAxisLineColour()const {return *wxBLACK;}
 wxColour TimingView::GetLabelsBackgroundColour()const
 {
-    return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
+    //return wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
+    return *wxWHITE;
 }
 wxColour TimingView::GetLabelsTextColour()const{return *wxBLACK;}
 wxColour TimingView::GetLabelsLineColour()const
@@ -492,16 +495,14 @@ void TimingView::UpdateHorizontalArrows()
         if ( fromVisibleVerticalLine && toVisibleVerticalLine)
         {
             /// calc offset based on vertical line to start from
-            wxPoint offset(leftSpace + fromvpos * GridStepWidth,
-                    ha.pos + heightOffsets[ha.signalnmbr]);
+            wxPoint offset(leftSpace + fromvpos * GridStepWidth, ha.pos + heightOffsets[ha.signalnmbr]);
             if ( doc->en50 && fromvposoffset == 1 )
                 offset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
             else if ( doc->en90 && fromvposoffset == 2 )
                 offset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
             /// calc offset based on vertical line where the horizontalArrow will end
-            wxPoint tooffset(leftSpace + tovpos * GridStepWidth,
-                offset.y);
+            wxPoint tooffset(leftSpace + tovpos * GridStepWidth, offset.y);
             if ( doc->en50 && tovposoffset == 1 )
                 tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth/2.0));
             else if ( doc->en90 && tovposoffset == 2 )
@@ -517,7 +518,7 @@ void TimingView::UpdateHorizontalArrows()
             ///the text:
             wxPoint textoff;
 
-            textoff.x  = (offset.x + tooffset.x)/2;
+            textoff.x  = (offset.x/2 + tooffset.x/2);
             if ( ha.textoffset.x > GridStepWidth )
                 textoff.x += GridStepWidth;
             else
@@ -610,7 +611,7 @@ const GraphVerticalLines &TimingView::GetGraphVerticalLines()const
 {
     return m_vertlines;
 }
-const GraphHorizontalArrows &TimingView::GetHorizontalArrows()const
+const GraphHorizontalArrows &TimingView::GetGraphHorizontalArrows()const
 {
     return m_graphHorizontalArrows;
 }
@@ -714,11 +715,11 @@ void TimingView::OnEditTool(wxCommandEvent& event)
 }
 
 ///  ///////////////////////////////////////////////////////// zooming
-bool TimingView::CanZoomIn(void)
+bool TimingView::CanZoomIn(void)const
 {
     return GridStepWidth < 150;
 }
-bool TimingView::CanZoomOut(void)
+bool TimingView::CanZoomOut(void)const
 {
     return GridStepWidth > 1;
 }
@@ -761,27 +762,27 @@ void TimingView::OnSelectAll(wxCommandEvent& WXUNUSED(event) )
 {
     task->SelectAll();
 }
-bool TimingView::CanPaste(void)
+bool TimingView::CanPaste(void)const
 {
     return task->CanPaste();
 }
-bool TimingView::CanDelete(void)
+bool TimingView::CanDelete(void)const
 {
     return task->CanDelete();
 }
-bool TimingView::CanCopy(void)
+bool TimingView::CanCopy(void)const
 {
     return task->CanCopy();
 }
-bool TimingView::CanCut(void)
+bool TimingView::CanCut(void)const
 {
     return task->CanCut();
 }
-wxInt32 TimingView::GetSelectedSignalNumber()
+wxInt32 TimingView::GetSelectedSignalNumber()const
 {
     return task->GetSelectedSignalNumber();
 }
-wxInt32 TimingView::GetSelectedDiscontinuity()
+wxInt32 TimingView::GetSelectedDiscontinuity()const
 {
     return task->GetSelectedDiscontinuity();
 }
@@ -842,11 +843,11 @@ void TimingView::AxisKey(const wxKeyEvent &event, bool down)
 
 /// //////////////////////////////////////////////////
 
-bool TimingView::IsDiscontinuitySelected()
+bool TimingView::IsDiscontinuitySelected()const
 {
     return GetSelectedDiscontinuity() != -1;
 }
-bool TimingView::IsClockSelected()
+bool TimingView::IsClockSelected()const
 {
     wxInt32 selsig = GetSelectedSignalNumber();
 
@@ -859,7 +860,7 @@ bool TimingView::IsClockSelected()
 
     return doc->signals[selsig].IsClock;
 }
-bool TimingView::IsSignalSelected(void)
+bool TimingView::IsSignalSelected(void)const
 {
     return GetSelectedSignalNumber() != -1;
 }

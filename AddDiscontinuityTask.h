@@ -16,11 +16,6 @@ public:
     virtual void WavesKey(const wxKeyEvent &event, bool down);
     virtual void AxisKey(const wxKeyEvent &event, bool down);
 
-    //virtual wxInt32 GetSelectedSignalNumber();
-    //virtual wxInt32 GetSelectedDiscontinuity();
-    //virtual void Copy();
-    //virtual void Cut();
-
 private:
 
 protected:
