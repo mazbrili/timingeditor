@@ -17,16 +17,16 @@ public:
     virtual void AxisKey(const wxKeyEvent &event, bool down);
     virtual void UpdateClockSettingsPanel(bool attach = true);
 
-    virtual bool CanDelete();
-    virtual bool CanCopy();
+    virtual bool CanDelete()const;
+    virtual bool CanCopy()const;
     virtual void Copy();
     virtual void Cut();
     virtual void Delete();
     virtual void Paste();
-    virtual bool CanPaste();
+    virtual bool CanPaste()const;
     virtual void Update();
 
-    int GetSelectedSignalNumber();
+    int GetSelectedSignalNumber()const;
 
 protected:
 private:

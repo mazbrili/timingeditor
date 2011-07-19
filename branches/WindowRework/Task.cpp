@@ -129,41 +129,41 @@ void Task::LabelsKey(const wxKeyEvent &event, bool down){}
 void Task::WavesKey(const wxKeyEvent &event, bool down){}
 void Task::AxisKey(const wxKeyEvent &event, bool down){}
 
-wxInt32 Task::GetSelectedSignalNumber(){return -1;}
-wxInt32 Task::GetSelectedDiscontinuity(){return -1;}
+wxInt32 Task::GetSelectedSignalNumber()const{return -1;}
+wxInt32 Task::GetSelectedDiscontinuity()const{return -1;}
 void Task::Copy(){}
 void Task::Cut(){}
 void Task::Paste(){}
 void Task::Delete(){}
 void Task::SelectAll(){}
-bool Task::CanPaste()
+bool Task::CanPaste()const
 {
     return false;
 }
-bool Task::CanDelete()
+bool Task::CanDelete()const
 {
     return false;
 }
-bool Task::CanCopy()
+bool Task::CanCopy()const
 {
     return false;
 }
-bool Task::CanCut()
+bool Task::CanCut()const
 {
     return CanCopy() & !IsReadOnly();
 }
-bool Task::IsReadOnly()
+bool Task::IsReadOnly()const
 {
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
     if (doc)
         return doc->IsReadOnly();
     return true;
 }
-wxInt32 Task::GetTickFromPosition(const wxPoint &pos)
+wxInt32 Task::GetTickFromPosition(const wxPoint &pos)const
 {
     return (pos.x - m_view->GetWavesLeftSpace())/(m_view->GridStepWidth);
 }
-wxInt32 Task::GetSignalFromPosition(const wxPoint &pos)
+wxInt32 Task::GetSignalFromPosition(const wxPoint &pos)const
 {
     for ( unsigned int k = 0 ; k < m_view->heightOffsets.size()-1 ; ++k )
     {
@@ -174,23 +174,35 @@ wxInt32 Task::GetSignalFromPosition(const wxPoint &pos)
     }
     return -1;
 }
-bool Task::IsOverWaves(const wxPoint &pos)
+bool Task::IsOverWaves(const wxPoint &pos)const
 {
     return //pos.x > m_view->GetWavesLeftSpace() &&
          pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1) &&
          //pos.y > m_view->heightOffsets[0]-5 &&
          pos.y < m_view->heightOffsets[m_view->heightOffsets.size()-1]+5;
 }
-int Task::IsOverVerticalLine(const wxPoint &pos)
+int Task::IsOverVerticalLine(const wxPoint &pos)const
 {
     const GraphVerticalLines vlines = m_view->GetGraphVerticalLines();
     for (unsigned int i = 0 ; i < vlines.size() ; i++ )
     {
-        for ( int snapTolerance = 0 ;  snapTolerance <= GetVerticalLineSnapTolerance();snapTolerance++)
+        for ( int snapTolerance = 0 ;  snapTolerance <= GetVerticalLineSnapTolerance() ; snapTolerance++ )
             if (vlines[i].HasPoint(pos, snapTolerance))
                 return i;
     }
 
+    return -1;
+}
+int Task::IsOverHorizontalArrow(const wxPoint &pos)const
+{
+    const GraphHorizontalArrows harrows = m_view->GetGraphHorizontalArrows();
+    for ( unsigned int i = 0 ; i < harrows.size() ; i++ )
+    {
+        for(int snapTolerance = 0 ; snapTolerance <= GetHorizontalArrowSnapTolerance() ; snapTolerance++ )
+            if ( harrows[i].HasPoint(pos, snapTolerance))
+                return i;
+
+    }
     return -1;
 }
 void Task::TextHasFocus(TimingTextCtrl *ctrl)
@@ -199,16 +211,16 @@ void Task::TextHasFocus(TimingTextCtrl *ctrl)
     ctrl->SetFocusToParent();
 }
 
-void Task::UpdateTimeCompressorPanel(bool attach)
+void Task::UpdateTimeCompressorPanel(bool attach)const
 {
     TimeCompressorSettingsPanel::GetInstance()->view = NULL;
 }
 
-void Task::UpdateClockSettingsPanel(bool attach)
+void Task::UpdateClockSettingsPanel(bool attach)const
 {
     ClockSettingsPanel::GetInstance()->view = NULL;
 }
-bool Task::IsSignalInClipboard()
+bool Task::IsSignalInClipboard()const
 {
     if (wxTheClipboard->Open())
     {
@@ -221,7 +233,7 @@ bool Task::IsSignalInClipboard()
     }
     return false;
 }
-void Task::AddSignal(Signal *sig)
+void Task::AddSignal(Signal *sig)const
 {
     TimingDocument *doc = (TimingDocument*)m_view->GetDocument();
     if ( !doc ) return;
@@ -230,7 +242,7 @@ void Task::AddSignal(Signal *sig)
     if(cmdproc)
         cmdproc->Submit(new AddSignalCommand(doc, GetSelectedSignalNumber(), *sig) );
 }
-void Task::PasteSignalFromClipboard()
+void Task::PasteSignalFromClipboard()const
 {
     if (wxTheClipboard->Open())
     {

@@ -16,12 +16,12 @@ public:
     virtual void LabelsKey(const wxKeyEvent &event, bool down);
     virtual void WavesKey(const wxKeyEvent &event, bool down);
     virtual void AxisKey(const wxKeyEvent &event, bool down);
-    virtual void UpdateTimeCompressorPanel(bool attach = true);
+    virtual void UpdateTimeCompressorPanel(bool attach = true)const;
 
 
-    bool CanDelete();
+    bool CanDelete()const;
     void Delete();
-    wxInt32 GetSelectedDiscontinuity();
+    wxInt32 GetSelectedDiscontinuity()const;
 protected:
 
 private:

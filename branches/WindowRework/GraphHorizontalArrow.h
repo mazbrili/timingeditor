@@ -4,6 +4,7 @@
 #include "GraphObject.h"
 
 
+class HoverDrawlet;
 class GraphHorizontalArrow : public GraphObject
 {
 public:
@@ -12,6 +13,12 @@ public:
 
     void Draw(wxDC &dc)const;
 
+    bool HasPoint(const wxPoint &pos, const unsigned char tolerance)const;
+    bool IsStartPoint(const wxPoint &pos, const unsigned char tolerance)const;
+    bool IsStopPoint(const wxPoint &pos, const unsigned char tolerance)const;
+    bool IsTextPoint(const wxPoint &pos, const unsigned char tolerance)const;
+    HoverDrawlet *GetActiveDrawlet(const wxColour &colour)const;
+    HoverDrawlet *GetLineDrawlet(const wxColour &colour, int style)const;
 protected:
 private:
     bool m_visible;

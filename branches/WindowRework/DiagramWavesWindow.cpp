@@ -96,8 +96,8 @@ void DiagramWavesWindow::ScrollWindow( int dx, int dy, const wxRect *rect )
 
 void DiagramWavesWindow::PaintBackground(wxDC &dc)
 {
-    dc.SetBrush(wxBrush(m_view->GetBackgroundColour()));
-    dc.SetPen(wxPen(m_view->GetBackgroundColour(), 1));
+    dc.SetBrush(wxBrush(m_view->GetWavesBackgroundColour()));
+    dc.SetPen(wxPen(m_view->GetWavesBackgroundColour(), 1));
     wxRect windowRect(wxPoint(0,0), GetClientSize());
     dc.DrawRectangle(windowRect);
     dc.SetBrush(wxNullBrush);
@@ -167,7 +167,7 @@ void DiagramWavesWindow::DrawDiscontinuities(wxDC &dc)
                         offset + ind + wxPoint(+0, +1.2*doc->SignalHeight)
                     };
                     if ( n != 0 && n != 3 )
-                        dc.SetPen(wxPen(GetBackgroundColour(),1));
+                        dc.SetPen(wxPen(m_view->GetWavesBackgroundColour(),1));
                     else
                         dc.SetPen(wxPen(*wxBLACK, 1));
                     dc.DrawSpline(4, points);
@@ -199,7 +199,7 @@ void DiagramWavesWindow::DrawHorizontalArrows(wxDC &dc)
 
     dc.SetPen(wxPen(m_view->GetLineColour(),1));
 
-    GraphHorizontalArrows arrows = m_view->GetHorizontalArrows();
+    GraphHorizontalArrows arrows = m_view->GetGraphHorizontalArrows();
 
     for ( unsigned int i = 0 ; i <  arrows.size() ; ++i )
         arrows[i].Draw(dc);

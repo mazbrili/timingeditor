@@ -24,39 +24,41 @@ public:
     virtual void WavesKey(const wxKeyEvent &event, bool down);
     virtual void AxisKey(const wxKeyEvent &event, bool down);
 
-    virtual wxInt32 GetSelectedSignalNumber();
-    virtual wxInt32 GetSelectedDiscontinuity();
+    virtual wxInt32 GetSelectedSignalNumber()const;
+    virtual wxInt32 GetSelectedDiscontinuity()const;
     virtual void Copy();
     virtual void Cut();
     virtual void Paste();
     virtual void Delete();
     virtual void SelectAll();
-    virtual bool CanCopy();
-    virtual bool CanCut();
-    virtual bool CanPaste();
-    virtual bool CanDelete();
+    virtual bool CanCopy()const;
+    virtual bool CanCut()const;
+    virtual bool CanPaste()const;
+    virtual bool CanDelete()const;
     virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
-    virtual void UpdateTimeCompressorPanel(bool attach = true);
-    virtual void UpdateClockSettingsPanel(bool attach = true);
+    virtual void UpdateTimeCompressorPanel(bool attach = true)const;
+    virtual void UpdateClockSettingsPanel(bool attach = true)const;
 
     virtual void Update();
 
 public:
     // common methods
-    wxInt32 GetTickFromPosition(const wxPoint &pos);
-    wxInt32 GetSignalFromPosition(const wxPoint &pos);
-    bool IsOverWaves(const wxPoint &pos);
-    int IsOverVerticalLine(const wxPoint &pos);
-    const int GetVerticalLineSnapTolerance(){return 3;}
+    wxInt32 GetTickFromPosition(const wxPoint &pos)const;
+    wxInt32 GetSignalFromPosition(const wxPoint &pos)const;
+    bool IsOverWaves(const wxPoint &pos)const;
+    int IsOverVerticalLine(const wxPoint &pos)const;
+    int IsOverHorizontalArrow(const wxPoint &pos)const;
+    const int GetVerticalLineSnapTolerance()const{return 3;}
+    const int GetHorizontalArrowSnapTolerance()const{return 3;}
 
 protected:
     virtual void EndTask();
     void Init();
-    bool IsSignalInClipboard();
-    void AddSignal(Signal *sig);
-    void PasteSignalFromClipboard();
-    bool IsReadOnly();
+    bool IsSignalInClipboard()const;
+    void AddSignal(Signal *sig)const;
+    void PasteSignalFromClipboard()const;
+    bool IsReadOnly()const;
 
 
     TimingView          *m_view;

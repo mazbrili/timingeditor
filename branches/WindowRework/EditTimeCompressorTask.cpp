@@ -21,7 +21,7 @@ EditTimeCompressorTask::~EditTimeCompressorTask()
     m_axisWin->Refresh();
 }
 
-bool EditTimeCompressorTask::CanDelete()
+bool EditTimeCompressorTask::CanDelete()const
 {
     return m_tick != -1;
 }
@@ -37,7 +37,7 @@ void EditTimeCompressorTask::Delete()
     EndTask();
 }
 
-wxInt32 EditTimeCompressorTask::GetSelectedDiscontinuity()
+wxInt32 EditTimeCompressorTask::GetSelectedDiscontinuity()const
 {
     return m_tick;
 }
@@ -123,7 +123,7 @@ void EditTimeCompressorTask::OnKey(const wxKeyEvent &event, bool down)
     if ( down && event.GetKeyCode() == WXK_ESCAPE)
         EndTask();
 }
-void EditTimeCompressorTask::UpdateTimeCompressorPanel(bool attach)
+void EditTimeCompressorTask::UpdateTimeCompressorPanel(bool attach)const
 {
     if (!attach)
     {

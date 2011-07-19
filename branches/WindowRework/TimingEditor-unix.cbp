@@ -45,6 +45,8 @@
 			<Add option="`wx-config --libs`" />
 			<Add library="wx_gtk2u_svg-2.8" />
 		</Linker>
+		<Unit filename="ActiveHorizontalArrowTask.cpp" />
+		<Unit filename="ActiveHorizontalArrowTask.h" />
 		<Unit filename="ActiveSignalTask.cpp" />
 		<Unit filename="ActiveSignalTask.h" />
 		<Unit filename="ActiveVerticalLineTask.cpp" />

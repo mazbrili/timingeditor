@@ -14,6 +14,7 @@
 #include "EditTimeCompressorTask.h"
 #include "ActiveSignalTask.h"
 #include "ActiveVerticalLineTask.h"
+#include "ActiveHorizontalArrowTask.h"
 #include "ChangeSignalSpacerTask.h"
 #include "cmd.h"
 
@@ -76,6 +77,12 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     if ( event.ButtonDown(wxMOUSE_BTN_LEFT) )
     {
+        int arrowidx = IsOverHorizontalArrow(pos);
+        if (arrowidx != -1)
+        {
+            m_view->SetTask(new ActiveHorizontalArrowTask(this, arrowidx));
+            return;
+        }
         int lineidx = IsOverVerticalLine(pos);
         if ( lineidx != -1 )
         {

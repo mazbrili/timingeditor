@@ -306,21 +306,21 @@ void TimingMainFrame::LoadDefaultLayout(wxCommandEvent& event)
 }
 
 
-bool TimingMainFrame::CanCopy(void)
+bool TimingMainFrame::CanCopy(void)const
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanCopy() )
         return true;
     return false;
 }
-bool TimingMainFrame::CanCut(void)
+bool TimingMainFrame::CanCut(void)const
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanCut() )
         return true;
     return false;
 }
-bool TimingMainFrame::CanPaste(void)
+bool TimingMainFrame::CanPaste(void)const
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanPaste() )
@@ -328,7 +328,7 @@ bool TimingMainFrame::CanPaste(void)
     return false;
 }
 
-bool TimingMainFrame::CanDelete(void)
+bool TimingMainFrame::CanDelete(void)const
 {
     TimingView *view = (TimingView *)wxGetApp().GetDocManager()->GetCurrentView();
     if ( view && view->CanDelete() )
