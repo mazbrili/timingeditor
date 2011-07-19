@@ -3239,6 +3239,7 @@ void TimingWindow::OnMouseLeftUp(wxMouseEvent &event)
                 newha.text = _("$t$");
                 newha.textoffset.x = 0;
                 newha.textoffset.y = -10;
+                newha.textgridoffset = 0;
                 newha.pos = editingValA;
                 newha.signalnmbr = editingValC;
 
