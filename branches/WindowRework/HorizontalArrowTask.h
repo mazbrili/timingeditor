@@ -15,7 +15,9 @@ public:
 protected:
     void CalcYPos(const wxPoint &pos);
 
-    HoverDrawlet *GetDrawlet(wxPoint start, wxPoint stop, int style = wxSOLID);
+    HoverDrawlet *GetInsertingDrawlet(wxPoint start, wxPoint stop, int style = wxSOLID)const;
+    HoverDrawlet *GetActiveDrawlet(const wxPoint &start, const wxPoint &stop, int style, const wxColour &colour, const wxPoint &textpos, int textlinestyle )const;
+    HoverDrawlet *GetActiveDrawlet(const wxPoint &start, const wxPoint &stop, int style, const wxColour &colour)const;
     int m_verticalLine;
     int m_ypos, m_yposoffset;
 };

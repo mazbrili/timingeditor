@@ -176,9 +176,9 @@ wxInt32 Task::GetSignalFromPosition(const wxPoint &pos)const
 }
 bool Task::IsOverWaves(const wxPoint &pos)const
 {
-    return //pos.x > m_view->GetWavesLeftSpace() &&
+    return pos.x > m_view->GetWavesLeftSpace() &&
          pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1) &&
-         //pos.y > m_view->heightOffsets[0]-5 &&
+         pos.y > m_view->heightOffsets[0]-5 &&
          pos.y < m_view->heightOffsets[m_view->heightOffsets.size()-1]+5;
 }
 int Task::IsOverVerticalLine(const wxPoint &pos)const

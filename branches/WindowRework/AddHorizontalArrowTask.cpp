@@ -180,7 +180,7 @@ void AddHorizontalArrowTask::SetInsertingDrawlet(const wxPoint &pos)
     else
         stop.x = m_view->GetGraphVerticalLines()[m_secondVerticalLine].GetStartPoint().x;
 
-    m_waveWin->SetDrawlet(GetDrawlet(start, stop, m_secondVerticalLine != -1 ? wxSOLID : wxSHORT_DASH ));
+    m_waveWin->SetDrawlet(GetInsertingDrawlet(start, stop, m_secondVerticalLine != -1 ? wxSOLID : wxSHORT_DASH ));
 }
 
 void AddHorizontalArrowTask::Update()
