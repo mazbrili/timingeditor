@@ -34,9 +34,15 @@ private:
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
 private:
+    void CheckMovingArrow(const wxPoint &pos);
+    void CheckMovingStart(const wxPoint &pos);
+    void CheckMovingStop(const wxPoint &pos);
+    void CheckMovingText(const wxPoint &pos);
+private:
     int m_horizontalArrowIdx;
 
      TimingDocument *m_doc;
+     void Init();
 private:
     enum states{
         activeArrow,
@@ -48,9 +54,14 @@ private:
     };
     states state;
 
-    wxInt32 old_yStart;
-    wxInt32 old_yStop;
+    //wxInt32 old_yStart;
+    //wxInt32 old_yStop;
+    int m_secondVerticalLine;
+    wxPoint m_pos;
+    wxInt32 m_signalnmbr;
+    bool m_isValidMove;
 
+    //wxString text;
 };
 
 #endif // ACTIVEHORIZONTALARROWTASK_H

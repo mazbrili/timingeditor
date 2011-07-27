@@ -17,8 +17,10 @@ public:
     bool IsStartPoint(const wxPoint &pos, const unsigned char tolerance)const;
     bool IsStopPoint(const wxPoint &pos, const unsigned char tolerance)const;
     bool IsTextPoint(const wxPoint &pos, const unsigned char tolerance)const;
-    HoverDrawlet *GetActiveDrawlet(const wxColour &colour)const;
-    HoverDrawlet *GetLineDrawlet(const wxColour &colour, int style)const;
+    //HoverDrawlet *GetLineDrawlet(const wxColour &colour, int style)const;
+    const wxPoint &GetStartPoint()const{return m_start;}
+    const wxPoint &GetStopPoint()const{return m_stop;}
+    const wxPoint &GetTextPoint()const{return m_textoffset;}
 protected:
 private:
     bool m_visible;

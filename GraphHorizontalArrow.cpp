@@ -1,8 +1,5 @@
 #include "GraphHorizontalArrow.h"
 
-#include "HoverCombo.h"
-#include "HoverGraphCaret.h"
-#include "HoverLine.h"
 
 GraphHorizontalArrow::GraphHorizontalArrow(const wxPoint &start, const wxPoint &stop, const wxString str, const wxPoint stroffset, const bool visible):
 m_visible(visible),
@@ -85,20 +82,7 @@ bool GraphHorizontalArrow::IsTextPoint(const wxPoint &pos, const unsigned char t
 
     return false;
 }
-HoverDrawlet *GraphHorizontalArrow::GetActiveDrawlet(const wxColour &colour)const
-{
-    return new HoverCombo(
-        new HoverCombo(
-            new HoverGraphCaret(m_start - wxPoint(3,3),wxSize(7,7), colour),
-            new HoverGraphCaret(m_stop - wxPoint(3,3),wxSize(7,7), colour)
-        ),
-        new HoverCombo(
-            new HoverGraphCaret(m_textoffset - wxPoint(3,3),wxSize(7,7), colour),
-            new HoverLine(wxPoint(m_start.x/2 +m_stop.x/2, m_start.y), m_textoffset, *wxLIGHT_GREY, 1, wxDOT_DASH )
-        )
-    );
-}
-HoverDrawlet *GraphHorizontalArrow::GetLineDrawlet(const wxColour &colour, int style)const
-{
-    return new HoverLine(m_start, m_stop, colour, 1, style);
-}
+//HoverDrawlet *GraphHorizontalArrow::GetLineDrawlet(const wxColour &colour, int style)const
+//{
+//    return new HoverLine(m_start, m_stop, colour, 1, style);
+//}
