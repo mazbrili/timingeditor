@@ -509,12 +509,6 @@ void TimingView::UpdateHorizontalArrows()
                 tooffset.x += GridStepWidth/(100.0/(doc->TransitWidth));
 
 
-            if ( offset.x > tooffset.x ) // swap
-            {
-                wxCoord t = offset.x;
-                offset.x = tooffset.x;
-                tooffset.x = t;
-            }
             ///the text:
             wxPoint textoff;
 

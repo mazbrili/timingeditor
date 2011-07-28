@@ -1,21 +1,30 @@
 #include "GraphHorizontalArrow.h"
 
 
-GraphHorizontalArrow::GraphHorizontalArrow(const wxPoint &start, const wxPoint &stop, const wxString str, const wxPoint stroffset, const bool visible):
+GraphHorizontalArrow::GraphHorizontalArrow(const wxPoint &start, const wxPoint &stop, const wxString str, const wxPoint stroffset, bool visible):
 m_visible(visible),
 m_text(str),
-m_start(start),
-m_stop(stop),
 m_textoffset(stroffset)
 {
     //ctor
+    m_swapped = start.x > stop.x;
+    if ( m_swapped ) // swap
+    {
+        m_start = stop;
+        m_stop = start;
+    }
+    else
+    {
+        m_start = start;
+        m_stop = stop;
+    }
 }
 
 GraphHorizontalArrow::~GraphHorizontalArrow()
 {
     //dtor
 }
-
+bool GraphHorizontalArrow::IsSwapped()const{return m_swapped;}
 void GraphHorizontalArrow::Draw(wxDC &dc)const
 {
     if ( ! m_visible )

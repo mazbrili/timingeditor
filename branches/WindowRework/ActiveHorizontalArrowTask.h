@@ -35,9 +35,9 @@ private:
     void OnKey(const wxKeyEvent &event, bool down);
 private:
     void CheckMovingArrow(const wxPoint &pos);
-    void CheckMovingStart(const wxPoint &pos);
-    void CheckMovingStop(const wxPoint &pos);
+    void CheckMovingStartStop(const wxPoint &pos);
     void CheckMovingText(const wxPoint &pos);
+    HoverDrawlet *GetActiveArrowStateDrawlet();
 private:
     int m_horizontalArrowIdx;
 
@@ -57,9 +57,11 @@ private:
     //wxInt32 old_yStart;
     //wxInt32 old_yStop;
     int m_secondVerticalLine;
+    int m_overVerticalLine;
     wxPoint m_pos;
-    wxInt32 m_signalnmbr;
+    //wxInt32 m_signalnmbr;
     bool m_isValidMove;
+    bool m_isValidPos;
 
     //wxString text;
 };

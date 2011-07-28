@@ -9,7 +9,7 @@
 
 #include "enumers.h"
 
-//const wxChar *TimingEditorSignalFormatId = _T("TimingEditorSignalDataFormat");
+const wxChar *const TimingEditorSignalFormatId = _T("TimingEditorSignalDataFormat");
 
 TimingEditorSignalDataObject::TimingEditorSignalDataObject(Signal *sig):
 wxDataObjectSimple(wxDataFormat(TimingEditorSignalFormatId)),

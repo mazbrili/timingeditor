@@ -193,11 +193,11 @@ protected:
     TimingDocument *m_doc;
     VerticalLine m_newline;
 };
-class AddHorizonalArrowCommand : public wxCommand
+class AddHorizontalArrowCommand : public wxCommand
 {
 public:
-    AddHorizonalArrowCommand(TimingDocument *doc, HorizontalArrow newha);
-    ~AddHorizonalArrowCommand();
+    AddHorizontalArrowCommand(TimingDocument *doc, HorizontalArrow newha);
+    ~AddHorizontalArrowCommand();
     bool Do(void);
     bool Undo(void);
 protected:
