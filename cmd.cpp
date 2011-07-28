@@ -1138,13 +1138,13 @@ bool DeleteVerticalLineCommand::Undo(void)
 
 
 
-AddHorizonalArrowCommand::AddHorizonalArrowCommand(TimingDocument *doc, HorizontalArrow newha)
+AddHorizontalArrowCommand::AddHorizontalArrowCommand(TimingDocument *doc, HorizontalArrow newha)
     : wxCommand(true, _T("added a horizontal  arrow")),
     m_doc(doc),
     m_newha(newha)
 {}
-AddHorizonalArrowCommand::~AddHorizonalArrowCommand(){}
-bool AddHorizonalArrowCommand::Do(void)
+AddHorizontalArrowCommand::~AddHorizontalArrowCommand(){}
+bool AddHorizontalArrowCommand::Do(void)
 {
     m_doc->horizontalArrows.push_back(m_newha);
 
@@ -1152,7 +1152,7 @@ bool AddHorizonalArrowCommand::Do(void)
     m_doc->UpdateAllViews();
     return true;
 }
-bool AddHorizonalArrowCommand::Undo(void)
+bool AddHorizontalArrowCommand::Undo(void)
 {
     m_doc->horizontalArrows.pop_back();
 

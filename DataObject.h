@@ -10,7 +10,7 @@
 #include "TimingDoc.h"
 
 
-static const wxChar *TimingEditorSignalFormatId = _T("TimingEditorSignalDataFormat");
+extern const wxChar *const TimingEditorSignalFormatId;
 
 class TimingEditorSignalDataObject : public wxDataObjectSimple
 {

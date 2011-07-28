@@ -16,59 +16,59 @@ ActiveHorizontalArrowTask::ActiveHorizontalArrowTask(const Task *task, int horiz
 HorizontalArrowTask(task),
 m_horizontalArrowIdx(horizontalArrowIdx),
 state(activeArrow),
-m_isValidMove(false)
+m_isValidMove(false),
+m_isValidPos(false)
 {
     m_doc = (TimingDocument *)m_view->GetDocument();
     Init();
 }
 void ActiveHorizontalArrowTask::Init()
 {
-    SetDrawlets();
     m_verticalLine = m_doc->horizontalArrows[m_horizontalArrowIdx].fromVerticalLine;
     m_secondVerticalLine = m_doc->horizontalArrows[m_horizontalArrowIdx].toVerticalLine;
+    SetDrawlets();
 }
 
 ActiveHorizontalArrowTask::~ActiveHorizontalArrowTask(){}
 
 void ActiveHorizontalArrowTask::SetDrawlets()
 {
+    GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
     if (state == activeArrow)
     {
-        GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
-        HoverDrawlet *drawlet = GetActiveDrawlet(gharrow.GetStartPoint(), gharrow.GetStopPoint(),
-                                                 wxTRANSPARENT, m_view->GetActiveGraphCaretColour(), gharrow.GetTextPoint(), wxSOLID);
-        m_waveWin->SetDrawlet(drawlet);
-        return;
-    }
-    if ( state == movingStartPos )
-    {
-        GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
-        HoverDrawlet *drawlet = GetActiveDrawlet(wxPoint(m_pos.x,gharrow.GetStopPoint().y), gharrow.GetStopPoint(), wxSOLID, m_view->GetActiveGraphCaretColour());//, gharrow.GetTextPoint(), wxSOLID);
-        m_waveWin->SetDrawlet(drawlet);
-        return;
-    }
-    if ( state == movingEndPos )
-    {
-        GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
-        HoverDrawlet *drawlet = GetActiveDrawlet(gharrow.GetStartPoint(), wxPoint(m_pos.x, gharrow.GetStartPoint().y ), wxSOLID, m_view->GetActiveGraphCaretColour());//, gharrow.GetTextPoint(), wxSOLID);
-        m_waveWin->SetDrawlet(drawlet);
-        return;
-    }
-    if ( state == movingArrow)
-    {
-        GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
-        HoverDrawlet *drawlet = GetActiveDrawlet(wxPoint(gharrow.GetStartPoint().x, m_pos.y), wxPoint(gharrow.GetStopPoint().x, m_pos.y), wxSHORT_DASH, m_view->GetActiveGraphCaretColour());//, gharrow.GetTextPoint(), wxSOLID);
-        m_waveWin->SetDrawlet(drawlet);
+        m_waveWin->SetDrawlet(GetActiveArrowStateDrawlet());
         return;
     }
     if ( state == movingText )
     {
-        GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
         HoverDrawlet *drawlet = GetActiveDrawlet(gharrow.GetStartPoint(), gharrow.GetStopPoint(),
                                                  wxTRANSPARENT, m_view->GetActiveGraphCaretColour(), m_pos, wxSHORT_DASH);
         m_waveWin->SetDrawlet(drawlet);
         return;
     }
+    if ( state == movingStartPos || state == movingEndPos || state == movingArrow )
+    {
+        HoverDrawlet *drawlet;
+        if (m_isValidMove)
+        {
+            if ( state == movingStartPos )
+                drawlet = GetActiveDrawlet(wxPoint(m_pos.x,gharrow.GetStopPoint().y), gharrow.GetStopPoint(), m_isValidPos ? wxSOLID : wxSHORT_DASH, m_view->GetActiveGraphCaretColour());//, gharrow.GetTextPoint(), wxSOLID);
+            else if ( state == movingEndPos )
+                drawlet = GetActiveDrawlet(gharrow.GetStartPoint(), wxPoint(m_pos.x, gharrow.GetStartPoint().y ), m_isValidPos ? wxSOLID : wxSHORT_DASH, m_view->GetActiveGraphCaretColour());//, gharrow.GetTextPoint(), wxSOLID);
+            else //if ( state == movingArrow )
+                drawlet = GetActiveDrawlet(wxPoint(gharrow.GetStartPoint().x, m_pos.y), wxPoint(gharrow.GetStopPoint().x, m_pos.y), wxSHORT_DASH, m_view->GetActiveGraphCaretColour());//, gharrow.GetTextPoint(), wxSOLID);
+        }
+        else
+            drawlet = GetActiveArrowStateDrawlet();
+        m_waveWin->SetDrawlet(drawlet);
+        return;
+    }
+}
+HoverDrawlet *ActiveHorizontalArrowTask::GetActiveArrowStateDrawlet()
+{
+    GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
+    return GetActiveDrawlet(gharrow.GetStartPoint(), gharrow.GetStopPoint(),
+                     wxTRANSPARENT, m_view->GetActiveGraphCaretColour(), gharrow.GetTextPoint(), wxSOLID);
 }
 
 void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
@@ -95,7 +95,7 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
             return;
         }
 
-        // is a click on an arrow?
+        // is it a click on an arrow?
         int k = IsOverHorizontalArrow(pos);
         if ( k == -1 )
         {
@@ -107,20 +107,18 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
             // check if start point is clicked
             if( gharrow.IsStartPoint(pos, snapTolerance) )
             {
-                ::wxLogMessage(_T("ActiveSignalTask::start"));
                 state = movingStartPos;
                 m_pos = gharrow.GetStartPoint();
-                CheckMovingStart(pos);
+                CheckMovingStartStop(pos);
                 SetDrawlets();
                 return;
             }
             // check if stop point is clicked
             if ( gharrow.IsStopPoint(pos, snapTolerance) )
             {
-                ::wxLogMessage(_T("ActiveSignalTask::stop"));
                 state = movingEndPos;
                 m_pos = gharrow.GetStopPoint();
-                CheckMovingStop(pos);
+                CheckMovingStartStop(pos);
                 SetDrawlets();
                 return;
             }
@@ -132,10 +130,10 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
         }
         else
         {
-            /// ????
+            // ???? clicked on anther arrow change selection directly (normal
+            // behaviour deselect and select the other -> one additional click
             m_horizontalArrowIdx = k;
             Init();
-            SetDrawlets();
             return;
         }
     }
@@ -152,10 +150,8 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
                 CheckMovingArrow(pos);
                 break;
             case movingStartPos:
-                CheckMovingStart(pos);
-                break;
             case movingEndPos:
-                CheckMovingStop(pos);
+                CheckMovingStartStop(pos);
                 break;
             default:
                 return;
@@ -167,13 +163,52 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
 
     if (event.ButtonUp(wxMOUSE_BTN_LEFT) )
     {
-        ///
+        if ( m_isValidMove )
+        {
+            if ( state == movingText )
+            {
+                int xoff = m_pos.x - (gharrow.GetStartPoint().x/2+gharrow.GetStopPoint().x/2);
+                int yoff = m_pos.y - gharrow.GetStartPoint().y;
+                m_doc->GetCommandProcessor()->Submit(
+                    new ChangeHorizontalArrowTextPosCommand(m_doc, m_horizontalArrowIdx, xoff % (m_view->GridStepWidth), yoff, xoff/(m_view->GridStepWidth) )
+                );
+                return;
+            }
+            if (state == movingArrow)
+            {
+                int sigindex = GetSignalFromPosition(m_pos);
+                int xoff = m_pos.y - m_view->heightOffsets[sigindex];
+
+                m_doc->GetCommandProcessor()->Submit(
+                    new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_verticalLine, m_secondVerticalLine )
+                );
+                return;
+            }
+
+            int xoff = m_doc->horizontalArrows[m_horizontalArrowIdx].pos;
+            int sigindex = m_doc->horizontalArrows[m_horizontalArrowIdx].signalnmbr;
+            if ( state == movingStartPos && !gharrow.IsSwapped() || state == movingEndPos && gharrow.IsSwapped())
+            {
+                m_doc->GetCommandProcessor()->Submit(
+                    new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_overVerticalLine, m_secondVerticalLine )
+                );
+                return;
+            }
+            if ( state == movingEndPos && !gharrow.IsSwapped() || state == movingStartPos && gharrow.IsSwapped())
+            {
+                m_doc->GetCommandProcessor()->Submit(
+                    new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_verticalLine, m_overVerticalLine )
+                );
+                return;
+            }
+        }
+        state = activeArrow;
+        Init();
     }
     if (event.Entering() && !event.ButtonIsDown(wxMOUSE_BTN_LEFT) )
     {
         state = activeArrow;
         Init();
-        SetDrawlets();
     }
 //    if (event.Leaving() && (state == movingArrow || state == movingStartPos || state == movingEndPos || state == movingText) )
 //    {
@@ -189,27 +224,49 @@ void ActiveHorizontalArrowTask::CheckMovingArrow(const wxPoint &pos)
     int top = m_doc->verticalLines[m_verticalLine].StartPos;
     int top2 = m_doc->verticalLines[m_secondVerticalLine].StartPos;
     if ( top2 > top )
-        top = top2; // take the "lower" as the top line
+        top = top2; // take the "later" as the top line
     int bot = m_doc->verticalLines[m_verticalLine].EndPos+1;
     int bot2 = m_doc->verticalLines[m_secondVerticalLine].EndPos+1;
     if (bot2 < bot)
-        bot = bot2; // take the smaller as the bottom line
+        bot = bot2; // take the "earlier" as the bottom line
 
     top = m_view->heightOffsets[top];
     bot = m_view->heightOffsets[bot];
 
-    m_isValidMove = pos.y > top && pos.y < bot;
+    //m_isValidMove = pos.y > top && pos.y < bot;
 
-    if (m_isValidMove)
+    if ( pos.y == m_doc->horizontalArrows[m_horizontalArrowIdx].pos + m_view->heightOffsets[m_doc->horizontalArrows[m_horizontalArrowIdx].signalnmbr])
+        m_isValidMove = false;
+    else
+        m_isValidMove = true;
+
+    if (pos.y > top && pos.y < bot)
         m_pos = pos;
 }
-void ActiveHorizontalArrowTask::CheckMovingStart(const wxPoint &pos)
+void ActiveHorizontalArrowTask::CheckMovingStartStop(const wxPoint &pos)
 {
+    if (!IsOverWaves(pos) )
+    {
+        m_isValidMove = false;
+        m_isValidPos = false;
+        return;
+    }
 
-}
-void ActiveHorizontalArrowTask::CheckMovingStop(const wxPoint &pos)
-{
+    CalcYPos(pos);
 
+    //int old_secondVerticalLine = m_secondVerticalLine;
+    m_overVerticalLine = IsOverVerticalLine(wxPoint(pos.x, m_view->heightOffsets[m_ypos] + m_yposoffset ));
+    if (m_overVerticalLine == m_secondVerticalLine || m_overVerticalLine == m_verticalLine  )
+    {
+        m_isValidMove = false;
+        m_isValidPos = false;
+    }
+    else
+    {
+        m_isValidMove = true;
+        m_pos = pos;
+        m_isValidPos = m_overVerticalLine != -1;
+    }
 }
 void ActiveHorizontalArrowTask::CheckMovingText(const wxPoint &pos)
 {
@@ -242,7 +299,7 @@ void ActiveHorizontalArrowTask::Update()
     if (state == movingArrow || state == movingEndPos || state == movingStartPos || state == movingText )
     {
         state = activeArrow;
-        SetDrawlets();
+        Init();
     }
 }
 
