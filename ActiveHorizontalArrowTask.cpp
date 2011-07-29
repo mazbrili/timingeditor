@@ -187,14 +187,14 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
 
             int xoff = m_doc->horizontalArrows[m_horizontalArrowIdx].pos;
             int sigindex = m_doc->horizontalArrows[m_horizontalArrowIdx].signalnmbr;
-            if ( state == movingStartPos && !gharrow.IsSwapped() || state == movingEndPos && gharrow.IsSwapped())
+            if ( (state == movingStartPos && !gharrow.IsSwapped()) || (state == movingEndPos && gharrow.IsSwapped()) )
             {
                 m_doc->GetCommandProcessor()->Submit(
                     new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_overVerticalLine, m_secondVerticalLine )
                 );
                 return;
             }
-            if ( state == movingEndPos && !gharrow.IsSwapped() || state == movingStartPos && gharrow.IsSwapped())
+            if ( (state == movingEndPos && !gharrow.IsSwapped()) || (state == movingStartPos && gharrow.IsSwapped()) )
             {
                 m_doc->GetCommandProcessor()->Submit(
                     new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_verticalLine, m_overVerticalLine )

@@ -15,10 +15,10 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D__WXDEBUG__" />
-					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswud" />
+					<Add directory="$(#wx.lib)\gcc_lib\mswud" />
 				</Compiler>
 				<ResourceCompiler>
-					<Add directory="$(#wx)\lib\gcc_lib\mswud" />
+					<Add directory="$(#wx.lib)\gcc_lib\mswud" />
 				</ResourceCompiler>
 				<Linker>
 					<Add library="libwxmsw28ud_svg" />
@@ -41,7 +41,7 @@
 					<Add library="libwxzlibd.a" />
 					<Add library="libwxregexud.a" />
 					<Add library="libwxexpatd.a" />
-					<Add directory="$(#wx)\lib\gcc_lib" />
+					<Add directory="$(#wx.lib)\gcc_lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -57,10 +57,10 @@
 					<Add option="-O2" />
 					<Add option="-O1" />
 					<Add option="-O" />
-					<Add directory="C:\cpplibs\wxWidgets-2.8.11\lib\gcc_lib\mswu" />
+					<Add directory="$(#wx.lib)\gcc_lib\mswu" />
 				</Compiler>
 				<ResourceCompiler>
-					<Add directory="$(#wx)\lib\gcc_lib\mswu" />
+					<Add directory="$(#wx.lib)\gcc_lib\mswu" />
 				</ResourceCompiler>
 				<Linker>
 					<Add option="-s" />
@@ -84,7 +84,7 @@
 					<Add library="libwxzlib.a" />
 					<Add library="libwxregexu.a" />
 					<Add library="libwxexpat.a" />
-					<Add directory="$(#wx)\lib\gcc_lib" />
+					<Add directory="$(#wx.lib)\gcc_lib" />
 				</Linker>
 			</Target>
 		</Build>
@@ -98,11 +98,11 @@
 			<Add option="-D__WXMSW__" />
 			<Add option="-DwxUSE_UNICODE" />
 			<Add option="-DWX_PRECOMP" />
-			<Add directory="C:\cpplibs\wxWidgets-2.8.11\include" />
-			<Add directory="C:\cpplibs\wxWidgets-2.8.11\contrib\include" />
+			<Add directory="$(#wx.include)" />
+			<Add directory="$(#wx)\contrib\include" />
 		</Compiler>
 		<ResourceCompiler>
-			<Add directory="$(#wx)\include" />
+			<Add directory="$(#wx.include)" />
 		</ResourceCompiler>
 		<Linker>
 			<Add library="libkernel32.a" />
@@ -120,6 +120,8 @@
 			<Add library="libodbc32.a" />
 			<Add library="libgdiplus.a" />
 		</Linker>
+		<Unit filename="ActiveHorizontalArrowTask.cpp" />
+		<Unit filename="ActiveHorizontalArrowTask.h" />
 		<Unit filename="ActiveSignalTask.cpp" />
 		<Unit filename="ActiveSignalTask.h" />
 		<Unit filename="ActiveVerticalLineTask.cpp" />
