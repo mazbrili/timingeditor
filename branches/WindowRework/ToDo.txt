@@ -3,6 +3,7 @@ edit arrow text
 edit data of bus
 add "time" into an exiting Diagram
 remove "time" from an exiting Diagram
-MDI ok on msw but not on gtk! after closing a child it is not possible to activate any other.
+MDI ok on msw but not on gtk! after closing a child it is
+not possible to activate any other. perhaps use aui instead?
 
 and a lot more
