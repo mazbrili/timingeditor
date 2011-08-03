@@ -1,0 +1,76 @@
+#include "HorizontalArrowText.h"
+#include "ActiveHorizontalArrowTask.h"
+#include "TimingView.h"
+
+#include "cmd.h"
+
+IMPLEMENT_DYNAMIC_CLASS(HorizontalArrowText,TimingTextCtrl)
+
+BEGIN_EVENT_TABLE(HorizontalArrowText, TimingTextCtrl)
+  EVT_SET_FOCUS(           HorizontalArrowText::OnSetFocus)
+  EVT_TEXT_ENTER(wxID_ANY, HorizontalArrowText::OnEnterCommand)
+  EVT_TEXT(wxID_ANY,       HorizontalArrowText::OnText)
+  //EVT_KILL_FOCUS(          BusWidthText::OnKillFocus)
+END_EVENT_TABLE()
+
+
+HorizontalArrowText::HorizontalArrowText(wxPanel *parent, TimingView *view):
+TimingTextCtrl(parent, view, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxBORDER_NONE ), //wxBORDER_NONE| wxTE_DONTWRAP | wxBORDER_SIMPLE
+m_horizontalArrow(-1),
+m_activeTask(NULL)
+{
+    //ctor
+    //ChangeValue(_("[") + value + _("]"));
+}
+
+HorizontalArrowText::~HorizontalArrowText()
+{
+    //dtor
+}
+void HorizontalArrowText::OnText(wxCommandEvent &event)
+{
+//    if ( m_activeTask )
+//        m_activeTask->OnText();
+}
+void HorizontalArrowText::OnEnterCommand(wxCommandEvent &event)
+{
+    //m_view->SetTask(NULL);
+    if ( m_activeTask )
+        m_activeTask->OnEnterText();
+}
+void HorizontalArrowText::OnSetFocus(wxFocusEvent &event)
+{
+    ::wxLogMessage(wxString::Format(_T("HorizontalArrowText::OnSetFocus %d"),m_horizontalArrow  ));
+    //ChangeValue(unchanged);
+    m_view->TextHasFocus(this);
+}
+void HorizontalArrowText::OnKillFocus(wxFocusEvent &event)
+{
+    ::wxLogMessage(wxString::Format(_T("HorizontalArrowText::OnKillFocus %d"),m_horizontalArrow ));
+}
+wxCommand *HorizontalArrowText::GetEnterCommand()
+{
+    if ( m_horizontalArrow == -1)
+        return NULL;
+    return new ChangeHorizontalArrowTextCommand((TimingDocument *)m_view->GetDocument(), m_horizontalArrow, GetValue());
+}
+wxCommand *HorizontalArrowText::GetChangedCommand()
+{
+    if ( m_horizontalArrow == -1)
+        return NULL;
+    return new ChangeHorizontalArrowTextCommand((TimingDocument *)m_view->GetDocument(), m_horizontalArrow, GetValue());
+}
+//void HorizontalArrowText::RestoreText()
+//{
+//    ChangeValue(_("[") + unchanged + _("]"));
+//    ChangeValue( unchanged );
+//
+//    should not fail, because labels, axis and waves are panels
+//    wxPanel *parentpanel = dynamic_cast<wxPanel *>( m_parent );
+//    if ( parentpanel )
+//        parentpanel->SetFocusIgnoringChildren();
+//    else
+//        m_parent->SetFocus();
+//
+//    edittask = NULL;
+//}

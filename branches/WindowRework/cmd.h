@@ -260,6 +260,18 @@ protected:
     wxPoint m_off;
     wxInt32 m_gridoff;
 };
+class ChangeHorizontalArrowTextCommand : public wxCommand
+{
+public:
+    ChangeHorizontalArrowTextCommand(TimingDocument *doc, wxInt32 editingNumber, wxString newText);
+    ~ChangeHorizontalArrowTextCommand();
+    bool Do(void);
+    bool Undo(void);
+protected:
+    TimingDocument *m_doc;
+    wxInt32 m_nmbr;
+    wxString m_text;
+};
 
 class ChangeSignalName : public wxCommand
 {

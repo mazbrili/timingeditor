@@ -15,6 +15,11 @@ EditTextTask::EditTextTask(const Task *task, TimingTextCtrl *txtctrl):
 Task(task),
 m_txtctrl(txtctrl)
 {
+    Init();
+}
+
+void EditTextTask::Init()
+{
     editdone = false;
     m_txtctrl->edittask = this;
 }
@@ -23,6 +28,7 @@ EditTextTask::~EditTextTask()
 {
     if (!editdone)
         m_txtctrl->RestoreText();
+    m_txtctrl->edittask = NULL;
 }
 
 //void EditTextTask::LabelsKey(const wxKeyEvent &event, bool down)
@@ -67,7 +73,7 @@ void EditTextTask::Paste()
 }
 bool EditTextTask::CanPaste()const
 {
-    bool ret;
+    bool ret = false;
     if (wxTheClipboard->Open())
     {
         ret = wxTheClipboard->IsSupported( wxDF_TEXT );
@@ -86,8 +92,6 @@ void EditTextTask::Copy()
             wxTheClipboard->SetData( new wxTextDataObject(str) );
         wxTheClipboard->Close();
     }
-// MSW and Motif only
-//    m_txtctrl->Copy();
 }
 void EditTextTask::Cut()
 {
@@ -110,7 +114,7 @@ bool EditTextTask::IsTextSelected()const
 }
 bool EditTextTask::CanDelete()const
 {
-    return IsTextSelected() & !IsReadOnly();
+    return IsTextSelected() && !IsReadOnly();
 }
 bool EditTextTask::CanCopy()const
 {
@@ -118,17 +122,17 @@ bool EditTextTask::CanCopy()const
 }
 bool EditTextTask::CanCut()const
 {
-    return IsTextSelected() & !IsReadOnly();
+    return IsTextSelected() && !IsReadOnly();
 }
 void EditTextTask::TextHasFocus(TimingTextCtrl *ctrl)
 {
-    //break loop
     if (m_txtctrl == ctrl) return;
     SendCommandToProcessor();
 
     //m_labelsWin->SetFocus();
 
-    m_view->SetTask(NULL/*new EditTextTask(m_view, m_labelsWin, m_axisWin, m_waveWin, ctrl)*/);
+    //another control gets the focus so end this task
+    m_view->SetTask(NULL);
 }
 void EditTextTask::SendCommandToProcessor()
 {

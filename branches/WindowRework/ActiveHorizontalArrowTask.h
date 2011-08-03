@@ -5,6 +5,8 @@
 
 
 class TimingDocument;
+class HorizontalArrowText;
+
 class ActiveHorizontalArrowTask : public HorizontalArrowTask
 {
 public:
@@ -18,16 +20,21 @@ public:
     virtual void WavesKey(const wxKeyEvent &event, bool down);
     virtual void AxisKey(const wxKeyEvent &event, bool down);
 
-    virtual bool CanDelete();
-    //virtual bool CanCopy();
-    //virtual void Copy();
-    //virtual void Cut();
+    virtual bool CanCut()const;
+    virtual bool CanCopy()const;
+    virtual bool CanPaste()const;
+    virtual bool CanDelete()const;
+    virtual void Copy();
+    virtual void Cut();
+    virtual void Paste();
     virtual void Delete();
-    //virtual void Paste();
-    //virtual bool CanPaste();
     virtual void Update();
+    virtual void SelectAll();
+    virtual void TextHasFocus(TimingTextCtrl *ctrl);
 
 
+    void OnText();
+    void OnEnterText();
 protected:
 private:
     void SetDrawlets();
@@ -38,11 +45,16 @@ private:
     void CheckMovingStartStop(const wxPoint &pos);
     void CheckMovingText(const wxPoint &pos);
     HoverDrawlet *GetActiveArrowStateDrawlet();
+    bool IsTextSelected()const;
+    void EndEditing();
 private:
     int m_horizontalArrowIdx;
 
      TimingDocument *m_doc;
      void Init();
+
+
+
 private:
     enum states{
         activeArrow,
@@ -50,7 +62,8 @@ private:
         movingStartPos,
         movingEndPos,
         movingText,
-        deleting
+        deleting,
+        editingText
     };
     states state;
 
@@ -63,6 +76,7 @@ private:
     bool m_isValidMove;
     bool m_isValidPos;
 
+    HorizontalArrowText *m_txtCtrl;
     //wxString text;
 };
 

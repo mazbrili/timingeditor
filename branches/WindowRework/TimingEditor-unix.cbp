@@ -96,6 +96,8 @@
 		<Unit filename="GraphVerticalLine.h" />
 		<Unit filename="HorizontalArrowTask.cpp" />
 		<Unit filename="HorizontalArrowTask.h" />
+		<Unit filename="HorizontalArrowText.cpp" />
+		<Unit filename="HorizontalArrowText.h" />
 		<Unit filename="HoverCombo.cpp" />
 		<Unit filename="HoverCombo.h" />
 		<Unit filename="HoverCross.cpp" />
