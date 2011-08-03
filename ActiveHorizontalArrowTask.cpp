@@ -1,5 +1,7 @@
 #include "ActiveHorizontalArrowTask.h"
 
+#include <wx/clipbrd.h>
+
 #include "TimingDoc.h"
 #include "TimingView.h"
 #include "cmd.h"
@@ -10,7 +12,8 @@
 //#include "OnceDrawlet.h"
 //#include "HoverGraphCaret.h"
 #include "DiagramWavesWindow.h"
-//#include "DiagramLabelsWindow.h"
+#include "HorizontalArrowText.h"
+
 
 ActiveHorizontalArrowTask::ActiveHorizontalArrowTask(const Task *task, int horizontalArrowIdx):
 HorizontalArrowTask(task),
@@ -20,16 +23,35 @@ m_isValidMove(false),
 m_isValidPos(false)
 {
     m_doc = (TimingDocument *)m_view->GetDocument();
+    m_txtCtrl = m_waveWin->GetHorizontalArrowTextCtrl();
     Init();
 }
 void ActiveHorizontalArrowTask::Init()
 {
+
+    state = activeArrow;
     m_verticalLine = m_doc->horizontalArrows[m_horizontalArrowIdx].fromVerticalLine;
     m_secondVerticalLine = m_doc->horizontalArrows[m_horizontalArrowIdx].toVerticalLine;
+
+    HorizontalArrowText *txtCtrl = m_waveWin->GetHorizontalArrowTextCtrl();
+    GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
+    txtCtrl->SetPosition(gharrow.GetTextPoint()-wxPoint(0, txtCtrl->GetSize().y));
+    txtCtrl->ChangeValue(m_doc->horizontalArrows[m_horizontalArrowIdx].text);
+    txtCtrl->Show();
+    txtCtrl->m_horizontalArrow = m_horizontalArrowIdx;
+    txtCtrl->m_activeTask = this;
+    txtCtrl->SetFocusToParent();
+
     SetDrawlets();
 }
 
-ActiveHorizontalArrowTask::~ActiveHorizontalArrowTask(){}
+ActiveHorizontalArrowTask::~ActiveHorizontalArrowTask()
+{
+    HorizontalArrowText *txtCtrl = m_waveWin->GetHorizontalArrowTextCtrl();
+    txtCtrl->Hide();
+    txtCtrl->m_horizontalArrow = -1;
+    txtCtrl->m_activeTask = NULL;
+}
 
 void ActiveHorizontalArrowTask::SetDrawlets()
 {
@@ -73,6 +95,14 @@ HoverDrawlet *ActiveHorizontalArrowTask::GetActiveArrowStateDrawlet()
 
 void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
+    if ( state == editingText )
+    {
+        if (event.Button(wxMOUSE_BTN_LEFT))
+            EndEditing();
+        else if (event.Button(wxMOUSE_BTN_RIGHT))
+            Task::EndTask();
+        return;
+    }
     GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
 
     if ( event.ButtonDown(wxMOUSE_BTN_RIGHT) )
@@ -87,7 +117,6 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
         // check if position of text is clicked
         if( gharrow.IsTextPoint(pos, snapTolerance))
         {
-            ::wxLogMessage(_T("ActiveSignalTask::text"));
             state = movingText;
             m_pos = gharrow.GetTextPoint();
             CheckMovingText(pos);
@@ -140,7 +169,6 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
 
     if (event.Dragging() && event.ButtonIsDown(wxMOUSE_BTN_LEFT))
     {
-        ///
         switch(state)
         {
             case movingText:
@@ -185,29 +213,30 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
                 return;
             }
 
-            int xoff = m_doc->horizontalArrows[m_horizontalArrowIdx].pos;
-            int sigindex = m_doc->horizontalArrows[m_horizontalArrowIdx].signalnmbr;
-            if ( (state == movingStartPos && !gharrow.IsSwapped()) || (state == movingEndPos && gharrow.IsSwapped()) )
+            if ( m_isValidPos )
             {
-                m_doc->GetCommandProcessor()->Submit(
-                    new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_overVerticalLine, m_secondVerticalLine )
-                );
-                return;
-            }
-            if ( (state == movingEndPos && !gharrow.IsSwapped()) || (state == movingStartPos && gharrow.IsSwapped()) )
-            {
-                m_doc->GetCommandProcessor()->Submit(
-                    new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_verticalLine, m_overVerticalLine )
-                );
-                return;
+                int xoff = m_doc->horizontalArrows[m_horizontalArrowIdx].pos;
+                int sigindex = m_doc->horizontalArrows[m_horizontalArrowIdx].signalnmbr;
+                if ( (state == movingStartPos && !gharrow.IsSwapped()) || (state == movingEndPos && gharrow.IsSwapped()) )
+                {
+                    m_doc->GetCommandProcessor()->Submit(
+                        new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_overVerticalLine, m_secondVerticalLine )
+                    );
+                    return;
+                }
+                if ( (state == movingEndPos && !gharrow.IsSwapped()) || (state == movingStartPos && gharrow.IsSwapped()) )
+                {
+                    m_doc->GetCommandProcessor()->Submit(
+                        new ChangeHorizontalArrowCommand(m_doc, m_horizontalArrowIdx, xoff, sigindex, m_verticalLine, m_overVerticalLine )
+                    );
+                    return;
+                }
             }
         }
-        state = activeArrow;
         Init();
     }
     if (event.Entering() && !event.ButtonIsDown(wxMOUSE_BTN_LEFT) )
     {
-        state = activeArrow;
         Init();
     }
 //    if (event.Leaving() && (state == movingArrow || state == movingStartPos || state == movingEndPos || state == movingText) )
@@ -275,19 +304,43 @@ void ActiveHorizontalArrowTask::CheckMovingText(const wxPoint &pos)
         m_pos = pos;
 }
 
+void ActiveHorizontalArrowTask::TextHasFocus(TimingTextCtrl *ctrl)
+{
+    if (m_txtCtrl != ctrl)
+        Task::TextHasFocus(ctrl);
+    else
+        state = editingText;
+}
+
+
+bool ActiveHorizontalArrowTask::IsTextSelected()const
+{
+    return !(m_txtCtrl->GetStringSelection().IsEmpty());
+}
+
 void ActiveHorizontalArrowTask::Delete()
 {
     if (CanDelete())
     {
-        state = deleting;
-        wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
-        if (cmdproc)
-            cmdproc->Submit(new DeleteHorizontalArrowCommand(m_doc, m_horizontalArrowIdx));
+        if (state == activeArrow)
+        {
+            state = deleting;
+            wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
+            if (cmdproc)
+                cmdproc->Submit(new DeleteHorizontalArrowCommand(m_doc, m_horizontalArrowIdx));
+        }
+        else // editingText
+        {
+            long from, to;
+            m_txtCtrl->GetSelection(&from, &to);
+            if (from != to)
+                m_txtCtrl->Remove(from, to);
+        }
     }
 }
-bool ActiveHorizontalArrowTask::CanDelete()
+bool ActiveHorizontalArrowTask::CanDelete()const
 {
-    return state == activeArrow;
+    return (state == activeArrow) || (state == editingText && IsTextSelected() && !IsReadOnly());
 }
 void ActiveHorizontalArrowTask::Update()
 {
@@ -296,15 +349,22 @@ void ActiveHorizontalArrowTask::Update()
         EndTask();
         return;
     }
-    if (state == movingArrow || state == movingEndPos || state == movingStartPos || state == movingText )
+    else//if (state == movingArrow || state == movingEndPos || state == movingStartPos || state == movingText )
     {
-        state = activeArrow;
         Init();
     }
 }
 
 void ActiveHorizontalArrowTask::OnMouse(const wxMouseEvent &event)
 {
+    if ( state == editingText )
+    {
+        if (event.Button(wxMOUSE_BTN_LEFT))
+            EndEditing();
+        if (event.Button(wxMOUSE_BTN_RIGHT))
+            EndTask();
+        return;
+    }
     if (event.ButtonDown(wxMOUSE_BTN_ANY ))
         EndTask();
 }
@@ -340,6 +400,66 @@ void ActiveHorizontalArrowTask::AxisKey(const wxKeyEvent &event, bool down)
     OnKey(event, down);
 }
 
+bool ActiveHorizontalArrowTask::CanCut()const
+{
+    return state == editingText &&  IsTextSelected() && !IsReadOnly();
+}
+bool ActiveHorizontalArrowTask::CanCopy()const
+{
+    return IsTextSelected();
+}
+bool ActiveHorizontalArrowTask::CanPaste()const
+{
+    bool ret = false;
+    if ( state == editingText && wxTheClipboard->Open())
+    {
+        ret = wxTheClipboard->IsSupported( wxDF_TEXT );
+        wxTheClipboard->Close();
+    }
+    return ret;
+}
+void ActiveHorizontalArrowTask::Copy()
 
+{
+    if (state == editingText && wxTheClipboard->Open())
+    {
+        // This data objects are held by the clipboard,
+        // so do not delete them in the app.
+        wxString str = m_txtCtrl->GetStringSelection();
+        if ( !str.IsEmpty() )
+            wxTheClipboard->SetData( new wxTextDataObject(str) );
+        wxTheClipboard->Close();
+    }
+}
+void ActiveHorizontalArrowTask::Cut()
+{
+    if ( state == editingText )
+        m_txtCtrl->Cut();
+}
+void ActiveHorizontalArrowTask::Paste()
+{
+    if ( state == editingText)
+        m_txtCtrl->Paste();
+}
+void ActiveHorizontalArrowTask::SelectAll()
+{
+    if ( state == editingText)
+        m_txtCtrl->SetSelection(-1, -1);
+}
 
-
+void ActiveHorizontalArrowTask::EndEditing()
+{
+    HorizontalArrowText *txtCtrl = m_waveWin->GetHorizontalArrowTextCtrl();
+    state = activeArrow;
+    wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
+    if (cmdproc)
+        cmdproc->Submit(txtCtrl->GetChangedCommand());
+}
+void ActiveHorizontalArrowTask::OnText()
+{
+    EndEditing();
+}
+void ActiveHorizontalArrowTask::OnEnterText()
+{
+    EndEditing();
+}

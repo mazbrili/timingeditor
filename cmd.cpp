@@ -1188,7 +1188,27 @@ bool ChangeHorizontalArrowTextPosCommand::Undo(void)
 {
     return Do();
 }
+ChangeHorizontalArrowTextCommand::ChangeHorizontalArrowTextCommand(TimingDocument *doc, wxInt32 editingNumber, wxString newText):
+wxCommand(true, _T("change text of arrow")),
+m_doc(doc),
+m_nmbr(editingNumber),
+m_text(newText)
+{}
+ChangeHorizontalArrowTextCommand::~ChangeHorizontalArrowTextCommand(){}
+bool ChangeHorizontalArrowTextCommand::Do(void)
+{
+    wxString tmp = m_doc->horizontalArrows[m_nmbr].text;
+    m_doc->horizontalArrows[m_nmbr].text = m_text;
+    m_text = tmp;
 
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+bool ChangeHorizontalArrowTextCommand::Undo(void)
+{
+    return Do();
+}
 
 
 ChangeSignalName::ChangeSignalName(TimingDocument *doc, wxString newName, unsigned int SignalNumber):

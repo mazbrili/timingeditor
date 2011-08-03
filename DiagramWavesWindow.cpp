@@ -8,6 +8,7 @@
 #include "TimingDoc.h"
 #include "TimingView.h"
 #include "GraphSignal.h"
+#include "HorizontalArrowText.h"
 
 #include "HoverDrawlet.h"
 
@@ -44,6 +45,8 @@ m_drawlet(NULL)
 //    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text I"), wxPoint(0,100), wxSize(80,25), wxBORDER_NONE ));
 //    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text II"), wxPoint(0,150), wxSize(80,25), wxBORDER_NONE ));
 //    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text III"), wxPoint(0,200), wxSize(80,25), wxBORDER_NONE ));
+    m_horizontalArrowTextCtrl = new HorizontalArrowText(this,m_view);
+    m_horizontalArrowTextCtrl->Hide();
 }
 DiagramWavesWindow::DiagramWavesWindow(){}
 DiagramWavesWindow::~DiagramWavesWindow(){}
@@ -296,6 +299,7 @@ bool DiagramWavesWindow::SetCursor(const wxCursor &cursor, bool forchilds )
 {
     bool ret = wxWindow::SetCursor(cursor);
 
+    //m_horizontalArrowTextCtrl->SetCursor(cursor);
 
     for (unsigned int i = 0 ; i < textctrls.size(); i++)
         if (!forchilds)

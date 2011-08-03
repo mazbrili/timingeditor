@@ -35,6 +35,8 @@ private:
     friend class TimingTextCtrl;
     virtual void EndTask();
     bool IsTextSelected()const;
+
+    void Init();
 private:
     void OnMouse(const wxMouseEvent &event);
 

@@ -1,6 +1,5 @@
 change signal values
-edit arrow text
-edit data of bus
+edit text data of bus
 add "time" into an exiting Diagram
 remove "time" from an exiting Diagram
 MDI ok on msw but not on gtk! after closing a child it is

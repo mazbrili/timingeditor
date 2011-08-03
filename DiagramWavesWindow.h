@@ -11,6 +11,7 @@ class DiagramAxisWindow;
 class DiagramLabelsWindow;
 class TimingView;
 class HoverDrawlet;
+class HorizontalArrowText;
 
 class DiagramWavesWindow : public wxPanel
 {
@@ -44,7 +45,8 @@ private:
 
     void OnKeyDown(wxKeyEvent &event);
     void OnKeyUp(wxKeyEvent &event);
-
+public:
+    HorizontalArrowText    *GetHorizontalArrowTextCtrl(){return m_horizontalArrowTextCtrl;}
 private:
     wxScrolledWindow        *m_owner;
     DiagramAxisWindow       *m_axis;
@@ -53,7 +55,7 @@ private:
 
     HoverDrawlet            *m_drawlet;
 
-
+    HorizontalArrowText     *m_horizontalArrowTextCtrl;
     std::vector<wxTextCtrl*> textctrls;
 
     DECLARE_DYNAMIC_CLASS(DiagramWavesWindow)
