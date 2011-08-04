@@ -153,7 +153,7 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
             }
             state = movingArrow;
             m_pos = wxPoint(pos.x, gharrow.GetStartPoint().y);
-            CheckMovingArrow(pos);
+            CheckMovingArrow(event, pos);
             SetDrawlets();
             return;
         }
@@ -175,7 +175,7 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
                 CheckMovingText(pos);
                 break;
             case movingArrow:
-                CheckMovingArrow(pos);
+                CheckMovingArrow(event, pos);
                 break;
             case movingStartPos:
             case movingEndPos:
@@ -247,7 +247,7 @@ void ActiveHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPo
 
 }
 
-void ActiveHorizontalArrowTask::CheckMovingArrow(const wxPoint &pos)
+void ActiveHorizontalArrowTask::CheckMovingArrow(const wxMouseEvent &event, wxPoint pos)
 {
     //"top" has the smaller y position than "bottom"
     int top = m_doc->verticalLines[m_verticalLine].StartPos;
@@ -262,7 +262,12 @@ void ActiveHorizontalArrowTask::CheckMovingArrow(const wxPoint &pos)
     top = m_view->heightOffsets[top];
     bot = m_view->heightOffsets[bot];
 
-    //m_isValidMove = pos.y > top && pos.y < bot;
+    if (!event.ShiftDown())
+    {
+        int ha = IsOverHorizontalArrow(pos);
+        if ( ha != -1 && ha != m_horizontalArrowIdx )
+            pos.y = m_doc->horizontalArrows[ha].pos + m_view->heightOffsets[m_doc->horizontalArrows[ha].signalnmbr];
+    }
 
     if ( pos.y == m_doc->horizontalArrows[m_horizontalArrowIdx].pos + m_view->heightOffsets[m_doc->horizontalArrows[m_horizontalArrowIdx].signalnmbr])
         m_isValidMove = false;
