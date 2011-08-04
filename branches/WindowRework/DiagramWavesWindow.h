@@ -24,6 +24,7 @@ public:
     void SetDrawlet(HoverDrawlet *drawlet);
     void RemoveDrawlet();
     virtual bool SetCursor(const wxCursor &cursor, bool forchilds = false );
+    void CalcUnscrolledPoint(wxPoint &point)const;
 private:
     DiagramWavesWindow();
     void OnPaint( wxPaintEvent &event );
