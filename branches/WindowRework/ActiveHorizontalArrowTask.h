@@ -41,7 +41,7 @@ private:
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
 private:
-    void CheckMovingArrow(const wxPoint &pos);
+    void CheckMovingArrow(const wxMouseEvent &event, wxPoint pos);
     void CheckMovingStartStop(const wxPoint &pos);
     void CheckMovingText(const wxPoint &pos);
     HoverDrawlet *GetActiveArrowStateDrawlet();
