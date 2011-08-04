@@ -112,7 +112,6 @@ void DiagramWavesWindow::Draw(wxDC &dc)
 
     DrawSignalSeparators(dc);
 
-
     DrawDiscontinuities(dc);
 
     DrawVerticalLines(dc);
@@ -197,8 +196,6 @@ void DiagramWavesWindow::DrawVerticalLines(wxDC &dc)
 void DiagramWavesWindow::DrawHorizontalArrows(wxDC &dc)
 {
     if (!m_view) return;
-    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
-    if ( !doc ) return;
 
     dc.SetPen(wxPen(m_view->GetLineColour(),1));
 
@@ -212,8 +209,6 @@ void DiagramWavesWindow::DrawHorizontalArrows(wxDC &dc)
 void DiagramWavesWindow::DrawSignals(wxDC &dc)
 {
     if (!m_view) return;
-    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
-    if ( !doc ) return;
 
     dc.SetPen(wxPen(m_view->GetLineColour(),1));
 
@@ -274,6 +269,14 @@ void DiagramWavesWindow::OnMouse(wxMouseEvent &event)
     if (event.ButtonDown(/*wxMOUSE_BTN_LEFT*/))
         SetFocusIgnoringChildren();
     event.Skip();
+}
+void DiagramWavesWindow::CalcUnscrolledPoint(wxPoint &point)const
+{
+    int scroll_x = 0;
+    int scroll_y = 0;
+    m_owner->CalcUnscrolledPosition( scroll_x, scroll_y, &scroll_x, &scroll_y );
+    point.x -= scroll_x;
+    point.y -= scroll_y;
 }
 void DiagramWavesWindow::OnKeyDown(wxKeyEvent &event)
 {

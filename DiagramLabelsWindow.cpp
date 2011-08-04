@@ -77,8 +77,14 @@ void DiagramLabelsWindow::Update()
                                    h/2;
 
         //dc.DrawText(str, 10, m_view->heightOffsets[k] + additionaloffset);
+        wxPoint pos(GetOffsetToLabelTextCtrl(), m_view->heightOffsets[k] + additionaloffset);
+        int yScrollUnits, yOrigin;
+        m_owner->GetViewStart( 0, &yOrigin );
+        m_owner->GetScrollPixelsPerUnit( 0, &yScrollUnits );
+        pos.y -= yOrigin*yScrollUnits;
+
         LabelText *label = new LabelText(this, m_view, str,
-                                         wxPoint(GetOffsetToLabelTextCtrl(), m_view->heightOffsets[k] + additionaloffset),
+                                         pos,
                                          wxSize(w+5,h+5), k);
         label->SetBackgroundColour(this->GetBackgroundColour());
         textctrls.push_back( label );
@@ -90,8 +96,10 @@ void DiagramLabelsWindow::Update()
             str = sig.buswidth;
             GetTextExtent(str+_("["), &wadd, &h);
 
+            wxPoint pos(GetOffsetToLabelTextCtrl()+ w+10+5, m_view->heightOffsets[k] + additionaloffset );
+            pos.y -= yOrigin*yScrollUnits;
             BusWidthText *bwidth = new BusWidthText(this, m_view, str,
-                                                    wxPoint(GetOffsetToLabelTextCtrl()+ w+10+5, m_view->heightOffsets[k] + additionaloffset ),
+                                                    pos,
                                                     wxSize(wadd+5,h+5), k);
             bwidth->SetBackgroundColour(this->GetBackgroundColour());
             label->SetBuswidthField(bwidth);

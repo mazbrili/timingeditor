@@ -58,8 +58,6 @@
 #include "AddDiscontinuityTask.h"
 #include "AddVerticalLineTask.h"
 #include "AddHorizontalArrowTask.h"
-#include "EditTextTask.h"
-
 
 IMPLEMENT_DYNAMIC_CLASS(TimingView, wxView)
 BEGIN_EVENT_TABLE(TimingView, wxView)
