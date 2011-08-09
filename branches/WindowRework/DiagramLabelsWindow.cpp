@@ -71,10 +71,10 @@ void DiagramLabelsWindow::DoUpdate()
 
         GetTextExtent(str+_("["), &w, &h);
 
-        wxCoord additionaloffset = doc->SignalHeight/2 +
+        wxCoord additionaloffset = //doc->SignalHeight/2 +
                                    doc->MinimumSignalDistance/2 +
-                                   sig.prespace-
-                                   h/2;
+                                   sig.prespace//-h/2
+                                   ;
 
         //dc.DrawText(str, 10, m_view->heightOffsets[k] + additionaloffset);
         wxPoint pos(GetOffsetToLabelTextCtrl(), m_view->heightOffsets[k] + additionaloffset);
@@ -85,7 +85,7 @@ void DiagramLabelsWindow::DoUpdate()
 
         LabelText *label = new LabelText(this, m_view, str,
                                          pos,
-                                         wxSize(w+5,h+5), k);
+                                         wxSize(w+5,h-4), k);
         label->SetBackgroundColour(this->GetBackgroundColour());
         textctrls.push_back( label );
 
@@ -264,7 +264,7 @@ void DiagramLabelsWindow::OnMouse(wxMouseEvent &event)
     m_owner->GetScrollPixelsPerUnit( 0, &yScrollUnits );
 
     pt.x -= xOrigin*xScrollUnits;
-    pt.y -= yOrigin*yScrollUnits;
+    pt.y += yOrigin*yScrollUnits;
 
     m_view->LabelsMouse(event, pt);
 

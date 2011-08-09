@@ -717,7 +717,7 @@ bool TimingView::CanZoomIn(void)const
 }
 bool TimingView::CanZoomOut(void)const
 {
-    return GridStepWidth > 1;
+    return GridStepWidth > 2;
 }
 void TimingView::OnZoomOut(wxCommandEvent& WXUNUSED(event) )
 {

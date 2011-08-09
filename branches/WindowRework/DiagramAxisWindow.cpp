@@ -323,7 +323,7 @@ void DiagramAxisWindow::OnMouse(wxMouseEvent &event)
 
     m_owner->GetViewStart( &xOrigin, 0 );
     m_owner->GetScrollPixelsPerUnit( &xScrollUnits, 0 );
-    pt.x -= xOrigin*xScrollUnits;
+    pt.x += xOrigin*xScrollUnits;
 
     m_view->AxisMouse(event, pt);
     event.Skip();
