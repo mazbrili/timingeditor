@@ -36,7 +36,7 @@ void ActiveHorizontalArrowTask::Init()
     HorizontalArrowText *txtCtrl = m_waveWin->GetHorizontalArrowTextCtrl();
     GraphHorizontalArrow gharrow = m_view->GetGraphHorizontalArrows()[m_horizontalArrowIdx];
     wxPoint p = gharrow.GetTextPoint()-wxPoint(0, txtCtrl->GetSize().y);
-    m_waveWin->CalcUnscrolledPoint(p);
+    m_waveWin->CalcControlPos(p);
     txtCtrl->SetPosition(p);
     txtCtrl->ChangeValue(m_doc->horizontalArrows[m_horizontalArrowIdx].text);
     txtCtrl->Show();

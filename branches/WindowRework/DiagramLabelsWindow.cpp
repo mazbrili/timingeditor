@@ -44,7 +44,7 @@ DiagramLabelsWindow::~DiagramLabelsWindow(){}
 DiagramLabelsWindow::DiagramLabelsWindow(){}
 
 
-void DiagramLabelsWindow::Update()
+void DiagramLabelsWindow::DoUpdate()
 {
     if (!m_view) return;
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();

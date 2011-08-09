@@ -19,12 +19,12 @@ public:
     DiagramWavesWindow(TimingView *v, wxWindow* parent, wxScrolledWindow *scrollowner, DiagramAxisWindow *axis, DiagramLabelsWindow *labels, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTAB_TRAVERSAL);
     virtual ~DiagramWavesWindow();
 public:
-    void Update();
+    void DoUpdate();
 
     void SetDrawlet(HoverDrawlet *drawlet);
     void RemoveDrawlet();
     virtual bool SetCursor(const wxCursor &cursor, bool forchilds = false );
-    void CalcUnscrolledPoint(wxPoint &point)const;
+    void CalcControlPos(wxPoint &point)const;
 private:
     DiagramWavesWindow();
     void OnPaint( wxPaintEvent &event );

@@ -51,7 +51,7 @@ m_drawlet(NULL)
 DiagramWavesWindow::DiagramWavesWindow(){}
 DiagramWavesWindow::~DiagramWavesWindow(){}
 
-void DiagramWavesWindow::Update()
+void DiagramWavesWindow::DoUpdate()
 {
     wxCoord leftSpace = m_view->GetWavesLeftSpace();
     wxCoord stop = leftSpace + (m_view->GridStepWidth)*(m_view->VisibleTicks.size() - 1);
@@ -270,7 +270,7 @@ void DiagramWavesWindow::OnMouse(wxMouseEvent &event)
         SetFocusIgnoringChildren();
     event.Skip();
 }
-void DiagramWavesWindow::CalcUnscrolledPoint(wxPoint &point)const
+void DiagramWavesWindow::CalcControlPos(wxPoint &point)const
 {
     int scroll_x = 0;
     int scroll_y = 0;

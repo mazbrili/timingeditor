@@ -13,7 +13,7 @@ public:
     virtual ~DiagramAxisWindow();
 
 public:
-    void Update();
+    void DoUpdate();
 
     void SetDrawlet(HoverDrawlet *drawlet);
     void RemoveDrawlet();

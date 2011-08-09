@@ -345,6 +345,10 @@ void TimingView::OnDraw(wxDC *dc){} // is virtual and has nothing to do (flicker
 /// ///////////////////////////////////////////////////////////  update internal structure after changes in the document
 void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 {
+    DoUpdate();
+}
+void TimingView::DoUpdate()
+{
     TimingDocument *doc = (TimingDocument *)m_viewDocument;
     wxFileName fn( doc->GetFilename() );
     wxString fname = fn.GetName();
@@ -373,7 +377,7 @@ void TimingView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 
     AttachPanels();
     if (splitterwindow)
-        splitterwindow->Update();
+        splitterwindow->DoUpdate();
     task->Update();
 }
 void TimingView::UpdateHeightsContainer()
@@ -719,17 +723,19 @@ void TimingView::OnZoomOut(wxCommandEvent& WXUNUSED(event) )
 {
     if ( GridStepWidth > 1 )
         GridStepWidth  *= 0.7;
-    if ( GridStepWidth < 1 ) GridStepWidth = 1;
-    if ( splitterwindow )
-        splitterwindow->Update();
+    if ( GridStepWidth < 2 ) GridStepWidth = 2;
+    DoUpdate();
 }
 void TimingView::OnZoomIn(wxCommandEvent& WXUNUSED(event) )
 {
     if ( GridStepWidth < 150 )
-        GridStepWidth  *= 1.4;
+    {
+        GridStepWidth *= 14;
+        GridStepWidth +=5;
+        GridStepWidth /= 10;
+    }
     if ( GridStepWidth > 150 ) GridStepWidth = 150;
-    if ( splitterwindow )
-        splitterwindow->Update();
+    DoUpdate();
 }
 
 
