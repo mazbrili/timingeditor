@@ -48,7 +48,7 @@ private:
     DiagramRightWindow  *m_right;
 
 public:
-    void Update();
+    void DoUpdate();
     DiagramLabelsWindow *GelLabelsWindow();
     DiagramRightWindow  *GetRightWindow();
 

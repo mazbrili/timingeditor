@@ -17,7 +17,7 @@ public:
 
 
 public:
-    void Update();
+    void DoUpdate();
     DiagramAxisWindow *GetAxisWindow();
     DiagramWavesWindow *GetWavesWindow();
 

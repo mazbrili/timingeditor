@@ -61,6 +61,7 @@ public:
     bool OnCreate(wxDocument *doc, long WXUNUSED(flags));
     void OnDraw(wxDC *dc);
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    void DoUpdate();
     bool OnClose(bool deleteWindow = true);
 
     std::vector<wxInt32> VisibleTicks;

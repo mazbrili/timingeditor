@@ -71,7 +71,7 @@ void DiagramAxisWindow::PaintBackground(wxDC &dc)
     dc.SetPen(wxNullPen);
 }
 
-void DiagramAxisWindow::Update()
+void DiagramAxisWindow::DoUpdate()
 {
     RemoveDrawlet();
     Refresh();

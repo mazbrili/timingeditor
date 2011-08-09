@@ -65,11 +65,11 @@ DiagramRightWindow  *DiagramSplitterWindow::GetRightWindow()
 {
     return m_right;
 }
-void DiagramSplitterWindow::Update()
+void DiagramSplitterWindow::DoUpdate()
 {
     //m_labels->Refresh();
-    m_labels->Update();
-    m_right->Update();
+    m_labels->DoUpdate();
+    m_right->DoUpdate();
 }
 
 void DiagramSplitterWindow::OnDragEnter(void)

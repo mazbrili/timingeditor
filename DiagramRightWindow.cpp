@@ -65,10 +65,10 @@ void DiagramRightWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 */
 }
 
-void DiagramRightWindow::Update()
+void DiagramRightWindow::DoUpdate()
 {
-    m_axis->Update();
-    m_waves->Update();
+    m_axis->DoUpdate();
+    m_waves->DoUpdate();
 }
 
 DiagramAxisWindow *DiagramRightWindow::GetAxisWindow()

@@ -45,7 +45,7 @@ private:
     const unsigned int GetOffsetToLabelTextCtrl()const;
 
 public:
-    void Update();
+    void DoUpdate();
     void SetDrawlet(HoverDrawlet *drawlet);
     void RemoveDrawlet();
 //    void UpdateSizeToMatchLabels();
