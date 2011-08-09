@@ -59,11 +59,74 @@ void DiagramWavesWindow::DoUpdate()
     SetVirtualSize(2*leftSpace+stop, m_view->heightOffsets[m_view->heightOffsets.size()-1]);
     m_owner->AdjustScrollbars();
 
+    DoUpdateTextFields();
+
     RemoveDrawlet();
 
     Refresh();
 }
+void DiagramWavesWindow::DoUpdateTextFields()
+{
+    for( unsigned int i = 0; i < textctrls.size(); i++)
+        textctrls[i]->Destroy();
+    textctrls.clear();
 
+    if (!m_view) return;
+    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
+    if ( !doc ) return;
+
+    for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
+    {
+        Signal &sig = doc->signals[k];
+        if (!sig.IsBus) continue;
+
+        wxPoint offset;
+        offset.x = m_view->GetWavesLeftSpace();
+        offset.y = m_view->heightOffsets[k] + doc->MinimumSignalDistance/2 + sig.prespace;
+
+        vals oldval = sig.values[0];
+        for ( wxUint32 k = 0; k < m_view->VisibleTicks.size()-1 ; ++k )
+        {
+            wxCoord wo = (m_view->GridStepWidth)/(100.0/doc->TransitWidth);
+            wxInt32 tick = m_view->VisibleTicks[k];
+            vals val = sig.values[tick];
+
+            bool hascompressor = false;
+            for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
+            if ( doc->compressors.find(tick) != doc->compressors.end() && doc->compressors[tick].enabled )
+            {
+//                wxInt32 invislen = doc->compressors[tick].length;
+//                for ( wxInt32 i = 0 ; i < invislen ; ++i )
+//                {
+//                    wxInt32 ti = tick + i;
+//                    val = sig.values[ti];
+//                    if ( ( ti == 0 || (sig.values[ti-1] != val)) && (val == one || val == zero ))
+//                        //dc.DrawText(sig.TextValues[ti], offset);
+//                        textctrls.push_back(new wxTextCtrl( this, wxID_ANY, sig.TextValues[ti], offset, wxDefaultSize, wxBORDER_NONE ));
+//                }
+                hascompressor = true;
+                break;
+            }
+            if ( !hascompressor )
+            {
+                if ( (tick == 0 || oldval != val) && (val == one || val == zero ))
+                {
+                    wxPoint textoff(
+                        wo + offset.x + k*(m_view->GridStepWidth),
+                        offset.y   +2                 );
+                    CalcControlPos(textoff);
+                    wxTextCtrl *ctrl = new wxTextCtrl( this, wxID_ANY, sig.TextValues[tick], textoff, wxDefaultSize, wxBORDER_NONE );
+                    textctrls.push_back(ctrl);
+                    wxCoord w, h;
+                    ctrl->GetTextExtent(sig.TextValues[tick], &w, &h);
+                    ctrl->SetSize(w+5, doc->SignalHeight-4);
+
+                }
+            }
+            oldval = val;
+        }
+    }
+}
 void DiagramWavesWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 {
     wxBufferedPaintDC dc( this );

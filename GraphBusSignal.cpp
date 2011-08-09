@@ -263,48 +263,6 @@ void GraphBusSignal::Draw(wxDC &dc)const
         offset.x += (m_view->GridStepWidth);
     }
 
-    //drawing the texts
-    offset.x = m_view->GetWavesLeftSpace();
-    oldval = m_sig->values[0];
-    for ( wxUint32 k = 0; k < m_view->VisibleTicks.size()-1 ; ++k )
-    {
-        wxInt32 tick = m_view->VisibleTicks[k];
-        vals val = m_sig->values[tick];
-        wxInt32 invislen = 0;
-
-        bool hascompressor = false;
-        for ( wxUint32 indx = 0 ; indx < doc->compressors.size() ; ++indx)
-        if ( doc->compressors.find(tick) != doc->compressors.end() && doc->compressors[tick].enabled )
-        {
-            invislen = doc->compressors[tick].length;
-            for ( wxInt32 i = 0 ; i < invislen ; ++i )
-            {
-                wxInt32 ti = tick + i;
-                val = m_sig->values[ti];
-                if ( ( ti == 0 || (m_sig->values[ti-1] != val)) && (val == one || val == zero ))
-                    dc.DrawText(m_sig->TextValues[ti], offset);
-            }
-            hascompressor = true;
-            break;
-        }
-        if ( !hascompressor )
-        {
-            if ( (tick == 0 || oldval != val) && (val == one || val == zero ))
-            {
-                wxPoint textoff(
-                    wo + offset.x + k*(m_view->GridStepWidth),
-                    offset.y + doc->SignalHeight/2 -
-                    dc.GetCharHeight()/2
-                );
-                //bool viz = true;
-                //if ( textoff.y + dc.GetCharHeight()/2 < 0) viz = false;
-                //if ( textoff.x                        < m_view->GetWavesLeftSpace() - 5 ) viz = false;
-                dc.DrawText(m_sig->TextValues[tick], textoff);//DrawEditableText(dc, sig.TextValues[tick], textoff, viz);
-            }
-        }
-        oldval = val;
-    }
-
     dc.SetPen(wxNullPen);
 }
 

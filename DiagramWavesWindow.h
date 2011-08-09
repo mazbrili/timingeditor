@@ -46,6 +46,8 @@ private:
 
     void OnKeyDown(wxKeyEvent &event);
     void OnKeyUp(wxKeyEvent &event);
+
+    void DoUpdateTextFields();
 public:
     HorizontalArrowText    *GetHorizontalArrowTextCtrl(){return m_horizontalArrowTextCtrl;}
 private:
