@@ -9,6 +9,7 @@
 #include "TimingView.h"
 #include "GraphSignal.h"
 #include "HorizontalArrowText.h"
+#include "BusValueText.h"
 
 #include "HoverDrawlet.h"
 
@@ -42,9 +43,6 @@ m_labels(labels),
 m_view(view),
 m_drawlet(NULL)
 {
-//    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text I"), wxPoint(0,100), wxSize(80,25), wxBORDER_NONE ));
-//    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text II"), wxPoint(0,150), wxSize(80,25), wxBORDER_NONE ));
-//    textctrls.push_back(new wxTextCtrl( this, wxID_ANY, _T("Text III"), wxPoint(0,200), wxSize(80,25), wxBORDER_NONE ));
     m_horizontalArrowTextCtrl = new HorizontalArrowText(this,m_view);
     m_horizontalArrowTextCtrl->Hide();
 }
@@ -75,14 +73,14 @@ void DiagramWavesWindow::DoUpdateTextFields()
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
     if ( !doc ) return;
 
-    for ( unsigned int k = 0 ; k < doc->signals.size() ; ++k )
+    for ( unsigned int i = 0 ; i < doc->signals.size() ; ++i )
     {
-        Signal &sig = doc->signals[k];
+        Signal &sig = doc->signals[i];
         if (!sig.IsBus) continue;
 
         wxPoint offset;
         offset.x = m_view->GetWavesLeftSpace();
-        offset.y = m_view->heightOffsets[k] + doc->MinimumSignalDistance/2 + sig.prespace;
+        offset.y = m_view->heightOffsets[i] + doc->MinimumSignalDistance/2 + sig.prespace;
 
         vals oldval = sig.values[0];
         for ( wxUint32 k = 0; k < m_view->VisibleTicks.size()-1 ; ++k )
@@ -115,7 +113,7 @@ void DiagramWavesWindow::DoUpdateTextFields()
                         wo + offset.x + k*(m_view->GridStepWidth),
                         offset.y   +2                 );
                     CalcControlPos(textoff);
-                    wxTextCtrl *ctrl = new wxTextCtrl( this, wxID_ANY, sig.TextValues[tick], textoff, wxDefaultSize, wxBORDER_NONE );
+                    wxTextCtrl *ctrl = new BusValueText( this, m_view, sig.TextValues[tick], textoff, i, tick );
                     textctrls.push_back(ctrl);
                     wxCoord w, h;
                     ctrl->GetTextExtent(sig.TextValues[tick], &w, &h);

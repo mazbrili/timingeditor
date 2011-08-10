@@ -272,7 +272,19 @@ protected:
     wxInt32 m_nmbr;
     wxString m_text;
 };
-
+class ChangeBusTextCommand : public wxCommand
+{
+public:
+    ChangeBusTextCommand(TimingDocument *doc, unsigned int signalNmbr, unsigned int tick, wxString newText);
+    ~ChangeBusTextCommand();
+    bool Do(void);
+    bool Undo(void);
+protected:
+    TimingDocument *m_doc;
+    unsigned int m_signalNmbr;
+    unsigned int m_tick;
+    wxString m_text;
+};
 class ChangeSignalName : public wxCommand
 {
 public:

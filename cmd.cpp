@@ -1210,6 +1210,29 @@ bool ChangeHorizontalArrowTextCommand::Undo(void)
     return Do();
 }
 
+ChangeBusTextCommand::ChangeBusTextCommand(TimingDocument *doc, unsigned int signalNmbr, unsigned int tick, wxString newText):
+wxCommand(true, _T("change value on bus")),
+m_doc(doc),
+m_signalNmbr(signalNmbr),
+m_tick(tick),
+m_text(newText)
+{}
+ChangeBusTextCommand::~ChangeBusTextCommand(){}
+bool ChangeBusTextCommand::Do(void)
+{
+    wxString tmp = m_doc->signals[m_signalNmbr].TextValues[m_tick];
+    m_doc->signals[m_signalNmbr].TextValues[m_tick] = m_text;
+    m_text = tmp;
+
+    m_doc->Modify(true);
+    m_doc->UpdateAllViews();
+    return true;
+}
+bool ChangeBusTextCommand::Undo(void)
+{
+    return Do();
+}
+
 
 ChangeSignalName::ChangeSignalName(TimingDocument *doc, wxString newName, unsigned int SignalNumber):
 wxCommand(true, _T("Change signal name")),
