@@ -59,6 +59,8 @@
 		<Unit filename="AddVerticalLineTask.h" />
 		<Unit filename="AxisSettingsPanel.cpp" />
 		<Unit filename="AxisSettingsPanel.h" />
+		<Unit filename="BusValueText.cpp" />
+		<Unit filename="BusValueText.h" />
 		<Unit filename="BusWidthText.cpp" />
 		<Unit filename="BusWidthText.h" />
 		<Unit filename="ChangeSignalSpacerTask.cpp" />
