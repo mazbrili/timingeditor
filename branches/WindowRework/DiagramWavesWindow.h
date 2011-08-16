@@ -12,6 +12,7 @@ class DiagramLabelsWindow;
 class TimingView;
 class HoverDrawlet;
 class HorizontalArrowText;
+class BusValueText;
 
 class DiagramWavesWindow : public wxPanel
 {
@@ -25,6 +26,7 @@ public:
     void RemoveDrawlet();
     virtual bool SetCursor(const wxCursor &cursor, bool forchilds = false );
     void CalcControlPos(wxPoint &point)const;
+    void ActivateText(bool act = true);
 private:
     DiagramWavesWindow();
     void OnPaint( wxPaintEvent &event );
@@ -59,7 +61,7 @@ private:
     HoverDrawlet            *m_drawlet;
 
     HorizontalArrowText     *m_horizontalArrowTextCtrl;
-    std::vector<wxTextCtrl*> textctrls;
+    std::vector<BusValueText*> textctrls;
 
     DECLARE_DYNAMIC_CLASS(DiagramWavesWindow)
     DECLARE_EVENT_TABLE()

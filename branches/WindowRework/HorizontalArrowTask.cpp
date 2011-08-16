@@ -4,10 +4,13 @@
 #include "HoverCombo.h"
 #include "HoverGraphCaret.h"
 
+#include "DiagramWavesWindow.h"
+
 HorizontalArrowTask::HorizontalArrowTask(const Task *task):
 Task(task)
 {
     //ctor
+    m_waveWin->ActivateText(false);
 }
 
 HorizontalArrowTask::~HorizontalArrowTask()

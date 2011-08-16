@@ -112,8 +112,9 @@ void DiagramWavesWindow::DoUpdateTextFields()
                     wxPoint textoff(
                         wo + offset.x + k*(m_view->GridStepWidth),
                         offset.y   +2                 );
+                    wxPoint unscrolled = textoff;
                     CalcControlPos(textoff);
-                    wxTextCtrl *ctrl = new BusValueText( this, m_view, sig.TextValues[tick], textoff, i, tick );
+                    BusValueText *ctrl = new BusValueText( this, m_view, sig.TextValues[tick], textoff, unscrolled, i, tick );
                     textctrls.push_back(ctrl);
                     wxCoord w, h;
                     ctrl->GetTextExtent(sig.TextValues[tick], &w, &h);
@@ -177,6 +178,9 @@ void DiagramWavesWindow::Draw(wxDC &dc)
 
     DrawVerticalLines(dc);
     DrawHorizontalArrows(dc);
+
+    for (unsigned int i = 0; i < textctrls.size() ; i++)
+        textctrls[i]->Draw(dc);
 
     if ( m_drawlet)
         m_drawlet->Draw(dc);
@@ -374,3 +378,8 @@ bool DiagramWavesWindow::SetCursor(const wxCursor &cursor, bool forchilds )
     return ret;
 }
 
+void DiagramWavesWindow::ActivateText(bool act)
+{
+    for (unsigned int i = 0 ; i < textctrls.size(); i++)
+        textctrls[i]->SetActive(act);
+}

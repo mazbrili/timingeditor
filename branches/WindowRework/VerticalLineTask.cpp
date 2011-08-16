@@ -7,9 +7,13 @@
 #include "HoverGraphCaret.h"
 #include "HoverLine.h"
 
+#include "DiagramWavesWindow.h"
+
 VerticalLineTask::VerticalLineTask(const Task *task):
 Task(task)
-{}
+{
+    m_waveWin->ActivateText(false);
+}
 
 VerticalLineTask::~VerticalLineTask()
 {}

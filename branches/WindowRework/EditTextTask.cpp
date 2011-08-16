@@ -16,6 +16,7 @@ Task(task),
 m_txtctrl(txtctrl)
 {
     Init();
+    m_waveWin->ActivateText(true);
 }
 
 void EditTextTask::Init()
