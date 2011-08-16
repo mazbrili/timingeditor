@@ -5,12 +5,14 @@
 #include "cmd.h"
 
 #include "DiagramLabelsWindow.h"
+#include "DiagramWavesWindow.h"
 #include "HoverLine.h"
 
 ChangeSignalSpacerTask::ChangeSignalSpacerTask(const Task *task, int posToChange):
 Task(task),
 m_newSpace(-1)
 {
+    m_waveWin->ActivateText(false);
     //ctor
     //::wxLogMessage(_T("ChangeSignalSpacerTask::ChangeSignalSpacerTask"));
     if ( posToChange < 0 )//|| (unsigned int) m_sig >= m_view->heightOffsets.size()-1)

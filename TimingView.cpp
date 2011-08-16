@@ -48,6 +48,7 @@
 
 #include "DiagramSplitterWindow.h"
 #include "DiagramRightWindow.h"
+#include "DiagramWavesWindow.h"
 
 
 #include "GraphBusSignal.h"
@@ -79,7 +80,7 @@ BEGIN_EVENT_TABLE(TimingView, wxView)
     EVT_MENU(TIMING_ID_RULER,           TimingView::OnRulerTool)
     EVT_MENU(TIMING_ID_HORIZONTALARROW, TimingView::OnHorizontalArrowTool)
     EVT_MENU(TIMING_ID_EDIT,            TimingView::OnEditTool)
-    //EVT_MENU(TIMING_ID_EDITTEXT,        TimingView::OnSelectTextTool)
+    EVT_MENU(TIMING_ID_EDITTEXT,        TimingView::OnSelectTextTool)
     EVT_MENU(TIMING_ID_EXPORT_BITMAP,   TimingView::OnExportBitmap)
     EVT_MENU(TIMING_ID_EXPORT_SVG,      TimingView::OnExportSVG)
     EVT_MENU(TIMING_ID_EXPORT_PS,       TimingView::OnExportPS)
@@ -702,10 +703,14 @@ void TimingView::OnHorizontalArrowTool(wxCommandEvent& event)
     AddHorizontalArrowTask *newtask = new AddHorizontalArrowTask(defaultTask);
     SetTask(newtask);
 }
-//void TimingView::OnSelectTextTool(wxCommandEvent& event)
+void TimingView::OnSelectTextTool(wxCommandEvent& event)
+{
+    splitterwindow->GetRightWindow()->GetWavesWindow()->ActivateText();
+}
 
 void TimingView::OnEditTool(wxCommandEvent& event)
 {
+    splitterwindow->GetRightWindow()->GetWavesWindow()->ActivateText(false);
     // set the default task:
     SetTask(NULL);
 }

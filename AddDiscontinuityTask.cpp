@@ -26,6 +26,8 @@ Task(task)
 
     m_waveWin->SetCursor(newcursor, true);
     m_axisWin->SetCursor(newcursor);
+
+    m_waveWin->ActivateText(false);
 }
 
 AddDiscontinuityTask::~AddDiscontinuityTask()

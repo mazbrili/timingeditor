@@ -67,6 +67,7 @@
 #include "art/risingedge.xpm"
 #include "art/clockedge.xpm"
 #include "art/busedge.xpm"
+#include "art/textedit_cur.xpm"
 
 ///////////////////////////////////////////////////////////////////////////
 IMPLEMENT_CLASS(TimingMainFrame, wxDocMDIParentFrame)
@@ -390,7 +391,7 @@ void TimingMainFrame::InitToolBar()
     toolBar->AddTool(TIMING_ID_DISCONTINUITY, _T("Edit time compressors"), wxBitmap(tri_xpm), _T("Add/Remove time compressors by clicking on the top axis"));
     toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), _T("Draw vertical line"));
     toolBar->AddTool(TIMING_ID_HORIZONTALARROW, _T("Draw horizontal arrow"),  wxBitmap(harrow_cur_xpm), _T("Draw a horizontal arrow") );
-    //toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm), _T("Edit text labels") );
+    toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm), _T("Edit text labels") );
     toolBar->AddSeparator();
     toolBar->AddTool(wxID_ABOUT, _T("Help"), wxBitmap( help_xpm ), _T("Show info about this application"));
     toolBar->Realize();

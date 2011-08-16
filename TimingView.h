@@ -180,7 +180,7 @@ private:
     void OnDiscontinuityTool(wxCommandEvent& event);
     void OnRulerTool(wxCommandEvent& event);
     void OnHorizontalArrowTool(wxCommandEvent& event);
-    //void OnTextTool(wxCommandEvent& event);
+    void OnSelectTextTool(wxCommandEvent& event);
     void OnEditTool(wxCommandEvent& event);
 
     void OnAddClock(wxCommandEvent& event);

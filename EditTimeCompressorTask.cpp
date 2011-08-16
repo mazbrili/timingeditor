@@ -2,6 +2,7 @@
 
 #include "TimingView.h"
 #include "DiagramAxisWindow.h"
+#include "DiagramWavesWindow.h"
 
 #include "TimingDoc.h"
 #include "cmd.h"
@@ -13,6 +14,7 @@ m_tick(tick)
     //ctor
     m_axisWin->Refresh();
     UpdateTimeCompressorPanel();
+    m_waveWin->ActivateText(false);
 }
 
 EditTimeCompressorTask::~EditTimeCompressorTask()

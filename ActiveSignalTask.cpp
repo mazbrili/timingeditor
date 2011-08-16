@@ -32,6 +32,7 @@ state(idleState)
     }
 
     UpdateClockSettingsPanel();
+    m_waveWin->ActivateText(false);
 
     SetDrawlets();
 }
