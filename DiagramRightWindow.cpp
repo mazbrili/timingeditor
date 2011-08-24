@@ -15,7 +15,7 @@ bool DiagramRightWindow::Create(TimingView *view, wxWindow *parent, DiagramLabel
 {
     m_view = view;
     wxScrolledWindow::Create(parent, id, pos, size, wxSUNKEN_BORDER);
-    m_axis = new DiagramAxisWindow(view, this, this, wxID_ANY, wxDefaultPosition, wxSize(wxDefaultCoord,60) );
+    m_axis = new DiagramAxisWindow(view, this, this, wxID_ANY, wxDefaultPosition, wxSize(wxDefaultCoord,m_view->GetHeightOfAxisWindow()) );
 
     m_waves = new DiagramWavesWindow(view, this, this, m_axis, labels, wxID_ANY, wxDefaultPosition, wxDefaultSize );
 

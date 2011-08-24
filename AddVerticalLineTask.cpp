@@ -107,7 +107,7 @@ void AddVerticalLineTask::NonInvolvedWindowMouse(const wxMouseEvent &event)
 }
 void AddVerticalLineTask::DoCheckWhenMouseDown(const wxPoint &pos)
 {
-    if (!IsOverWaves(pos) ) return;
+    if (!IsOverWavesRect(pos) ) return;
 
     CalcXPos(pos);
 
@@ -124,7 +124,7 @@ void AddVerticalLineTask::DoCheckMoving(const wxPoint &pos)
 //    TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
 //    if ( !doc || !doc->signals.size() )return;
 
-    if (!IsOverWaves(pos) ) return;
+    if (!IsOverWavesRect(pos) ) return;
 
     int endpos = GetYPos(pos);
 
@@ -143,7 +143,7 @@ void AddVerticalLineTask::DoCheckWhenMouseUp(const wxPoint &pos)
     if ( !doc || !doc->signals.size() )return;
     if (state != waitingSecondPoint ) return;
 
-    if (!IsOverWaves(pos) ) return;
+    if (!IsOverWavesRect(pos) ) return;
 
     yEndPos = GetYPos(pos);
 

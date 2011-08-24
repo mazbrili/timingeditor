@@ -110,7 +110,7 @@ void AddHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPoint
 
 void AddHorizontalArrowTask::DoCheckWhenMouseDown(const wxPoint &pos)
 {
-    if (!IsOverWaves(pos) ) return;
+    if (!IsOverWavesRect(pos) ) return;
 
     int verticalLine = IsOverVerticalLine(pos);
     if (verticalLine != -1)

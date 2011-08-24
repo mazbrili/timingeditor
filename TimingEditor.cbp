@@ -130,6 +130,8 @@
 		<Unit filename="AddDiscontinuityTask.h" />
 		<Unit filename="AddHorizontalArrowTask.cpp" />
 		<Unit filename="AddHorizontalArrowTask.h" />
+		<Unit filename="AddTimeTask.cpp" />
+		<Unit filename="AddTimeTask.h" />
 		<Unit filename="AddVerticalLineTask.cpp" />
 		<Unit filename="AddVerticalLineTask.h" />
 		<Unit filename="AxisSettingsPanel.cpp" />
@@ -154,6 +156,8 @@
 		<Unit filename="DiagramSplitterWindow.h" />
 		<Unit filename="DiagramWavesWindow.cpp" />
 		<Unit filename="DiagramWavesWindow.h" />
+		<Unit filename="EditSignalTask.cpp" />
+		<Unit filename="EditSignalTask.h" />
 		<Unit filename="EditTextTask.cpp" />
 		<Unit filename="EditTextTask.h" />
 		<Unit filename="EditTimeCompressorTask.cpp" />
@@ -175,6 +179,8 @@
 		<Unit filename="HorizontalArrowTask.h" />
 		<Unit filename="HorizontalArrowText.cpp" />
 		<Unit filename="HorizontalArrowText.h" />
+		<Unit filename="HoverCheckbox.cpp" />
+		<Unit filename="HoverCheckbox.h" />
 		<Unit filename="HoverCombo.cpp" />
 		<Unit filename="HoverCombo.h" />
 		<Unit filename="HoverCross.cpp" />
