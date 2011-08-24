@@ -9,6 +9,7 @@
 #include "HoverText.h"
 #include "HoverLine.h"
 #include "HoverCombo.h"
+#include "HoverCheckbox.h"
 
 #include "EditTextTask.h"
 #include "EditTimeCompressorTask.h"
@@ -16,6 +17,8 @@
 #include "ActiveVerticalLineTask.h"
 #include "ActiveHorizontalArrowTask.h"
 #include "ChangeSignalSpacerTask.h"
+#include "AddTimeTask.h"
+#include "EditSignalTask.h"
 #include "cmd.h"
 
 
@@ -83,6 +86,7 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
             m_view->SetTask(new ActiveHorizontalArrowTask(this, arrowidx));
             return;
         }
+
         int lineidx = IsOverVerticalLine(pos);
         if ( lineidx != -1 )
         {
@@ -90,6 +94,14 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
             m_view->SetTask(new ActiveVerticalLineTask(this, lineidx));
             return;
         }
+
+        int signalidx = IsOverWaves(pos);
+        if ( signalidx != -1)
+        {
+            m_view->SetTask(new EditSignalTask(this, signalidx));
+            return;
+        }
+
     }
 
     Task::WavesMouse(event, pos);
@@ -98,15 +110,41 @@ void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     //call default
     Task::AxisMouse(event, pos);
-
-    //::wxLogMessage(_T("MainTask::AxisMouse"));
+    if (event.Moving())
+    {
+        if (IsOnAddTimeRange(pos))
+        {
+            m_axisWin->SetDrawlet(new HoverCheckbox(pos+wxPoint(10,-10)));
+            return;
+        }
+        if (IsOnRemoveTimeRange(pos))
+        {
+            m_axisWin->SetDrawlet(new HoverCheckbox(pos+wxPoint(10,-10), false));
+            return;
+        }
+    }
 
     if (event.ButtonDown(wxMOUSE_BTN_LEFT))
     {
         TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
         wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
+
+        if (IsOnAddTimeRange(pos))
+        {
+            m_view->SetTask(new AddRemoveTimeTask(this, tick));
+            return;
+        }
+        if (IsOnRemoveTimeRange(pos))
+        {
+            m_view->SetTask(new AddRemoveTimeTask(this, tick, false));
+            return;
+        }
+
         if(doc->compressors.find(tick) != doc->compressors.end())
+        {
             m_view->SetTask(new EditTimeCompressorTask(this, tick));
+            return;
+        }
     }
 }
 

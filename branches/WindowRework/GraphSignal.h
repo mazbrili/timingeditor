@@ -13,6 +13,8 @@ class GraphSignal : public GraphObject
 
         virtual void Draw(wxDC &dc)const=0;
         virtual void DrawBackground(wxDC &dc)const=0;
+
+        bool HasYPos(const unsigned int yPos)const;
     protected:
         TimingView *m_view;
         Signal *m_sig;

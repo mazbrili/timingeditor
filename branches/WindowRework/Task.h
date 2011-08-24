@@ -42,15 +42,20 @@ public:
 
     virtual void Update();
 
-public:
+protected:
     // common methods
     wxInt32 GetTickFromPosition(const wxPoint &pos)const;
     wxInt32 GetSignalFromPosition(const wxPoint &pos)const;
-    bool IsOverWaves(const wxPoint &pos)const;
+    bool IsOverWavesRect(const wxPoint &pos)const;
     int IsOverVerticalLine(const wxPoint &pos)const;
     int IsOverHorizontalArrow(const wxPoint &pos)const;
+    int IsOverWaves(const wxPoint &pos)const;
     const int GetVerticalLineSnapTolerance()const{return 3;}
     const int GetHorizontalArrowSnapTolerance()const{return 3;}
+protected:
+    const int GetRangeAddRemoveTime()const{return 5;}
+    bool IsOnAddTimeRange(const wxPoint &pos)const;
+    bool IsOnRemoveTimeRange(const wxPoint &pos)const;
 
 protected:
     virtual void EndTask();

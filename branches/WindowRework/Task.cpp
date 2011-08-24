@@ -11,6 +11,7 @@
 #include "HoverText.h"
 #include "HoverLine.h"
 #include "HoverCombo.h"
+#include "GraphSignal.h"
 
 #include "GraphVerticalLine.h"
 #include "TimingTextCtrl.h"
@@ -62,7 +63,7 @@ void Task::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     if ( event.Moving() || event.Dragging() )
     {
-        if ( IsOverWaves(pos) )
+        if ( IsOverWavesRect(pos) )
         {
             wxInt32 tick = GetTickFromPosition(pos);
 
@@ -174,12 +175,26 @@ wxInt32 Task::GetSignalFromPosition(const wxPoint &pos)const
     }
     return -1;
 }
-bool Task::IsOverWaves(const wxPoint &pos)const
+bool Task::IsOverWavesRect(const wxPoint &pos)const
 {
     return pos.x > m_view->GetWavesLeftSpace() &&
          pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1) &&
          pos.y > m_view->heightOffsets[0]-5 &&
          pos.y < m_view->heightOffsets[m_view->heightOffsets.size()-1]+5;
+}
+int Task::IsOverWaves(const wxPoint &pos)const
+{
+    if ( pos.x > m_view->GetWavesLeftSpace() &&
+         pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1))
+    {
+        const GraphSignals gSignals = m_view->GetGraphSignals();
+        for ( unsigned int i = 0 ; i < gSignals.size() ; i++ )
+        {
+            if ( gSignals[i]->HasYPos(pos.y))
+                return i;
+        }
+    }
+    return -1;
 }
 int Task::IsOverVerticalLine(const wxPoint &pos)const
 {
@@ -205,6 +220,25 @@ int Task::IsOverHorizontalArrow(const wxPoint &pos)const
     }
     return -1;
 }
+
+
+bool Task::IsOnAddTimeRange(const wxPoint &pos)const
+{
+    int axispos =  m_view->GetDistanceToAxis() + m_view->GetDistanceToTicksLine() + m_view->GetDistanceFromTicksLine();
+    return  pos.y >= axispos - GetRangeAddRemoveTime() &&
+        pos.y <= axispos &&
+        pos.x > m_view->GetWavesLeftSpace() &&
+        pos.x <  m_view->GetWavesLeftSpace() + (int)((m_view->GridStepWidth)*(m_view->VisibleTicks.size() - 1));
+}
+bool Task::IsOnRemoveTimeRange(const wxPoint &pos)const
+{
+    int axispos =  m_view->GetDistanceToAxis() + m_view->GetDistanceToTicksLine() + m_view->GetDistanceFromTicksLine();
+    return pos.y > axispos &&
+        pos.y <= axispos + GetRangeAddRemoveTime() &&
+        pos.x > m_view->GetWavesLeftSpace() &&
+        pos.x <  m_view->GetWavesLeftSpace() + (int)((m_view->GridStepWidth)*(m_view->VisibleTicks.size() - 1));
+}
+
 void Task::TextHasFocus(TimingTextCtrl *ctrl)
 {
     // ???

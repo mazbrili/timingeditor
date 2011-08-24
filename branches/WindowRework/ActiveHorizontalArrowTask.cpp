@@ -281,7 +281,7 @@ void ActiveHorizontalArrowTask::CheckMovingArrow(const wxMouseEvent &event, wxPo
 }
 void ActiveHorizontalArrowTask::CheckMovingStartStop(const wxPoint &pos)
 {
-    if (!IsOverWaves(pos) )
+    if (!IsOverWavesRect(pos) )
     {
         m_isValidMove = false;
         m_isValidPos = false;
@@ -306,7 +306,7 @@ void ActiveHorizontalArrowTask::CheckMovingStartStop(const wxPoint &pos)
 }
 void ActiveHorizontalArrowTask::CheckMovingText(const wxPoint &pos)
 {
-    m_isValidMove = IsOverWaves(pos);
+    m_isValidMove = IsOverWavesRect(pos);
     if (m_isValidMove)
         m_pos = pos;
 }

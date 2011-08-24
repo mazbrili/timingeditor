@@ -230,7 +230,7 @@ wxFont TimingView::GetFont() const
 }
 wxCoord TimingView::GetHeightOfAxisWindow()const
 {
-    return 60;
+    return 70;
 }
 
 /// ////////////////////////////////////////////////////////////  panels
