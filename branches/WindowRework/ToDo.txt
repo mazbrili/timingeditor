@@ -1,6 +1,4 @@
 change signal values
-add "time" into an exiting Diagram
-remove "time" from an exiting Diagram
 
 export diagram to bitmap and svg/ps
 

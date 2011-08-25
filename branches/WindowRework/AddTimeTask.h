@@ -3,7 +3,7 @@
 
 #include "Task.h"
 
-
+class TimingDocument;
 class AddRemoveTimeTask : public Task
 {
 
@@ -30,12 +30,16 @@ public:
 protected:
 
 private:
-    //void SetDrawlets(int targetpos = -1);
+    void SetDrawlets();
     //virtual void EndTask();
     void OnMouse(const wxMouseEvent &event);
     void OnKey(const wxKeyEvent &event, bool down);
+
+    TimingDocument *m_doc;
 private:
-    int m_tick;
+    int m_startTick, m_endTick;
     bool m_add;
+    bool m_validMove;
+    bool m_waitDoubleClick;
 };
 #endif // ADDTIMETASK_H

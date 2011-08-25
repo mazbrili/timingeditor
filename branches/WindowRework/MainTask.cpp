@@ -98,10 +98,24 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         int signalidx = IsOverWaves(pos);
         if ( signalidx != -1)
         {
-            m_view->SetTask(new EditSignalTask(this, signalidx));
+            wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
+
+            m_view->SetTask(new EditSignalTask(this, signalidx, tick));
             return;
         }
 
+    }
+
+    if (event.ButtonDown(wxMOUSE_BTN_RIGHT))
+    {
+        int signalidx = IsOverWaves(pos);
+        if ( signalidx != -1)
+        {
+            wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
+
+            m_view->SetTask(new EditSignalTask(this, signalidx, tick, false));
+            return;
+        }
     }
 
     Task::WavesMouse(event, pos);
@@ -126,9 +140,7 @@ void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 
     if (event.ButtonDown(wxMOUSE_BTN_LEFT))
     {
-        TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
-        wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
-
+        wxInt32 tick = GetTickFromPosition(pos);
         if (IsOnAddTimeRange(pos))
         {
             m_view->SetTask(new AddRemoveTimeTask(this, tick));
@@ -140,6 +152,8 @@ void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
             return;
         }
 
+        tick = m_view->VisibleTicks[tick];
+        TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
         if(doc->compressors.find(tick) != doc->compressors.end())
         {
             m_view->SetTask(new EditTimeCompressorTask(this, tick));
