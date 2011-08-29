@@ -6,6 +6,8 @@
 #include "DiagramAxisWindow.h"
 
 #include "HoverHatch.h"
+#include "HoverCombo.h"
+#include "SplitterDrawlet.h"
 
 #include <wx/numdlg.h>
 
@@ -135,7 +137,14 @@ void AddRemoveTimeTask::SetDrawlets()
         wxInt32 s = m_startTick, e = m_endTick;
         wxCoord x = m_view->GetWavesLeftSpace() + m_view->GridStepWidth*s;
         wxCoord w = m_view->GridStepWidth*(e-s);
-        m_waveWin->SetDrawlet(new HoverHatch(wxPoint(x,0), wxSize(w,0), wxColour(32, 32, 0), HoverHatch::expand_y));
+
+
+        m_waveWin->SetDrawlet(
+            new HoverCombo(
+                new SplitterDrawlet(x, w),
+                new HoverHatch(wxPoint(x,0), wxSize(w,0), wxColour(32, 32, 0), HoverHatch::expand_y)
+            )
+        );
     }
     else
     {
@@ -147,7 +156,9 @@ void AddRemoveTimeTask::SetDrawlets()
         }
         wxCoord x = m_view->GetWavesLeftSpace() + m_view->GridStepWidth*s;
         wxCoord w = m_view->GridStepWidth*(e-s);
-        m_waveWin->SetDrawlet(new HoverHatch(wxPoint(x,0), wxSize(w,0), wxColour(32, 32, 0), HoverHatch::expand_y));
+        m_waveWin->SetDrawlet(
+            new HoverHatch(wxPoint(x,0), wxSize(w,0), wxColour(0, 32, 32), HoverHatch::expand_y)
+        );
     }
 }
 void AddRemoveTimeTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
