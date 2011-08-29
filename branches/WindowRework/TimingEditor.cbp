@@ -198,6 +198,8 @@
 		<Unit filename="LabelText.h" />
 		<Unit filename="MainTask.cpp" />
 		<Unit filename="MainTask.h" />
+		<Unit filename="SplitterDrawlet.cpp" />
+		<Unit filename="SplitterDrawlet.h" />
 		<Unit filename="Task.cpp" />
 		<Unit filename="Task.h" />
 		<Unit filename="TimeCompressorSettingsPanel.cpp" />

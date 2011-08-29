@@ -53,7 +53,7 @@ protected:
     const int GetVerticalLineSnapTolerance()const{return 3;}
     const int GetHorizontalArrowSnapTolerance()const{return 3;}
 protected:
-    const int GetRangeAddRemoveTime()const{return 5;}
+    const int GetRangeAddRemoveTime()const{return 10;}
     bool IsOnAddTimeRange(const wxPoint &pos)const;
     bool IsOnRemoveTimeRange(const wxPoint &pos)const;
 
