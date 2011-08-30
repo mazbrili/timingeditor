@@ -35,6 +35,7 @@ state(idleState)
     m_waveWin->ActivateText(false);
 
     SetDrawlets();
+    SetStatusText(_("move or delete signal"));
 }
 
 void ActiveSignalTask::SetDrawlets(int targetpos)

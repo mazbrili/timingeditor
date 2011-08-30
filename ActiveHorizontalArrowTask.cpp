@@ -43,6 +43,7 @@ void ActiveHorizontalArrowTask::Init()
     txtCtrl->m_horizontalArrow = m_horizontalArrowIdx;
     txtCtrl->m_activeTask = this;
     txtCtrl->SetFocusToParent();
+    SetStatusText(_("active Arrow: choose a point to move or move the arrow"));
 
     SetDrawlets();
 }
