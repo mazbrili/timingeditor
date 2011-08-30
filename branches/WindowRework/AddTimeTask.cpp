@@ -57,7 +57,6 @@ void AddRemoveTimeTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
         }
         else
         {
-
             if ( pos.x < m_view->GetWavesLeftSpace() ||
                  pos.x > m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1) )
             {
@@ -74,6 +73,7 @@ void AddRemoveTimeTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
                 m_validMove = true;
             }
         }
+        m_waitDoubleClick = false;
         SetDrawlets();
         return;
     }

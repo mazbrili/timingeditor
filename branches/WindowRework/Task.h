@@ -52,6 +52,8 @@ protected:
     int IsOverWaves(const wxPoint &pos)const;
     const int GetVerticalLineSnapTolerance()const{return 3;}
     const int GetHorizontalArrowSnapTolerance()const{return 3;}
+
+    void SetStatusText(const wxString& text);
 protected:
     const int GetRangeAddRemoveTime()const{return 10;}
     bool IsOnAddTimeRange(const wxPoint &pos)const;

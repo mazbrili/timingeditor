@@ -6,6 +6,8 @@
 #include "DiagramLabelsWindow.h"
 #include "DiagramWavesWindow.h"
 #include "TimingView.h"
+#include "TimingApp.h"
+#include "TimingMainFrame.h"
 #include "DataObject.h"
 #include "HoverCross.h"
 #include "HoverText.h"
@@ -47,6 +49,8 @@ void Task::Init()
     m_axisWin->SetCursor(*wxCROSS_CURSOR);
     m_waveWin->SetCursor(*wxCROSS_CURSOR);
     m_labelsWin->SetCursor(wxNullCursor);
+
+    SetStatusText(_(""));
 }
 
 Task::~Task()
@@ -56,6 +60,11 @@ Task::~Task()
 void Task::EndTask()
 {
     m_view->SetTask(NULL);
+}
+void Task::SetStatusText(const wxString& text)
+{
+    TimingApp &app = ::wxGetApp();
+    app.GetMainFrame()->SetStatusText(text);
 }
 
 void Task::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos){}

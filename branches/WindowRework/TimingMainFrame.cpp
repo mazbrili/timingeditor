@@ -214,9 +214,9 @@ void TimingMainFrame::InitMenuBar()
 
 void TimingMainFrame::InitStatusBar()
 {
-    CreateStatusBar(3);
-    wxInt32 widths[3] = { 200, -1, 40 };
-    SetStatusWidths(3, &widths[0]);
+    CreateStatusBar(2);
+    wxInt32 widths[2] = {-1, 60 };
+    SetStatusWidths(2, &widths[0]);
     SetStatusBarPane(0);
     SetStatusText(_T("Welcome to TimingEditor!"), 0);
 }

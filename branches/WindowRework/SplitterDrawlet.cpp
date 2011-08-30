@@ -32,8 +32,9 @@ bool SplitterDrawlet::Draw(wxDC &dc)
             sz.x-m_dist, sz.y,
             &temp_dc,
             m_dist, 0);
-
-
+    dc.SetBrush(*wxWHITE_BRUSH);
+    dc.SetPen(*wxWHITE_PEN);
+    dc.DrawRectangle(m_dist, 0, m_gap, sz.y);
 
     return true;
 }

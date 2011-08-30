@@ -43,9 +43,15 @@ void MainTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
     if ( event.Moving() )
     {
         if ( IsOnResizeHeightPos(pos) != -1)
+        {
             m_labelsWin->SetCursor(wxCursor(wxCURSOR_SIZENS));
+            SetStatusText(_("change space around signal"));
+        }
         else
+        {
             m_labelsWin->SetCursor(wxNullCursor);
+            SetStatusText(_(""));
+        }
 
         m_axisWin->RemoveDrawlet();
         m_waveWin->RemoveDrawlet();
@@ -98,12 +104,13 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         int signalidx = IsOverWaves(pos);
         if ( signalidx != -1)
         {
-            wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
-
-            m_view->SetTask(new EditSignalTask(this, signalidx, tick));
+            if( !(((TimingDocument*)m_view->GetDocument())->signals[signalidx].IsBus) )
+            {
+                wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
+                m_view->SetTask(new EditSignalTask(this, signalidx, tick));
+            }
             return;
         }
-
     }
 
     if (event.ButtonDown(wxMOUSE_BTN_RIGHT))
@@ -119,6 +126,32 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
     }
 
     Task::WavesMouse(event, pos);
+    if ( event.Moving() )
+    {
+        int arrowidx = IsOverHorizontalArrow(pos);
+        if (arrowidx != -1)
+        {
+            SetStatusText(_("Select Arrow (click)"));
+            return;
+        }
+
+        int lineidx = IsOverVerticalLine(pos);
+        if ( lineidx != -1 )
+        {
+            SetStatusText(_("Select Line (click)"));
+            return;
+        }
+
+        int signalidx = IsOverWaves(pos);
+        if ( signalidx != -1 )
+        {
+            if( !(((TimingDocument*)m_view->GetDocument())->signals[signalidx].IsClock) )
+                SetStatusText(_("change signal (rclick / lclick)"));
+
+            return;
+        }
+        SetStatusText(_(""));
+    }
 }
 void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
@@ -129,13 +162,26 @@ void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
         if (IsOnAddTimeRange(pos))
         {
             m_axisWin->SetDrawlet(new HoverCheckbox(pos+wxPoint(10,-10)));
+            SetStatusText( _("'Add' time (drag or double click)") );
             return;
         }
         if (IsOnRemoveTimeRange(pos))
         {
             m_axisWin->SetDrawlet(new HoverCheckbox(pos+wxPoint(10,-10), false));
+            SetStatusText(_("'Remove' time by dragging"));
             return;
         }
+
+        wxInt32 tick = GetTickFromPosition(pos);
+        tick = m_view->VisibleTicks[tick];
+        TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
+        if(doc->compressors.find(tick) != doc->compressors.end())
+        {
+            SetStatusText(_("Edit time compressor"));
+            return;
+        }
+        else
+            SetStatusText(_(""));
     }
 
     if (event.ButtonDown(wxMOUSE_BTN_LEFT))
@@ -180,4 +226,5 @@ void MainTask::TextHasFocus(TimingTextCtrl *ctrl)
 {
 // TODO (danselmi#1#): Check for a real default implementation
     m_view->SetTask(new EditTextTask(this, ctrl));
+    SetStatusText(_("change Text"));
 }
