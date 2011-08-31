@@ -33,12 +33,10 @@ DiagramSplitterWindow::DiagramSplitterWindow(TimingView *v, wxWindow* parent, wx
 
     wxBoxSizer *lsizer = new wxBoxSizer(wxVERTICAL);
     lsizer->Add(MinimumOfLeftWidth,HeightOfAxisWindow);
-    //wxPanel *topLeftPanel = new wxPanel(left, wxID_ANY, wxDefaultPosition, wxSize(MinimumOfLeftWidth, HeightOfAxisWindow), wxBORDER_NONE );
-    //topLeftPanel->SetBackgroundColour(v->GetLabelsBackgroundColour());
-    //lsizer->Add(topLeftPanel);
     lsizer->Add(m_labels, 1, wxEXPAND);
     left->SetAutoLayout(true);
     left->SetSizer(lsizer);
+    left->SetBackgroundColour(v->GetLabelsBackgroundColour());
 
     // set to a minimum width so it will not become invisible
     SetMinimumPaneSize(MinimumOfLeftWidth);
