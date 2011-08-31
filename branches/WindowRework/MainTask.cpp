@@ -104,10 +104,10 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         int signalidx = IsOverWaves(pos);
         if ( signalidx != -1)
         {
-            if( !(((TimingDocument*)m_view->GetDocument())->signals[signalidx].IsBus) )
+            if( !(((TimingDocument*)m_view->GetDocument())->signals[signalidx].IsClock) )
             {
-                wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
-                m_view->SetTask(new EditSignalTask(this, signalidx, tick));
+                wxInt32 tick = GetTickFromPosition(pos);
+                m_view->SetTask(new EditSignalTask(this, signalidx, tick, pos));
             }
             return;
         }
@@ -118,9 +118,11 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         int signalidx = IsOverWaves(pos);
         if ( signalidx != -1)
         {
-            wxInt32 tick = m_view->VisibleTicks[GetTickFromPosition(pos)];
-
-            m_view->SetTask(new EditSignalTask(this, signalidx, tick, false));
+            if( !(((TimingDocument*)m_view->GetDocument())->signals[signalidx].IsClock) )
+            {
+                wxInt32 tick = GetTickFromPosition(pos);
+                m_view->SetTask(new EditSignalTask(this, signalidx, tick, pos, false));
+            }
             return;
         }
     }
