@@ -16,6 +16,7 @@ public:
     virtual void LabelsKey(const wxKeyEvent &event, bool down);
     virtual void WavesKey(const wxKeyEvent &event, bool down);
     virtual void AxisKey(const wxKeyEvent &event, bool down);
+    virtual void Update();
 
 protected:
 private:

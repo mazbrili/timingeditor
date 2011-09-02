@@ -3,6 +3,70 @@
 #include "TimingDoc.h"
 #include "cmd.h"
 #include "DiagramWavesWindow.h"
+#include "EditSignalDrawlet.h"
+
+
+namespace{
+vals GetNextValue( vals val, bool isBus, bool rotateRight = true)
+{
+    vals nval;
+    if ( !isBus )
+    {
+        if ( rotateRight )
+        {
+            switch ( val )
+            {
+                case zero: nval = one ; break;
+                case one : nval = hz  ; break;
+                case hz  : nval = u   ; break;
+                default:
+                case u   : nval = dc1 ; break;
+                case dc1 : nval = dc2 ; break;
+                case dc2 : nval = zero; break;
+            }
+        }
+        else
+        {
+            switch(val)
+            {
+                case zero: nval = dc2 ; break;
+                case one : nval = zero; break;
+                case hz  : nval = one ; break;
+                default:
+                case u   : nval = hz  ; break;
+                case dc1 : nval = u   ; break;
+                case dc2 : nval = dc1 ; break;
+            }
+        }
+    }
+    else
+    {
+        if ( rotateRight )
+        {
+            switch ( val )
+            {
+                case zero: nval = one ; break;
+                case one : nval = hz  ; break;
+                case hz  : nval = u   ; break;
+                default:
+                case u   : nval = zero; break;
+            }
+        }
+        else
+        {
+            switch ( val )
+            {
+                case zero: nval = u   ; break;
+                case one : nval = zero; break;
+                case hz  : nval = one ; break;
+                default:
+                case u   : nval = hz  ; break;
+            }
+        }
+    }
+    return nval;
+}
+}
 
 EditSignalTask::EditSignalTask(const Task *task, unsigned int sig, wxInt32 tick, const wxPoint &pos, bool leftDown):
 Task(task),
@@ -67,66 +131,6 @@ void EditSignalTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         return;
     }
 }
-
-vals GetNextValue( vals val, bool isBus, bool rotateRight = true)
-{
-    vals nval;
-    if ( !isBus )
-    {
-        if ( rotateRight )
-        {
-            switch ( val )
-            {
-                case zero: nval = one ; break;
-                case one : nval = hz  ; break;
-                case hz  : nval = u   ; break;
-                default:
-                case u   : nval = dc1 ; break;
-                case dc1 : nval = dc2 ; break;
-                case dc2 : nval = zero; break;
-            }
-        }
-        else
-        {
-            switch(val)
-            {
-                case zero: nval = dc2 ; break;
-                case one : nval = zero; break;
-                case hz  : nval = one ; break;
-                default:
-                case u   : nval = hz  ; break;
-                case dc1 : nval = u   ; break;
-                case dc2 : nval = dc1 ; break;
-            }
-        }
-    }
-    else
-    {
-        if ( rotateRight )
-        {
-            switch ( val )
-            {
-                case zero: nval = one ; break;
-                case one : nval = hz  ; break;
-                case hz  : nval = u   ; break;
-                default:
-                case u   : nval = zero; break;
-            }
-        }
-        else
-        {
-            switch ( val )
-            {
-                case zero: nval = u   ; break;
-                case one : nval = zero; break;
-                case hz  : nval = one ; break;
-                default:
-                case u   : nval = hz  ; break;
-            }
-        }
-    }
-    return nval;
-}
 void EditSignalTask::MouseDragState(const wxPoint &pos)
 {
     int signalidx = IsOverWaves(pos);
@@ -140,10 +144,7 @@ void EditSignalTask::MouseDragState(const wxPoint &pos)
         return;
     }
 
-    wxInt32 endTick = //m_view->VisibleTicks[
-                          GetTickFromPosition(pos)
-                      //]
-                      ;
+    wxInt32 endTick = GetTickFromPosition(pos);
     if ( m_endTick != endTick || !m_validMove)
     {
         m_validMove = true;
@@ -176,14 +177,18 @@ void EditSignalTask::MouseUpState(const wxPoint &pos)
         vals newval = GetNextValue(val, sig.IsBus, m_leftDown);
         e = m_view->VisibleTicks[e];
         s = m_view->VisibleTicks[s];
-        for ( wxInt32 k = e ; k <=s ; k++)
+        for ( wxInt32 k = s ; k <= e ; k++)
             sig.values[k]=newval;
         cmdproc->Submit(new ChangeSignal(m_doc, m_sig, sig));
+        //EndTask will be called by Update
     }
     else
-    {
-        EndTask();
-    }
+    {    }
+}
+
+void EditSignalTask::Update()
+{
+    EndTask();
 }
 
 void EditSignalTask::SetDrawlets()
@@ -202,14 +207,15 @@ void EditSignalTask::SetDrawlets()
             e = m_startTick;
         }
 
-        if ( ! m_doc->signals[m_sig].IsBus )
-        {
-
-        }
-        else// is a bus
-        {
-
-        }
+        Signal *sig = new Signal;
+        *sig = m_doc->signals[m_sig];
+        vals val = sig->values[m_view->VisibleTicks[m_startTick]];
+        vals nval = GetNextValue(val, sig->IsBus, m_leftDown);
+        e = m_view->VisibleTicks[e];
+        s = m_view->VisibleTicks[s];
+        for ( wxInt32 k = s ; k <=e ; k++)
+            sig->values[k]=nval;
+        m_waveWin->SetDrawlet(new EditSignalDrawlet(sig, m_view, m_view->heightOffsets[m_sig]));
     }
 }
 
