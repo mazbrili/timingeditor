@@ -156,6 +156,8 @@
 		<Unit filename="DiagramSplitterWindow.h" />
 		<Unit filename="DiagramWavesWindow.cpp" />
 		<Unit filename="DiagramWavesWindow.h" />
+		<Unit filename="EditSignalDrawlet.cpp" />
+		<Unit filename="EditSignalDrawlet.h" />
 		<Unit filename="EditSignalTask.cpp" />
 		<Unit filename="EditSignalTask.h" />
 		<Unit filename="EditTextTask.cpp" />

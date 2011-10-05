@@ -99,10 +99,11 @@ EditSignalTask::~EditSignalTask()
 void EditSignalTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 {
     if ((event.ButtonDown(wxMOUSE_BTN_RIGHT) && m_leftDown) || (event.ButtonDown(wxMOUSE_BTN_LEFT) && !m_leftDown) )
+    {
         EndTask();
+        return;
+    }
 
-    if ( (!event.ButtonIsDown(wxMOUSE_BTN_LEFT) && m_leftDown ) || (!event.ButtonIsDown(wxMOUSE_BTN_RIGHT) && !m_leftDown ) )
-        EndTask();
 
     if ( event.Leaving() )
     {
@@ -157,13 +158,6 @@ void EditSignalTask::MouseUpState(const wxPoint &pos)
 {
     if (m_validMove)
     {
-        wxCommandProcessor *cmdproc = m_doc->GetCommandProcessor();
-        if (!cmdproc)
-        {
-            EndTask();
-            return;
-        }
-
         wxInt32 s = m_startTick, e = m_endTick;
         if (s > e)
         {
@@ -179,11 +173,13 @@ void EditSignalTask::MouseUpState(const wxPoint &pos)
         s = m_view->VisibleTicks[s];
         for ( wxInt32 k = s ; k <= e ; k++)
             sig.values[k]=newval;
-        cmdproc->Submit(new ChangeSignal(m_doc, m_sig, sig));
+        m_doc->GetCommandProcessor()->Submit(new ChangeSignal(m_doc, m_sig, sig));
         //EndTask will be called by Update
     }
     else
-    {    }
+    {
+        EndTask();
+    }
 }
 
 void EditSignalTask::Update()
