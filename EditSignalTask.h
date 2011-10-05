@@ -33,13 +33,13 @@ private:
 
 private:
     unsigned int m_sig;
-    const bool m_leftDown;
+    bool m_leftDown;
     wxInt32 m_startTick;
     bool m_startedOnEdge;
 
     bool m_validMove;
     wxInt32 m_endTick;
-     TimingDocument *m_doc;
+    TimingDocument *m_doc;
 };
 
 #endif // EDITSIGNALTASK_H

@@ -1,8 +1,7 @@
-change signal values
+change signal values by moving edges
 
 export diagram to bitmap and svg/ps
 
-MDI ok on msw but not on gtk! after closing a child it is
-not possible to activate any other. perhaps use aui instead?
+MDI ok on msw but not on gtk! after closing a child it is not possible to activate any other. perhaps use aui instead?
 
-and a lot more
+and a lot more ... ???
