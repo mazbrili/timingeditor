@@ -8,6 +8,7 @@ class TimingView;
 class wxCommand;
 class EditTextTask;
 class TimingTextCtrl;
+class wxPanel;
 
 //class TimingTextDropTarget : public wxTextDropTarget
 //{

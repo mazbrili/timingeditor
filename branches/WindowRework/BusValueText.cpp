@@ -34,13 +34,10 @@ BusValueText::~BusValueText()
 //}
 void BusValueText::OnSetFocus(wxFocusEvent &event)
 {
-    ::wxLogMessage(_T("BusValueText::OnSetFocus %d, tick: %d"), m_signalNumber, m_tick);
     m_view->TextHasFocus(this);
 }
 void BusValueText::OnKillFocus(wxFocusEvent &event)
-{
-    ::wxLogMessage(_T("BusValueText::OnKillFocus %d, tick: %d"), m_signalNumber, m_tick);
-}
+{}
 wxCommand *BusValueText::GetEnterCommand()
 {
     return new ChangeBusTextCommand((TimingDocument *)m_view->GetDocument(), m_signalNumber, m_tick, GetValue());
@@ -50,9 +47,7 @@ wxCommand *BusValueText::GetChangedCommand()
     return new ChangeBusTextCommand((TimingDocument *)m_view->GetDocument(), m_signalNumber, m_tick, GetValue());
 }
 void BusValueText::OnDrop(const wxString& data)
-{
-    ::wxLogMessage(_T("BusValueText::OnDrop %d, tick: %d"), m_signalNumber, m_tick);
-}
+{}
 void BusValueText::SetActive(const bool act)
 {
     m_active = act;
@@ -65,7 +60,6 @@ void BusValueText::Draw(wxDC &dc)const
 {
     if ( !m_active )
     {
-        //::wxLogMessage(_T("BusValueText::Draw"));
         dc.DrawText(GetValue(), m_unscrolledPos);
     }
 }

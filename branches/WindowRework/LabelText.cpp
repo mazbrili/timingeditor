@@ -31,12 +31,10 @@ void LabelText::SetBuswidthField(TimingTextCtrl * widthctrl)
 //}
 void LabelText::OnSetFocus(wxFocusEvent &event)
 {
-    ::wxLogMessage(_T("LabelText::OnSetFocus %d"), m_signalNumber);
     m_view->TextHasFocus(this);
 }
 void LabelText::OnKillFocus(wxFocusEvent &event)
 {
-    ::wxLogMessage(_T("LabelText::OnKillFocus %d"), m_signalNumber);
 }
 wxCommand *LabelText::GetEnterCommand()
 {
@@ -59,6 +57,4 @@ void LabelText::SetSize(int x, int y, int width, int height, int sizeFlags)
     }
 }
 void LabelText::OnDrop(const wxString& data)
-{
-    ::wxLogMessage(_T("LabelText::OnDrop %d"), m_signalNumber);
-}
+{}

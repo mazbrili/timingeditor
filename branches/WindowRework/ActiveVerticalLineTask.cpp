@@ -91,8 +91,6 @@ void ActiveVerticalLineTask::SetDrawlets()
     }
     if ( state == movingLine)
     {
-        //::wxLogMessage(_T("ActiveVerticalLineTask::SetDrawlets movingLine "));
-
         if ( old_xpos != xpos || old_xposoffset != xposoffset)
         {
             old_xpos = xpos;
@@ -301,7 +299,6 @@ void ActiveVerticalLineTask::Update()
 
 void ActiveVerticalLineTask::OnMouse(const wxMouseEvent &event)
 {
-    //::wxLogMessage(_T("ActiveSignalTask::OnMouse"));
     if (event.ButtonDown(wxMOUSE_BTN_ANY ))
         EndTask();
 }

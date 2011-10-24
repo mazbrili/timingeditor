@@ -81,7 +81,6 @@ void AddHorizontalArrowTask::WavesMouse(const wxMouseEvent &event, const wxPoint
 {
     if (( event.Moving() || event.Dragging() )&& state == waitingFirstPoint )
     {
-        ::wxLogMessage(_T("AddHorizontalArrowTask::WavesMouse Task::WavesMouse"));
         Task::WavesMouse(event, pos);
     }
     else if ( event.Dragging() && state == waitingSecondPoint )
@@ -170,7 +169,6 @@ void AddHorizontalArrowTask::DoCheckWhenMouseUp(const wxPoint &pos)
 }
 void AddHorizontalArrowTask::SetInsertingDrawlet(const wxPoint &pos)
 {
-    //::wxLogMessage(_T("AddHorizontalArrowTask::SetInsertingDrawlet"));
     wxPoint start, stop;
     start.y = m_view->heightOffsets[m_ypos] + m_yposoffset;
     start.x = m_view->GetGraphVerticalLines()[m_verticalLine].GetStartPoint().x;

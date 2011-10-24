@@ -152,7 +152,7 @@ void DiagramAxisWindow::Draw(wxDC & dc)
         //wxInt32 len = 1;
         if ( doc->compressors.find(tick) != doc->compressors.end() )
         {
-            wxString str;
+            //wxString str;
             if ( doc->compressors[tick].enabled )
             {
                 if (doc->compressors[tick].length > 1)
@@ -179,7 +179,7 @@ void DiagramAxisWindow::Draw(wxDC & dc)
                         dc.SetPen(m_view->GetCompressorColour());
                     }
                     dc.DrawPolygon(3, points);
-                    str = wxString::Format(_T("drawing an enabled time compressor at tick: %d"), tick);
+                    //str = wxString::Format(_T("drawing an enabled time compressor at tick: %d"), tick);
 
 
                     /// split the axis
@@ -220,7 +220,7 @@ void DiagramAxisWindow::Draw(wxDC & dc)
                     }
                     dc.DrawPolygon(3, points);
 
-                    str = wxString::Format(_T("drawing an enabled but zero length time compressor at tick: %d"), tick);
+                    //str = wxString::Format(_T("drawing an enabled but zero length time compressor at tick: %d"), tick);
 
                 }
             }
@@ -273,10 +273,9 @@ void DiagramAxisWindow::Draw(wxDC & dc)
                     dc.SetBrush(*wxWHITE_BRUSH);
                 }
                 dc.DrawPolygon(3, points);
-                str = wxString::Format(_T("drawing an disabled time compressor at tick: %d"), tick);
+                //str = wxString::Format(_T("drawing an disabled time compressor at tick: %d"), tick);
 
             }
-            ::wxLogMessage(str);
         }
     }
 

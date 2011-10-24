@@ -68,11 +68,11 @@ vals GetNextValue( vals val, bool isBus, bool rotateRight = true)
 }
 }
 
-EditSignalTask::EditSignalTask(const Task *task, unsigned int sig, wxInt32 tick, const wxPoint &pos, bool leftDown):
+EditSignalTask::EditSignalTask(const Task *task, unsigned int sig, const wxPoint &pos, bool leftDown):
 Task(task),
 m_sig(sig),
 m_leftDown(leftDown),
-m_startTick(tick)
+m_validMove(false)
 {
     //ctor
     m_doc = (TimingDocument*)m_view->GetDocument();
@@ -82,11 +82,39 @@ m_startTick(tick)
         return;
     }
 
-    // check if click on an edge of asignal
-    m_startedOnEdge = false; // not yet implemented
-
-    m_validMove = true;
+    m_startTick = GetTickFromPosition(pos);
     m_endTick = m_startTick;
+
+    m_startedOnEdge = false;
+
+    // check if click on an edge of a signal
+    if ( IsTransitionPosition(pos) && m_startTick > 0 )
+    {
+        m_startEdge = GetTransitionFromPosition(pos);
+        vals valueAfterEdge = m_doc->signals[m_sig].values[m_view->VisibleTicks[m_startEdge+1]];
+        vals valueBeforeEdge = m_doc->signals[m_sig].values[m_view->VisibleTicks[m_startEdge]];
+        if ( valueBeforeEdge != valueAfterEdge )
+        {
+            m_startedOnEdge = true;
+
+            wxInt32 pos = m_view->VisibleTicks[m_startEdge+1];
+            while ( pos < m_doc->length && m_doc->signals[m_sig].values[pos+1] == valueAfterEdge )
+                pos++;
+            m_lastPossibleEdge = pos-1;
+
+            pos = m_view->VisibleTicks[m_startEdge];
+            while( pos > 0 && m_doc->signals[m_sig].values[pos-1] == valueBeforeEdge )
+                pos--;
+            m_firstPossibleEdge = pos+1;
+
+            m_endEdge = m_startEdge;
+        }
+    }
+
+    if (!m_startedOnEdge)
+    {
+        m_validMove = true;
+    }
 
     SetDrawlets();
 }
@@ -181,10 +209,64 @@ void EditSignalTask::MouseUpState(const wxPoint &pos)
         EndTask();
     }
 }
-
-void EditSignalTask::Update()
+void EditSignalTask::MouseDragEdge(const wxPoint &pos)
 {
-    EndTask();
+    int signalidx = IsOverWaves(pos);
+    if ( signalidx == -1 || (unsigned int)signalidx != m_sig )
+    {
+        if (m_validMove)
+        {
+            m_validMove = false;
+            SetDrawlets();
+        }
+        return;
+    }
+
+    wxInt32 endEdge = m_view->VisibleTicks[GetTransitionFromPosition(pos)];
+    bool possible = endEdge >= m_firstPossibleEdge && endEdge <= m_lastPossibleEdge;
+    if (possible)
+    {
+        if ( m_endEdge != endEdge || !m_validMove )
+        {
+            m_validMove = true;
+            m_endEdge = endEdge;
+            SetDrawlets();
+            return;
+        }
+    }
+}
+void EditSignalTask::MouseUpEdge(const wxPoint &pos)
+{
+    if (m_validMove)
+    {
+        wxInt32 s = m_startEdge, e = m_endEdge;
+        vals valueBeforeEdge = m_doc->signals[m_sig].values[m_view->VisibleTicks[m_startEdge]];
+        vals valueAfterEdge = m_doc->signals[m_sig].values[m_view->VisibleTicks[m_startEdge+1]];
+        e = m_view->VisibleTicks[e];
+        s = m_view->VisibleTicks[s];
+
+        Signal sig = m_doc->signals[m_sig];
+
+        if (s < e)
+        {
+            wxInt32 k;
+            for ( k=s ; k <= e ; k++)
+                sig.values[k] = valueBeforeEdge;
+        }
+        else
+        {
+            wxInt32 k;
+            for ( k=e ; k <= s ; k++)
+                sig.values[k] = valueAfterEdge;
+        }
+
+        m_doc->GetCommandProcessor()->Submit(new ChangeSignal(m_doc, m_sig, sig));
+        //EndTask will be called by Update
+    }
+    else
+    {
+        EndTask();
+    }
 }
 
 void EditSignalTask::SetDrawlets()
@@ -194,6 +276,10 @@ void EditSignalTask::SetDrawlets()
         m_waveWin->RemoveDrawlet();
         return;
     }
+
+    Signal *sig = new Signal;
+    *sig = m_doc->signals[m_sig];
+
     if ( !m_startedOnEdge )
     {
         wxInt32 s = m_startTick, e = m_endTick;
@@ -203,22 +289,38 @@ void EditSignalTask::SetDrawlets()
             e = m_startTick;
         }
 
-        Signal *sig = new Signal;
-        *sig = m_doc->signals[m_sig];
         vals val = sig->values[m_view->VisibleTicks[m_startTick]];
         vals nval = GetNextValue(val, sig->IsBus, m_leftDown);
-        e = m_view->VisibleTicks[e];
-        s = m_view->VisibleTicks[s];
         for ( wxInt32 k = s ; k <=e ; k++)
             sig->values[k]=nval;
-        m_waveWin->SetDrawlet(new EditSignalDrawlet(sig, m_view, m_view->heightOffsets[m_sig]));
     }
+    else
+    {
+        wxInt32 s = m_startEdge, e = m_endEdge;
+        vals valueBeforeEdge = m_doc->signals[m_sig].values[m_view->VisibleTicks[m_startEdge]];
+        vals valueAfterEdge = m_doc->signals[m_sig].values[m_view->VisibleTicks[m_startEdge+1]];
+        e = m_view->VisibleTicks[e];
+        s = m_view->VisibleTicks[s];
+
+        if (s < e)
+        {
+            wxInt32 k;
+            for ( k=s ; k <= e ; k++)
+                sig->values[k] = valueBeforeEdge;
+        }
+        else
+        {
+            wxInt32 k;
+            for ( k=e ; k <= s ; k++)
+                sig->values[k] = valueAfterEdge;
+        }
+    }
+    m_waveWin->SetDrawlet(new EditSignalDrawlet(sig, m_view, m_view->heightOffsets[m_sig]));
 }
-
-// needs an implementation:
-void EditSignalTask::MouseDragEdge(const wxPoint &pos){}
-void EditSignalTask::MouseUpEdge(const wxPoint &pos){}
-
+void EditSignalTask::Update()
+{
+    EndTask();
+}
 
 // defaults:
 void EditSignalTask::OnMouse(const wxMouseEvent &event)
