@@ -14,7 +14,6 @@ m_newSpace(-1)
 {
     m_waveWin->ActivateText(false);
     //ctor
-    //::wxLogMessage(_T("ChangeSignalSpacerTask::ChangeSignalSpacerTask"));
     if ( posToChange < 0 )//|| (unsigned int) m_sig >= m_view->heightOffsets.size()-1)
     {
         EndTask();
@@ -147,7 +146,6 @@ void ChangeSignalSpacerTask::AxisMouse(const wxMouseEvent &event, const wxPoint 
 
 void ChangeSignalSpacerTask::OnMouse(const wxMouseEvent &event)
 {
-    //::wxLogMessage(_T("ChangeSignalSpacerTask::OnMouse"));
     if (event.ButtonDown(wxMOUSE_BTN_ANY ))
         EndTask();
 }

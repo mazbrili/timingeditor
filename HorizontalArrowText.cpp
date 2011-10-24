@@ -29,25 +29,18 @@ HorizontalArrowText::~HorizontalArrowText()
 }
 void HorizontalArrowText::OnText(wxCommandEvent &event)
 {
-//    if ( m_activeTask )
-//        m_activeTask->OnText();
 }
 void HorizontalArrowText::OnEnterCommand(wxCommandEvent &event)
 {
-    //m_view->SetTask(NULL);
     if ( m_activeTask )
         m_activeTask->OnEnterText();
 }
 void HorizontalArrowText::OnSetFocus(wxFocusEvent &event)
 {
-    ::wxLogMessage(wxString::Format(_T("HorizontalArrowText::OnSetFocus %d"),m_horizontalArrow  ));
-    //ChangeValue(unchanged);
     m_view->TextHasFocus(this);
 }
 void HorizontalArrowText::OnKillFocus(wxFocusEvent &event)
-{
-    ::wxLogMessage(wxString::Format(_T("HorizontalArrowText::OnKillFocus %d"),m_horizontalArrow ));
-}
+{}
 wxCommand *HorizontalArrowText::GetEnterCommand()
 {
     if ( m_horizontalArrow == -1)

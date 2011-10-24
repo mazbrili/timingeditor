@@ -73,7 +73,6 @@ void TimingTextCtrl::OnText(wxCommandEvent &event)
     if(!edittask)
     {
         m_view->SetTask(NULL);
-        ::wxLogMessage(wxString::Format(_T("TimingTextCtrl::OnText")  ));
 
         wxCommandProcessor *cmdproc = m_view->GetDocument()->GetCommandProcessor();
         if (cmdproc)

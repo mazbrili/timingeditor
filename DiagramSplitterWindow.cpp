@@ -42,7 +42,6 @@ DiagramSplitterWindow::DiagramSplitterWindow(TimingView *v, wxWindow* parent, wx
     SetMinimumPaneSize(MinimumOfLeftWidth);
     SplitVertically(left, m_right , 100);
     Connect( wxEVT_IDLE, (wxObjectEventFunction)&DiagramSplitterWindow::OnIdleDoSetSashPosition );
-    //::wxLogMessage(_T("SetSashPosition() does nothing %d"), GetClientSize().GetWidth());
     //SetSashPosition(100);
 }
 

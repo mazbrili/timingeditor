@@ -1,10 +1,12 @@
 #include "TimingSubFrame.h"
 
 #include <wx/cmdproc.h>
+#include <wx/icon.h>
+#include <wx/menu.h>
+
 
 #include "TimingApp.h"
 #include "enumers.h"
-
 
 TimingSubFrame::TimingSubFrame(wxDocument *doc, wxView* view, wxMDIParentFrame *parent)
 :wxDocMDIChildFrame(doc, view, parent, wxID_ANY, _T("Child Frame"))

@@ -24,7 +24,6 @@ m_sig(sig),
 state(idleState)
 {
     //ctor
-    //::wxLogMessage(_T("ActiveSignalTask::ActiveSignalTask"));
     if ( m_sig < 0 || (unsigned int) m_sig >= m_view->heightOffsets.size()-1)
     {
         EndTask();
@@ -82,7 +81,6 @@ void ActiveSignalTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos
     {
         if (state == idleState )
         {
-        //wxLogMessage(_T("DoDragDrop"));
             state = movingSignal;
         }
         else // state == movingSignal

@@ -1,6 +1,8 @@
 #ifndef GRAPHOBJECT_H
 #define GRAPHOBJECT_H
 
+#include <wx/dc.h>
+
 class GraphObject
 {
 public:

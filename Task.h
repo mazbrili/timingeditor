@@ -46,6 +46,8 @@ protected:
     // common methods
     wxInt32 GetTickFromPosition(const wxPoint &pos)const;
     wxInt32 GetSignalFromPosition(const wxPoint &pos)const;
+    bool IsTransitionPosition(wxPoint pos)const;
+    wxInt32 GetTransitionFromPosition(const wxPoint &pos)const;
     bool IsOverWavesRect(const wxPoint &pos)const;
     int IsOverVerticalLine(const wxPoint &pos)const;
     int IsOverHorizontalArrow(const wxPoint &pos)const;

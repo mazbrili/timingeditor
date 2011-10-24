@@ -44,7 +44,16 @@ bool EditSignalDrawlet::Draw(wxDC &dc)
     unsigned int height = m_sig->prespace + m_sig->space + doc->SignalHeight+doc->MinimumSignalDistance;
     dc.SetPen(*wxWHITE_PEN);
     dc.SetBrush(*wxWHITE_BRUSH);
-    dc.DrawRectangle(0, m_yoffset, sz.x, height);
+    dc.DrawRectangle(0, m_yoffset+1, sz.x, height-1);
+
+    dc.SetClippingRegion(0,m_yoffset+1, sz.x, height-1);
+    {
+    dc.SetPen(wxPen(m_view->GetLineColour(),1));
+
+    for ( unsigned int i = 0 ; i < m_view->GetGraphSignals().size(); i++)
+        m_view->GetGraphSignals()[i]->DrawBackground(dc);
+    }
+    dc.DestroyClippingRegion();
 
     m_gsig->Draw(dc);
 

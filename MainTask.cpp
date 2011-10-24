@@ -96,7 +96,6 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         int lineidx = IsOverVerticalLine(pos);
         if ( lineidx != -1 )
         {
-            //::wxLogMessage(wxString::Format(_T("MainTask::WavesMouse IsOverVerticalLine %d"), lineidx ));
             m_view->SetTask(new ActiveVerticalLineTask(this, lineidx));
             return;
         }
@@ -106,8 +105,7 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         {
             if( !(((TimingDocument*)m_view->GetDocument())->signals[signalidx].IsClock) )
             {
-                wxInt32 tick = GetTickFromPosition(pos);
-                m_view->SetTask(new EditSignalTask(this, signalidx, tick, pos));
+                m_view->SetTask(new EditSignalTask(this, signalidx, pos));
             }
             return;
         }
@@ -120,8 +118,7 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         {
             if( !(((TimingDocument*)m_view->GetDocument())->signals[signalidx].IsClock) )
             {
-                wxInt32 tick = GetTickFromPosition(pos);
-                m_view->SetTask(new EditSignalTask(this, signalidx, tick, pos, false));
+                m_view->SetTask(new EditSignalTask(this, signalidx, pos, false));
             }
             return;
         }

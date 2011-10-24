@@ -7,7 +7,7 @@ class TimingDocument;
 class EditSignalTask : public Task
 {
 public:
-    EditSignalTask(const Task *task, unsigned int sig, wxInt32 tick, const wxPoint &pos, bool leftDown = true);
+    EditSignalTask(const Task *task, unsigned int sig, const wxPoint &pos, bool leftDown = true);
     virtual ~EditSignalTask();
 
     virtual void LabelsMouse(const wxMouseEvent &event, const wxPoint &pos);
@@ -40,6 +40,10 @@ private:
     bool m_validMove;
     wxInt32 m_endTick;
     TimingDocument *m_doc;
+    wxInt32 m_startEdge;
+    wxInt32 m_endEdge;
+    wxInt32 m_firstPossibleEdge;
+    wxInt32 m_lastPossibleEdge;
 };
 
 #endif // EDITSIGNALTASK_H

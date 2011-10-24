@@ -5,6 +5,7 @@
 
 class TimingView;
 class HoverDrawlet;
+class wxScrolledWindow;
 
 class DiagramAxisWindow : public wxPanel
 {

@@ -26,7 +26,6 @@ END_EVENT_TABLE()
 
 //void DiagramLabelsWindow::OnSetFocus(wxFocusEvent &event)
 //{
-//    wxLogDebug(_T("DiagramLabelsWindow::OnSetFocus"));
 //}
 DiagramLabelsWindow::DiagramLabelsWindow(TimingView *view, wxWindow* parent, wxScrolledWindow *scrollowner, wxWindowID id , const wxPoint& pos, const wxSize& size, long style)
 : wxScrolledWindow(  parent, id, pos, size, style ),

@@ -55,7 +55,6 @@ HoverDrawlet *HorizontalArrowTask::GetActiveDrawlet(const wxPoint &start, const 
 }
 HoverDrawlet *HorizontalArrowTask::GetActiveDrawlet(const wxPoint &start, const wxPoint &stop, int style, const wxColour &colour, const wxPoint &textpos, int textposlinestyle )const
 {
-    //::wxLogMessage(_T("HorizontalArrowTask start.x=%d, stop.x=%d, text.x=%d, text.y=%d"), start.x, stop.x, textpos.x, textpos.y);
     return new HoverCombo(
         new HoverCombo(
             new HoverLine(start, stop, *wxLIGHT_GREY, 1, style),

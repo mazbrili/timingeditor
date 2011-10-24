@@ -29,14 +29,11 @@ BusWidthText::~BusWidthText()
 //}
 void BusWidthText::OnSetFocus(wxFocusEvent &event)
 {
-    ::wxLogMessage(wxString::Format(_T("BusWidthText::OnSetFocus %d, unchanged = ")+unchanged,m_signalNumber  ));
     ChangeValue(unchanged);
     m_view->TextHasFocus(this);
 }
 void BusWidthText::OnKillFocus(wxFocusEvent &event)
-{
-    ::wxLogMessage(wxString::Format(_T("BusWidthText::OnKillFocus %d"),m_signalNumber ));
-}
+{}
 wxCommand *BusWidthText::GetEnterCommand()
 {
     return new ChangeSignalBuswidth((TimingDocument *)m_view->GetDocument(), GetValue(), m_signalNumber);

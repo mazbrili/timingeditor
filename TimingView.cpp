@@ -410,8 +410,6 @@ void TimingView::UpdateVisibelTicksContainer()
         VisibleTicks.push_back(n);
 
         bool hascompressor = false;
-//        if ( doc->compressors.find(n) != doc->compressors.end() )
-//            ::wxLogMessage(_T("UpdateVisibleTicks::compressor at %d"),n );
         if ( doc->compressors.find(n) != doc->compressors.end() && doc->compressors[n].enabled )
         {
             n += doc->compressors[n].length;

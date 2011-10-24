@@ -173,6 +173,25 @@ wxInt32 Task::GetTickFromPosition(const wxPoint &pos)const
 {
     return (pos.x - m_view->GetWavesLeftSpace())/(m_view->GridStepWidth);
 }
+bool Task::IsTransitionPosition(wxPoint pos)const
+{
+    // no transition at start of diagram
+    if ( pos.x - m_view->GetWavesLeftSpace() < m_view->GridStepWidth/3 )
+        return false;
+
+    // no transition at end of diagram
+    if ( (pos.x - m_view->GetWavesLeftSpace()) / m_view->GridStepWidth >= (int)m_view->VisibleTicks.size() )
+        return false;
+
+    pos.x -= m_view->GetWavesLeftSpace();
+    wxInt32 rem = pos.x % (m_view->GridStepWidth);
+
+    return (rem < (m_view->GridStepWidth)/3) || (rem > (m_view->GridStepWidth)*2/3);
+}
+wxInt32 Task::GetTransitionFromPosition(const wxPoint &pos)const
+{
+    return (pos.x - m_view->GetWavesLeftSpace() - m_view->GridStepWidth/2)/(m_view->GridStepWidth);
+}
 wxInt32 Task::GetSignalFromPosition(const wxPoint &pos)const
 {
     for ( unsigned int k = 0 ; k < m_view->heightOffsets.size()-1 ; ++k )
