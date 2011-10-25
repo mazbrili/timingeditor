@@ -101,11 +101,13 @@ m_validMove(false)
             while ( pos < m_doc->length && m_doc->signals[m_sig].values[pos+1] == valueAfterEdge )
                 pos++;
             m_lastPossibleEdge = pos-1;
+            m_lastPossibleEdge = m_doc->length-1;///
 
             pos = m_view->VisibleTicks[m_startEdge];
             while( pos > 0 && m_doc->signals[m_sig].values[pos-1] == valueBeforeEdge )
                 pos--;
             m_firstPossibleEdge = pos+1;
+            m_firstPossibleEdge = 0;///
 
             m_endEdge = m_startEdge;
         }
@@ -234,6 +236,12 @@ void EditSignalTask::MouseDragEdge(const wxPoint &pos)
             return;
         }
     }
+    else if ( m_validMove )
+    {
+        m_validMove = false;
+        SetDrawlets();
+        return;
+    }
 }
 void EditSignalTask::MouseUpEdge(const wxPoint &pos)
 {
@@ -256,7 +264,7 @@ void EditSignalTask::MouseUpEdge(const wxPoint &pos)
         else
         {
             wxInt32 k;
-            for ( k=e ; k <= s ; k++)
+            for ( k=e+1 ; k <= s ; k++)
                 sig.values[k] = valueAfterEdge;
         }
 
@@ -311,7 +319,7 @@ void EditSignalTask::SetDrawlets()
         else
         {
             wxInt32 k;
-            for ( k=e ; k <= s ; k++)
+            for ( k=e+1 ; k <= s ; k++)
                 sig->values[k] = valueAfterEdge;
         }
     }
