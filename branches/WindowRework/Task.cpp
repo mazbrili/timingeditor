@@ -176,7 +176,7 @@ wxInt32 Task::GetTickFromPosition(const wxPoint &pos)const
 bool Task::IsTransitionPosition(wxPoint pos)const
 {
     // no transition at start of diagram
-    if ( pos.x - m_view->GetWavesLeftSpace() < m_view->GridStepWidth/3 )
+    if ( pos.x - m_view->GetWavesLeftSpace() < m_view->GridStepWidth/4 )
         return false;
 
     // no transition at end of diagram
@@ -186,7 +186,7 @@ bool Task::IsTransitionPosition(wxPoint pos)const
     pos.x -= m_view->GetWavesLeftSpace();
     wxInt32 rem = pos.x % (m_view->GridStepWidth);
 
-    return (rem < (m_view->GridStepWidth)/3) || (rem > (m_view->GridStepWidth)*2/3);
+    return (rem < (m_view->GridStepWidth)/4) || (rem > (m_view->GridStepWidth)*3/4);
 }
 wxInt32 Task::GetTransitionFromPosition(const wxPoint &pos)const
 {
