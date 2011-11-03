@@ -49,6 +49,8 @@
 #include "DiagramSplitterWindow.h"
 #include "DiagramRightWindow.h"
 #include "DiagramWavesWindow.h"
+#include "DiagramAxisWindow.h"
+#include "DiagramLabelsWindow.h"
 
 
 #include "GraphBusSignal.h"
@@ -112,7 +114,7 @@ bool TimingView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
 #endif
 
     DiagramRightWindow *rwnd = splitterwindow->GetRightWindow();
-    defaultTask = new MainTask(this, splitterwindow->GelLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
+    defaultTask = new MainTask(this, splitterwindow->GetLabelsWindow(), rwnd->GetAxisWindow(), rwnd->GetWavesWindow());
     if (!defaultTask)
         return false;
 
@@ -872,85 +874,125 @@ bool TimingView::IsSignalSelected(void)const
 
 void TimingView::OnExportBitmap(wxCommandEvent& event)
 {
-//    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"),_T(""),_T(""),_T("PNG files (*.png)|*.png"),wxSAVE | wxOVERWRITE_PROMPT );
-//    if ( dlg.ShowModal() != wxID_OK )
-//        return;
-//
-//    wxString filename = dlg.GetPath();
-//    if ( filename.empty() )
-//        return;
-//
-//    /// calc size
-//    //wxBitmap bm(10,10);
-//    wxMemoryDC *memdc = new wxMemoryDC();
-//    //memdc->SelectObject(bm);
-//
-//    wxPoint s = window->GetBitmapSize();
-//
-//
-//    wxBitmap bitmap(s.x, s.y);
-//    memdc->SelectObject(bitmap);
-//
-//    /// draw using the memdc
-//    //memdc->SetBackground(*wxWHITE_BRUSH);
-//    //window->PaintBackground(*memdc);
-//    memdc->SetBrush(*wxWHITE_BRUSH);
-//    memdc->SetPen(*wxWHITE_PEN);
-//    memdc->DrawRectangle(0, 0, s.x, s.y);
-//    memdc->SetPen(*wxBLACK_PEN);
-//    window->Draw(*memdc, true);
-//
-//
-//    memdc->SelectObject(wxNullBitmap);
-//    bitmap.SaveFile(filename, wxBITMAP_TYPE_PNG); //wxBITMAP_TYPE_JPEG);
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"),_T(""),_T(""),_T("PNG files (*.png)|*.png"),wxSAVE | wxOVERWRITE_PROMPT );
+    if ( dlg.ShowModal() != wxID_OK )
+        return;
+
+    wxString filename = dlg.GetPath();
+    if ( filename.empty() )
+        return;
+
+    SetTask();
+
+    /// calc size
+    int labelswidth = splitterwindow->GetLabelsWindow()->GetVirtualSize().GetX();
+    int axisheight = 40;//GetHeightOfAxisWindow();
+
+    wxSize s = wxSize(VisibleTicks.size()*GridStepWidth + 2*GetWavesLeftSpace(), heightOffsets[heightOffsets.size()-1]);
+    s.x += labelswidth;
+    s.y += axisheight;
+
+    wxBitmap bitmap(s.x, s.y);
+    wxMemoryDC *memdc = new wxMemoryDC();
+    memdc->SelectObject(bitmap);
+
+    /// draw using the memdc
+    //memdc->SetBackground(*wxWHITE_BRUSH);
+    //window->PaintBackground(*memdc);
+    memdc->SetBrush(*wxWHITE_BRUSH);
+    memdc->SetPen(*wxWHITE_PEN);
+    memdc->DrawRectangle(0, 0, s.x, s.y);
+    memdc->SetPen(*wxBLACK_PEN);
+
+    memdc->SetDeviceOrigin(labelswidth, 0);
+    splitterwindow->GetRightWindow()->GetAxisWindow()->Draw(*memdc,true);
+    memdc->SetDeviceOrigin(-labelswidth, 0);
+
+    memdc->SetDeviceOrigin(0, axisheight);
+    splitterwindow->GetLabelsWindow()->Draw(*memdc,true);
+    memdc->SetDeviceOrigin(0, -axisheight);
+
+    memdc->SetDeviceOrigin(labelswidth, axisheight);
+    splitterwindow->GetRightWindow()->GetWavesWindow()->Draw(*memdc);
+
+
+    memdc->SelectObject(wxNullBitmap);
+    bitmap.SaveFile(filename, wxBITMAP_TYPE_PNG); //wxBITMAP_TYPE_JPEG);
 
 }
 
 void TimingView::OnExportSVG(wxCommandEvent& event)
 {
-//    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("SVG files (*.svg)|*.svg"), wxSAVE | wxOVERWRITE_PROMPT);
-//    if ( dlg.ShowModal() != wxID_OK )
-//        return;
-//    wxString filename = dlg.GetPath();
-//    if ( filename.empty() )
-//        return;
-//
-//    wxPoint s = window->GetBitmapSize();
-//    wxSVGFileDC *svgdc = new wxSVGFileDC(filename, s.x, s.y);
-//    svgdc->SetBrush(*wxWHITE_BRUSH);
-//    svgdc->SetPen(*wxBLACK_PEN);
-//    //svgdc->DrawRectangle(0, 0, s.x, s.y);
-//    window->Draw(*svgdc, true);
-//
-//    delete svgdc;
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("SVG files (*.svg)|*.svg"), wxSAVE | wxOVERWRITE_PROMPT);
+    if ( dlg.ShowModal() != wxID_OK )
+        return;
+    wxString filename = dlg.GetPath();
+    if ( filename.empty() )
+        return;
+
+    SetTask();
+
+    int labelswidth = splitterwindow->GetLabelsWindow()->GetVirtualSize().GetX();
+    int axisheight = 40;//GetHeightOfAxisWindow();
+
+    wxSize s = wxSize(VisibleTicks.size()*GridStepWidth + 2*GetWavesLeftSpace(), heightOffsets[heightOffsets.size()-1]);
+    s.x += labelswidth;
+    s.y += axisheight;
+    wxSVGFileDC *svgdc = new wxSVGFileDC(filename, s.x, s.y);
+
+    svgdc->SetBrush(*wxWHITE_BRUSH);
+    svgdc->SetPen(*wxBLACK_PEN);
+
+    svgdc->SetDeviceOrigin(labelswidth, 0);
+    splitterwindow->GetRightWindow()->GetAxisWindow()->Draw(*svgdc,true);
+    svgdc->SetDeviceOrigin(-labelswidth, 0);
+
+    svgdc->SetDeviceOrigin(0, axisheight);
+    splitterwindow->GetLabelsWindow()->Draw(*svgdc,true);
+    svgdc->SetDeviceOrigin(0, -axisheight);
+
+    svgdc->SetDeviceOrigin(labelswidth, axisheight);
+    splitterwindow->GetRightWindow()->GetWavesWindow()->Draw(*svgdc);
+
+    delete svgdc;
 }
 
 void TimingView::OnExportPS(wxCommandEvent& event)
 {
-//    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("PostScrip files (*.ps)|*.ps"), wxSAVE | wxOVERWRITE_PROMPT);
-//    if ( dlg.ShowModal() != wxID_OK )
-//        return;
-//    wxString filename = dlg.GetPath();
-//    if ( filename.empty() )
-//        return;
-//
-//    wxPoint s = window->GetBitmapSize();
-//    //wxPostScriptDC *psdc = new wxPostScriptDC(filename);
-//    wxPrintData g_printData;
-//    g_printData.SetFilename(filename);
-//    wxPostScriptDC *psdc = new wxPostScriptDC(g_printData);
-//
-//    psdc->StartDoc(_T("Printing PS"));
-//    //psdc->SetUserScale(1.0,1.0);
-//    //psdc->SetBackground(*wxTRANSPARENT_BRUSH);
-//    psdc->Clear();
-//    psdc->SetBackgroundMode(wxTRANSPARENT);
-//    psdc->SetBrush(*wxWHITE_BRUSH);
-//    psdc->SetPen(*wxBLACK_PEN);
-//    //svgdc->DrawRectangle(0, 0, s.x, s.y);
-//    window->Draw(*psdc, true);
-//
-//    delete psdc;
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("PostScrip files (*.ps)|*.ps"), wxSAVE | wxOVERWRITE_PROMPT);
+    if ( dlg.ShowModal() != wxID_OK )
+        return;
+    wxString filename = dlg.GetPath();
+    if ( filename.empty() )
+        return;
+
+    SetTask();
+
+    int labelswidth = splitterwindow->GetLabelsWindow()->GetVirtualSize().GetX();
+    int axisheight = 40;//GetHeightOfAxisWindow();
+
+    wxPrintData g_printData;
+    g_printData.SetFilename(filename);
+    wxPostScriptDC *psdc = new wxPostScriptDC(g_printData);
+
+    psdc->StartDoc(_T("Printing PS"));
+    psdc->Clear();
+    psdc->SetBackgroundMode(wxTRANSPARENT);
+    psdc->SetBrush(*wxWHITE_BRUSH);
+    psdc->SetPen(*wxBLACK_PEN);
+
+    psdc->SetDeviceOrigin(labelswidth, 0);
+    splitterwindow->GetRightWindow()->GetAxisWindow()->Draw(*psdc,true);
+    psdc->SetDeviceOrigin(-labelswidth, 0);
+
+    psdc->SetDeviceOrigin(0, axisheight);
+    splitterwindow->GetLabelsWindow()->Draw(*psdc,true);
+    psdc->SetDeviceOrigin(0, -axisheight);
+
+    psdc->SetDeviceOrigin(labelswidth, axisheight);
+    splitterwindow->GetRightWindow()->GetWavesWindow()->Draw(*psdc);
+
+    delete psdc;
 }
 
 

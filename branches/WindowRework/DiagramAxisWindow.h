@@ -24,9 +24,10 @@ private:
     void OnPaint( wxPaintEvent &event );
     void OnEraseBackground(wxEraseEvent &WXUNUSED(event) );
     void PaintBackground(wxDC &dc);
-    void Draw(wxDC &dc);
 
     void ShiftDC(wxDC &dc);
+public:
+    void Draw(wxDC &dc, bool exporting=false);
 
 private:
     void OnMouse(wxMouseEvent &event);

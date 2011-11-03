@@ -27,12 +27,13 @@ public:
     virtual bool SetCursor(const wxCursor &cursor, bool forchilds = false );
     void CalcControlPos(wxPoint &point)const;
     void ActivateText(bool act = true);
+
+    void Draw(wxDC &dc);
 private:
     DiagramWavesWindow();
     void OnPaint( wxPaintEvent &event );
     void OnEraseBackground(wxEraseEvent &WXUNUSED(event) );
     void PaintBackground(wxDC &dc);
-    void Draw(wxDC &dc);
     void DrawVerticalLines(wxDC &dc);
     void DrawHorizontalArrows(wxDC &dc);
     void DrawDiscontinuities(wxDC &dc);
@@ -40,7 +41,6 @@ private:
     void DrawSignalSeparators(wxDC &dc);
     void ScrollWindow( int dx, int dy, const wxRect *rect );
     void OnSize(wxSizeEvent &event);
-
 
     void OnMouse(wxMouseEvent &event);
     void OnMouseEnter(wxMouseEvent &event);

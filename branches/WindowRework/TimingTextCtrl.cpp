@@ -27,6 +27,10 @@ TimingTextCtrl::~TimingTextCtrl()
     // delete the drop targets
     //SetDropTarget(NULL);
 }
+void TimingTextCtrl::Draw(wxDC &dc)
+{
+    dc.DrawText(GetValue(), GetPosition());
+}
 void TimingTextCtrl::RestoreText()
 {
     ChangeValue(unchanged);

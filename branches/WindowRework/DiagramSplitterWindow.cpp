@@ -54,7 +54,7 @@ void DiagramSplitterWindow::OnIdleDoSetSashPosition(wxIdleEvent& WXUNUSED(event)
     }
 }
 
-DiagramLabelsWindow *DiagramSplitterWindow::GelLabelsWindow()
+DiagramLabelsWindow *DiagramSplitterWindow::GetLabelsWindow()
 {
     return m_labels;
 }

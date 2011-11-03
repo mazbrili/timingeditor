@@ -211,29 +211,35 @@ void DiagramLabelsWindow::PaintBackground(wxDC &dc)
     dc.SetBrush(wxNullBrush);
     dc.SetPen(wxNullPen);
 }
-void DiagramLabelsWindow::Draw(wxDC &dc)
+void DiagramLabelsWindow::Draw(wxDC &dc, bool exporting)
 {
     if (!m_view) return;
     TimingDocument *doc = (TimingDocument *)m_view->GetDocument();
     if ( !doc ) return;
 
     // draw the horizontal lines
-    wxCoord width = GetVirtualSize().GetX();
-    if ( width < GetClientSize().x)
-        width = GetClientSize().x;
-    dc.SetPen(wxPen(GetLineColour(), 1));
-    for ( unsigned int k = 0 ; k < m_view->heightOffsets.size() ; ++k )
-        dc.DrawLine(0, m_view->heightOffsets[k], width+m_view->GetScrollPixelsPerUnit()+20, m_view->heightOffsets[k]);
-    dc.SetPen(wxNullPen);
+    if (!exporting)
+    {
+        wxCoord width = GetVirtualSize().GetX();
+        if ( width < GetClientSize().x)
+            width = GetClientSize().x;
+        dc.SetPen(wxPen(GetLineColour(), 1));
+        for ( unsigned int k = 0 ; k < m_view->heightOffsets.size() ; ++k )
+            dc.DrawLine(0, m_view->heightOffsets[k], width+m_view->GetScrollPixelsPerUnit()+20, m_view->heightOffsets[k]);
+        dc.SetPen(wxNullPen);
+    }
 
     unsigned int k = 0;
     for (unsigned int n = 0; n < doc->signals.size() ; n++)
     {
+        LabelText *label = textctrls[n];
+        if(exporting)
+            label->Draw(dc);
+
         Signal sig = doc->signals[n];
         if ( sig.IsBus )
         {
 
-            LabelText *label = textctrls[n];
             BusWidthText *bwidth = bwidthctrls[k++];
 
             wxPoint pos = label->GetPosition();
@@ -243,11 +249,13 @@ void DiagramLabelsWindow::Draw(wxDC &dc)
             dc.DrawText(_T("["),pos.x, pos.y);
             pos.x += bwidth->GetSize().x+10;
             dc.DrawText(_T("]"),pos.x, pos.y);
+            if(exporting)
+                bwidth->Draw(dc);
 
         }
     }
 
-    if (m_drawlet)
+    if (m_drawlet && !exporting)
         m_drawlet->Draw(dc);
 }
 
