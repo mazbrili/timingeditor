@@ -30,6 +30,8 @@ public:
     virtual wxCommand *GetEnterCommand()=0;
     virtual wxCommand *GetChangedCommand()=0;
 
+    void Draw(wxDC &dc);
+
     void SetFocusToParent();
 protected:
     TimingTextCtrl(){}

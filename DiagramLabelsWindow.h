@@ -34,9 +34,11 @@ private:
     void OnKeyDown(wxKeyEvent &event);
     void OnKeyUp(wxKeyEvent &event);
 
-    void Draw(wxDC &dc);
-
     void PaintBackground(wxDC &dc);
+
+public:
+    void Draw(wxDC &dc, bool exporting=false);
+
 
 private:
     virtual wxColour GetBackgroundColour() const;
@@ -62,7 +64,7 @@ private:
     wxScrolledWindow   *m_owner;
     TimingView         *m_view;
 
-    HoverDrawlet           *m_drawlet;
+    HoverDrawlet       *m_drawlet;
 
 private:
     void ScaleDC(wxDC &dc);

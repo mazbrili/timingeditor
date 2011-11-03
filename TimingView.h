@@ -91,7 +91,7 @@ public:
     wxColour GetLabelsLineColour()const;
     wxColour GetCompressorColour()const;
     wxColour GetActiveGraphCaretColour()const;
-    wxCoord GetHeightOfAxisWindow()const;
+    wxCoord  GetHeightOfAxisWindow()const;
 
     const int GetScrollPixelsPerUnit()const{return 10;}
 

@@ -49,7 +49,7 @@ private:
 
 public:
     void DoUpdate();
-    DiagramLabelsWindow *GelLabelsWindow();
+    DiagramLabelsWindow *GetLabelsWindow();
     DiagramRightWindow  *GetRightWindow();
 
 private:
