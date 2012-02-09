@@ -135,7 +135,7 @@ void AddRemoveTimeTask::SetDrawlets()
     if (m_add)
     {
         wxInt32 s = m_startTick, e = m_endTick;
-        wxCoord x = m_view->GetWavesLeftSpace() + m_view->GridStepWidth*s;
+        wxCoord x = m_view->GetWavesLeftSpace() + m_view->GridStepWidth*s + (m_view->GridStepWidth)*(m_doc->TransitWidth)/100+1;
         wxCoord w = m_view->GridStepWidth*(e-s);
 
 
