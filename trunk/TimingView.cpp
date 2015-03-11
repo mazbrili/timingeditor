@@ -415,7 +415,7 @@ bool TimingView::CanDelete(void)
 }
 void TimingView::OnExportBitmap(wxCommandEvent& event)
 {
-    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"),_T(""),_T(""),_T("PNG files (*.png)|*.png"),wxSAVE | wxOVERWRITE_PROMPT );
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"),_T(""),_T(""),_T("PNG files (*.png)|*.png"),wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
     if ( dlg.ShowModal() != wxID_OK )
         return;
 
@@ -451,7 +451,7 @@ void TimingView::OnExportBitmap(wxCommandEvent& event)
 
 void TimingView::OnExportSVG(wxCommandEvent& event)
 {
-    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("SVG files (*.svg)|*.svg"), wxSAVE | wxOVERWRITE_PROMPT);
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("SVG files (*.svg)|*.svg"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if ( dlg.ShowModal() != wxID_OK )
         return;
     wxString filename = dlg.GetPath();
@@ -470,7 +470,7 @@ void TimingView::OnExportSVG(wxCommandEvent& event)
 
 void TimingView::OnExportPS(wxCommandEvent& event)
 {
-    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("PostScrip files (*.ps)|*.ps"), wxSAVE | wxOVERWRITE_PROMPT);
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("PostScrip files (*.ps)|*.ps"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if ( dlg.ShowModal() != wxID_OK )
         return;
     wxString filename = dlg.GetPath();
