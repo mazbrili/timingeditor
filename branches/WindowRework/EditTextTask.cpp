@@ -34,7 +34,7 @@ EditTextTask::~EditTextTask()
 
 //void EditTextTask::LabelsKey(const wxKeyEvent &event, bool down)
 //{
-//    //::wxLogMessage(_T("EditTextTask::LabelsKey"));
+//    //::wxLogMessage("EditTextTask::LabelsKey");
 //}
 //void EditTextTask::WavesKey(const wxKeyEvent &event, bool down)
 //{

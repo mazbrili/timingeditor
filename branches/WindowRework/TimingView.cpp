@@ -187,7 +187,7 @@ wxColour TimingView::GetUndefinedSignalColour() const{return *wxLIGHT_GREY;}
 wxColour TimingView::GetCompressorColour()const
 {
     //return *wxGREY;
-    return wxTheColourDatabase->Find(_T("GREY"));
+    return wxTheColourDatabase->Find("GREY");
 }
 wxColour TimingView::GetActiveGraphCaretColour()const
 {
@@ -197,7 +197,7 @@ int TimingView::GetWavesLeftSpace()const{return 10;}
 wxString TimingView::GetFloatFormatStr() const
 {
     unsigned char digitsAfterDecimalpoint = 3;
-    wxString format = _T("%.") + wxString::Format(_T("%d"),digitsAfterDecimalpoint) + _T("f");
+    wxString format = "%." + wxString::Format("%d",digitsAfterDecimalpoint) + "f";
     return format;
 }
 wxString TimingView::GetTimeString(wxInt32 ticks)
@@ -213,16 +213,16 @@ wxString TimingView::GetTimeString(wxInt32 ticks)
     wxString str(wxString::Format(GetFloatFormatStr(), t));
     switch (u)
     {
-        case -5: str += _("fs"); break;
-        case -4: str += _("ps"); break;
-        case -3: str += _("ns"); break;
-        case -2: str += _("us"); break;
-        case -1: str += _("ms"); break;
-        case  0: str += _("s"); break;
-        case  1: str += _("ks"); break;
-        case  2: str += _("Ms"); break;
+        case -5: str += "fs"; break;
+        case -4: str += "ps"; break;
+        case -3: str += "ns"; break;
+        case -2: str += "us"; break;
+        case -1: str += "ms"; break;
+        case  0: str += "s"; break;
+        case  1: str += "ks"; break;
+        case  2: str += "Ms"; break;
         default:
-        case  3: str += _("Gs"); break;
+        case  3: str += "Gs"; break;
     }
     return str;
 }
@@ -362,7 +362,7 @@ void TimingView::DoUpdate()
     if (frame)
     {
         if ( doc->IsModified() )
-            frame->SetTitle( _("*") + fname );
+            frame->SetTitle( "*" + fname );
         else
             frame->SetTitle( fname );
     }
@@ -524,7 +524,7 @@ void TimingView::UpdateHorizontalArrows()
             textoff.y  = offset.y + ha.textoffset.y;
 
             wxString text = ha.text;
-            wxInt32 pos = text.Find( _T("$t$"));
+            wxInt32 pos = text.Find( "$t$");
             if ( pos != wxNOT_FOUND )
             {
                 wxInt32 l = 0;
@@ -568,18 +568,18 @@ void TimingView::UpdateHorizontalArrows()
                 str = wxString::Format(GetFloatFormatStr(), t);
                 switch (u)
                 {
-                    case -5: str += _("fs"); break;
-                    case -4: str += _("ps"); break;
-                    case -3: str += _("ns"); break;
-                    case -2: str += _("us"); break;
-                    case -1: str += _("ms"); break;
-                    case  0: str += _("s"); break;
-                    case  1: str += _("ks"); break;
-                    case  2: str += _("Ms"); break;
+                    case -5: str += "fs"; break;
+                    case -4: str += "ps"; break;
+                    case -3: str += "ns"; break;
+                    case -2: str += "us"; break;
+                    case -1: str += "ms"; break;
+                    case  0: str += "s"; break;
+                    case  1: str += "ks"; break;
+                    case  2: str += "Ms"; break;
                     default:
-                    case  3: str += _("Gs"); break;
+                    case  3: str += "Gs"; break;
                 }
-                text.Replace( _T("$t$"), str);
+                text.Replace( "$t$", str);
             }
             m_graphHorizontalArrows.push_back(GraphHorizontalArrow(offset, tooffset, text, textoff));
         }
@@ -975,7 +975,7 @@ void TimingView::OnExportPS(wxCommandEvent& event)
     g_printData.SetFilename(filename);
     wxPostScriptDC *psdc = new wxPostScriptDC(g_printData);
 
-    psdc->StartDoc(_T("Printing PS"));
+    psdc->StartDoc(_("Printing PS"));
     psdc->Clear();
     psdc->SetBackgroundMode(wxTRANSPARENT);
     psdc->SetBrush(*wxWHITE_BRUSH);

@@ -117,16 +117,16 @@ void DiagramAxisWindow::Draw(wxDC &dc, bool exporting)
             wxString str(wxString::Format(m_view->GetFloatFormatStr(), t));
             switch (u)
             {
-                case -5: str += _("fs"); break;
-                case -4: str += _("ps"); break;
-                case -3: str += _("ns"); break;
-                case -2: str += _("us"); break;
-                case -1: str += _("ms"); break;
-                case  0: str += _("s"); break;
-                case  1: str += _("ks"); break;
-                case  2: str += _("Ms"); break;
+                case -5: str += "fs"; break;
+                case -4: str += "ps"; break;
+                case -3: str += "ns"; break;
+                case -2: str += "us"; break;
+                case -1: str += "ms"; break;
+                case  0: str += "s"; break;
+                case  1: str += "ks"; break;
+                case  2: str += "Ms"; break;
                 default:
-                case  3: str += _("Gs"); break;
+                case  3: str += "Gs"; break;
             }
             wxCoord w, h;
             dc.GetTextExtent(str, &w, &h);

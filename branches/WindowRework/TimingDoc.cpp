@@ -45,7 +45,7 @@
 
 
 IMPLEMENT_DYNAMIC_CLASS(TimingDocument, wxDocument)
-TimingDocument::TimingDocument(void)
+TimingDocument::TimingDocument()
     :m_readOnly( false )
 {
     length = 25;
@@ -70,11 +70,11 @@ TimingDocument::TimingDocument(void)
     sig1.delay = 6;
     sig1.space = 10;
     sig1.prespace = 10;
-    sig1.name = _T("Clk");
+    sig1.name = "Clk";
     signals.push_back(sig1);
     }
 }
-TimingDocument::~TimingDocument(void){}
+TimingDocument::~TimingDocument(){}
 
 bool TimingDocument::DoSaveDocument(const wxString& file)
 {
@@ -314,8 +314,8 @@ bool TimingDocument::DoOpenDocument(const wxString& file)
     {
         // unknown format version
         wxMessageDialog dlg(NULL,
-            _T("File format is unknown.\nUpdate to a newer version of TimingEditor please."),
-            _T("Format unknown"),
+            _("File format is unknown.\nUpdate to a newer version of TimingEditor please."),
+            _("Format unknown"),
             wxOK);
             dlg.ShowModal();
 

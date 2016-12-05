@@ -68,7 +68,7 @@ void DiagramLabelsWindow::DoUpdate()
         Signal &sig = doc->signals[k];
         wxString str = sig.name;
 
-        GetTextExtent(str+_("["), &w, &h);
+        GetTextExtent(str + "[", &w, &h);
 
         wxCoord additionaloffset = //doc->SignalHeight/2 +
                                    doc->MinimumSignalDistance/2 +
@@ -93,7 +93,7 @@ void DiagramLabelsWindow::DoUpdate()
         {
             wxCoord wadd;
             str = sig.buswidth;
-            GetTextExtent(str+_("["), &wadd, &h);
+            GetTextExtent(str + "[", &wadd, &h);
 
             wxPoint pos(GetOffsetToLabelTextCtrl()+ w+15, m_view->heightOffsets[k] + additionaloffset );
             pos.y -= yOrigin*yScrollUnits;
@@ -246,9 +246,9 @@ void DiagramLabelsWindow::Draw(wxDC &dc, bool exporting)
             pos.y = m_view->heightOffsets[n] + doc->MinimumSignalDistance/2 + sig.prespace;
 
             pos.x += label->GetSize().x;
-            dc.DrawText(_T("["),pos.x, pos.y);
+            dc.DrawText("[", pos.x, pos.y);
             pos.x += bwidth->GetSize().x+10;
-            dc.DrawText(_T("]"),pos.x, pos.y);
+            dc.DrawText("]", pos.x, pos.y);
             if(exporting)
                 bwidth->Draw(dc);
 

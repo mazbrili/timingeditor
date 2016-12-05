@@ -156,7 +156,7 @@ void AddHorizontalArrowTask::DoCheckWhenMouseUp(const wxPoint &pos)
 
         newha.fromVerticalLine = m_verticalLine;
         newha.toVerticalLine = m_secondVerticalLine;
-        newha.text = _("$t$");
+        newha.text = "$t$";
         newha.textoffset.x = 0;
         newha.textoffset.y = -10;
         newha.textgridoffset = 0;

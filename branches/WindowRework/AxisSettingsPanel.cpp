@@ -95,7 +95,7 @@ void AxisSettingsPanel::OnUpdateFields(wxUpdateUIEvent& event)
 }
 void AxisSettingsPanel::SetTickLength(wxInt32 ticklength)
 {
-    m_textTickLenght->SetValue(wxString::Format(_T("%d"), ticklength));
+    m_textTickLenght->SetValue(wxString::Format("%d", ticklength));
 }
 void AxisSettingsPanel::SetLengthUnit(wxInt8 unit)
 {
@@ -104,15 +104,15 @@ void AxisSettingsPanel::SetLengthUnit(wxInt8 unit)
 }
 void AxisSettingsPanel::SetMarkerLength(wxInt32 markerlength)
 {
-    m_textMarkerLength->SetValue(wxString::Format(_T("%d"),markerlength));
+    m_textMarkerLength->SetValue(wxString::Format("%d", markerlength));
 }
 void AxisSettingsPanel::SetOffset(wxInt32 offset)
 {
-    m_textOffset->SetValue(wxString::Format(_T("%d"),offset));
+    m_textOffset->SetValue(wxString::Format("%d", offset));
 }
 void AxisSettingsPanel::SetTotalLengt(wxInt32 totallength)
 {
-    m_textTotalLength->SetValue(wxString::Format(_T("%d"), totallength));
+    m_textTotalLength->SetValue(wxString::Format("%d", totallength));
 }
 void AxisSettingsPanel::OnUpdatePanelApply(wxUpdateUIEvent& event)
 {
@@ -173,7 +173,7 @@ AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxS
 	m_textTickLenght = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_TICKLENGTH, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	bSizer5->Add( m_textTickLenght, 0, wxALL, 5 );
 
-	wxString m_choice1Choices[] = { wxT("fs"), wxT("ps"), wxT("ns"), wxT("us"), wxT("ms"), wxT("s"),  wxT("ks"), };
+	wxString m_choice1Choices[] = { "fs", "ps", "ns", "us", "ms", "s",  "ks" };
 	int m_choice1NChoices = sizeof( m_choice1Choices ) / sizeof( wxString );
 	m_choice1 = new wxChoice( this, TIMING_ID_PANEL_AXIS_UNITCHOICE, wxDefaultPosition, wxDefaultSize, m_choice1NChoices, m_choice1Choices, 0 );
 	bSizer5->Add( m_choice1, 0, wxALL, 5 );
@@ -181,29 +181,29 @@ AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxS
 
 	gSizer2->Add( bSizer5, 1, wxEXPAND, 5 );
 
-	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Ticks between markers"), wxDefaultPosition, wxDefaultSize, 0 );
+	staticText = new wxStaticText( this, ID_DEFAULT, _("Ticks between markers"), wxDefaultPosition, wxDefaultSize, 0 );
 	gSizer2->Add( staticText, 0, wxALL, 5 );
 
-	m_textMarkerLength = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_MARKERLENGTH, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
+	m_textMarkerLength = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_MARKERLENGTH, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	gSizer2->Add( m_textMarkerLength, 0, wxALL, 5 );
 
-	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Total Ticks of diagram"), wxDefaultPosition, wxDefaultSize, 0 );
+	staticText = new wxStaticText( this, ID_DEFAULT, _("Total Ticks of diagram"), wxDefaultPosition, wxDefaultSize, 0 );
 	gSizer2->Add( staticText, 0, wxALL, 5 );
 
-	m_textTotalLength = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_TOTALLENGTH, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
+	m_textTotalLength = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_TOTALLENGTH, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	gSizer2->Add( m_textTotalLength, 0, wxALL, 5 );
 
-	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Offset at start [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
+	staticText = new wxStaticText( this, ID_DEFAULT, _("Offset at start [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
 	gSizer2->Add( staticText, 0, wxALL, 5 );
 
-	m_textOffset = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_OFFSET, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ));
+	m_textOffset = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_OFFSET, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ));
 	gSizer2->Add( m_textOffset, 0, wxALL, 5 );
 
 	bSizer3->Add( gSizer2, 1, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer4 = new wxBoxSizer( wxVERTICAL );
 
-	m_applyButton = new wxButton( this, TIMING_ID_PANEL_AXIS_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_applyButton = new wxButton( this, TIMING_ID_PANEL_AXIS_APPLY, _("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer4->Add( m_applyButton, 0, wxALL, 5 );
 
 	bSizer3->Add( bSizer4, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );

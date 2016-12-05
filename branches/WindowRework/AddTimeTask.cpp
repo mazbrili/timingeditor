@@ -81,7 +81,7 @@ void AddRemoveTimeTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
     {
         if (m_add)
         {
-            wxInt32 len = ::wxGetNumberFromUser( _T("Ticks to add"), _T("the number of ticks to add in the diagram"), _T("Ticks to add"), 10, 1, 100);
+            wxInt32 len = ::wxGetNumberFromUser( _("Ticks to add"), _("the number of ticks to add in the diagram"), _("Ticks to add"), 10, 1, 100);
             if (len != -1)
                 m_doc->GetCommandProcessor()->Submit(
                     new AddTimeCommand((TimingDocument *)m_view->GetDocument(),

@@ -106,11 +106,10 @@ TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, 
 
     //// Give it an icon
 #ifdef __WXMSW__
-    //SetIcon(wxIcon(_T("nassi")));
     SetIcon(wxICON(aaaa)); // To Set App Icon
 #endif
 #ifdef __X__
-    SetIcon(wxIcon(_T("nassi.xpm")));
+    SetIcon(wxIcon("nassi.xpm"));
 #endif
 
 
@@ -137,13 +136,13 @@ TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, 
     tcsetpanel = new TimeCompressorSettingsPanel(this);
 
 
-    m_manager->AddPane(clksetpanel , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("ClockPanel")).Caption(wxT("Clock-type signal Settings")));
-    m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TransitionPanel")).Caption(wxT("Transition Settings")));
-    m_manager->AddPane(axissetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("AxisPanel")).Caption(wxT("Axis/Time Settings")));
-    m_manager->AddPane(tcsetpanel  , wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("TimeCompressorPanel")).Caption(wxT("Time compressor Settings")));
+    m_manager->AddPane(clksetpanel , wxAuiPaneInfo().MinSize(200,-1).Right().Name("ClockPanel").Caption(_("Clock-type signal Settings")));
+    m_manager->AddPane(trnssetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name("TransitionPanel").Caption(_("Transition Settings")));
+    m_manager->AddPane(axissetpanel, wxAuiPaneInfo().MinSize(200,-1).Right().Name("AxisPanel").Caption(_("Axis/Time Settings")));
+    m_manager->AddPane(tcsetpanel  , wxAuiPaneInfo().MinSize(200,-1).Right().Name("TimeCompressorPanel").Caption(_("Time compressor Settings")));
 
-    wxTextCtrl *logctrl = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
-    m_manager->AddPane(logctrl, wxAuiPaneInfo().MinSize(200,-1).Right().Name(_("LogPanel")).Caption(wxT("Log Panel")).CloseButton(false));
+    wxTextCtrl *logctrl = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE );
+    m_manager->AddPane(logctrl, wxAuiPaneInfo().MinSize(200,-1).Right().Name("LogPanel").Caption(_("Log Panel")).CloseButton(false));
     wxLogTextCtrl *loggerctrl = new wxLogTextCtrl(logctrl);
     DefalutLayout = m_manager->SavePerspective();
 
@@ -151,9 +150,9 @@ TimingMainFrame::TimingMainFrame(wxDocManager *manager, wxFrame *frame, int id, 
 
     //Centre(wxBOTH);
     wxConfig *cfg = wxGetApp().GetConfig();
-    cfg->SetPath( _T("/FileHistory") );
+    cfg->SetPath( "/FileHistory" );
     m_docManager->FileHistoryLoad(*cfg);
-    cfg->SetPath(_T("/"));
+    cfg->SetPath("/");
 
 
     LoadFramePositions(cfg);
@@ -169,39 +168,39 @@ void TimingMainFrame::InitMenuBar()
     wxMenu *file_menu = new wxMenu;
     wxMenu *edit_menu = (wxMenu *) NULL;
 
-    file_menu->Append(wxID_NEW, _T("&New...\tCtrl-N"), _T("Create a new file"));
-    file_menu->Append(wxID_OPEN, _T("&Open...\tCtrl-O"), _T("Open a existing file"));
+    file_menu->Append(wxID_NEW, _("&New...\tCtrl-N"), _("Create a new file"));
+    file_menu->Append(wxID_OPEN, _("&Open...\tCtrl-O"), _("Open a existing file"));
     //file_menu->Append(NASSI_ID_IMPORT_SOURCE, _T("&Import...\tCtrl-I"), _T("Import from C source file"));
     file_menu->AppendSeparator();
-    file_menu->Append(wxID_EXIT, _T("&Quit\tAlt-F4"), _T("Quit the application") );
+    file_menu->Append(wxID_EXIT, _("&Quit\tAlt-F4"), _("Quit the application") );
     // A nice touch: a history of files visited. Use this menu.
     m_docManager->FileHistoryUseMenu(file_menu);
     //m_docManager->FileHistoryAddFilesToMenu();
 
     wxMenu *help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, _T("&About\tF1"), _T("Show info about this application"));
-    help_menu->Append(TIMING_ID_TIP, _T("Tip"), _T("Tips on using TimingEditor") );
-    help_menu->Append(TIMING_ID_HELP, _T("Help"), _T("Open help pages"));
+    help_menu->Append(wxID_ABOUT, _("&About\tF1"), _("Show info about this application"));
+    help_menu->Append(TIMING_ID_TIP, _("Tip"), _("Tips on using TimingEditor") );
+    help_menu->Append(TIMING_ID_HELP, _("Help"), _("Open help pages"));
 
     wxMenu *panel_menu = new wxMenu;
-    panel_menu->Append(TIMING_ID_MENUITEM_CLOCK_TYPE, _T("Clock-type"), wxEmptyString, wxITEM_CHECK);
-    panel_menu->Append(TIMING_ID_MENUITEM_TIME_COMPRESSOR, _T("Time compressor"), wxEmptyString, wxITEM_CHECK);
-    panel_menu->Append(TIMING_ID_MENUITEM_AXIS_TIME, _T("Axis/Time"), wxEmptyString, wxITEM_CHECK);
-    panel_menu->Append(TIMING_ID_MENUITEM_TRANSITION, _T("Transition"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_CLOCK_TYPE, _("Clock-type"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_TIME_COMPRESSOR, _("Time compressor"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_AXIS_TIME, _("Axis/Time"), wxEmptyString, wxITEM_CHECK);
+    panel_menu->Append(TIMING_ID_MENUITEM_TRANSITION, _("Transition"), wxEmptyString, wxITEM_CHECK);
     panel_menu->AppendSeparator();
-    panel_menu->Append(TIMING_ID_MENUITEM_DEFAULT,_T("Default"));
+    panel_menu->Append(TIMING_ID_MENUITEM_DEFAULT, _("Default"));
 
     wxMenu *view_menu = new wxMenu;
     //view_menu->AppendSeparator();
-    view_menu->Append(wxID_ANY, _T("Panel"),panel_menu, _T("Show or Hide Panel"));
+    view_menu->Append(wxID_ANY, _("Panel"),panel_menu, _("Show or Hide Panel"));
 
 
     wxMenuBar *menu_bar = new wxMenuBar;
-    menu_bar->Append(file_menu, _T("&File"));
-    menu_bar->Append(view_menu, _T("&View"));
+    menu_bar->Append(file_menu, _("&File"));
+    menu_bar->Append(view_menu, _("&View"));
     if (edit_menu)
-        menu_bar->Append(edit_menu, _T("&Edit"));
-    menu_bar->Append(help_menu, _T("&Help"));
+        menu_bar->Append(edit_menu, _("&Edit"));
+    menu_bar->Append(help_menu, _("&Help"));
 
 #ifdef __WXMAC__
 
@@ -218,7 +217,7 @@ void TimingMainFrame::InitStatusBar()
     wxInt32 widths[2] = {-1, 60 };
     SetStatusWidths(2, &widths[0]);
     SetStatusBarPane(0);
-    SetStatusText(_T("Welcome to TimingEditor!"), 0);
+    SetStatusText(_("Welcome to TimingEditor!"), 0);
 }
 
 TimingMainFrame::~TimingMainFrame()
@@ -239,12 +238,12 @@ void TimingMainFrame::OnAbout(wxCommandEvent &event)
 {
 
     wxAboutDialogInfo info;
-    info.SetName(_("TimingEditor"));
-    info.SetVersion(_("0.2"));
-    info.SetDescription(_("Timing diagram editor."));
-    info.SetCopyright(_T("(C) 2008 2009 2010 2011"));
-    info.AddDeveloper(_T("Daniel Anselmi"));
-    info.AddDeveloper(_T("Yves Studer"));
+    info.SetName("TimingEditor");
+    info.SetVersion("0.2");
+    info.SetDescription("Timing diagram editor.");
+    info.SetCopyright("(C) 2008 2009 2010 2011 2012 2013 2014 2015 2016");
+    info.AddDeveloper("Daniel Anselmi");
+    info.AddDeveloper("Yves Studer");
 
     wxAboutBox(info);
 
@@ -252,7 +251,7 @@ void TimingMainFrame::OnAbout(wxCommandEvent &event)
 
 void TimingMainFrame::OnHelp(wxCommandEvent &event)
 {
-    wxLaunchDefaultBrowser(_T("http://timingeditor.wiki.sourceforge.net/"));
+    wxLaunchDefaultBrowser("http://timingeditor.wiki.sourceforge.net/");
 }
 
 void TimingMainFrame::OnUpdateCopy(wxUpdateUIEvent& event)
@@ -270,15 +269,15 @@ void TimingMainFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 
 wxString TimingMainFrame::DetectSourceOfEvent(const long EventId)
 {
-    wxString ID = _T("");
+    wxString ID = "";
     if(EventId == TIMING_ID_MENUITEM_CLOCK_TYPE)
-        ID = _T("ClockPanel");
+        ID = "ClockPanel";
     else if(EventId == TIMING_ID_MENUITEM_TIME_COMPRESSOR)
-        ID = _T("TimeCompressorPanel");
+        ID = "TimeCompressorPanel";
     else if(EventId == TIMING_ID_MENUITEM_AXIS_TIME)
-        ID = _T("AxisPanel");
+        ID = "AxisPanel";
     else if(EventId == TIMING_ID_MENUITEM_TRANSITION)
-        ID = _T("TransitionPanel");
+        ID = "TransitionPanel";
     return ID;
 }
 
@@ -367,33 +366,33 @@ void TimingMainFrame::InitToolBar()
 {
     wxAuiToolBar *toolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                          wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
-    toolBar->AddTool(wxID_NEW, _T("New file"), wxBitmap( new_xpm ), _T("Create a new file"), wxITEM_NORMAL);
-    toolBar->AddTool(wxID_OPEN, _T("Open file"), wxBitmap( open_xpm ));
-    toolBar->AddTool(wxID_SAVE, _T("Save file"), wxBitmap( save_xpm ));
+    toolBar->AddTool(wxID_NEW, _("New file"), wxBitmap( new_xpm ), _("Create a new file"), wxITEM_NORMAL);
+    toolBar->AddTool(wxID_OPEN, _("Open file"), wxBitmap( open_xpm ));
+    toolBar->AddTool(wxID_SAVE, _("Save file"), wxBitmap( save_xpm ));
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_CUT, _T("Cut"), wxBitmap( cut_xpm ));
-    toolBar->AddTool(wxID_COPY, _T("Copy"), wxBitmap( copy_xpm ));
-    toolBar->AddTool(wxID_PASTE, _T("Paste"), wxBitmap( paste_xpm ));
+    toolBar->AddTool(wxID_CUT, _("Cut"), wxBitmap( cut_xpm ));
+    toolBar->AddTool(wxID_COPY, _("Copy"), wxBitmap( copy_xpm ));
+    toolBar->AddTool(wxID_PASTE, _("Paste"), wxBitmap( paste_xpm ));
     toolBar->AddSeparator();
     //toolBar->AddTool(wxID_PRINT, _T("Print"), wxBitmap( print_xpm ), wxNullBitmap, wxITEM_NORMAL, _T("Print"), _T("Print the active file"));
     //toolBar->AddSeparator();
-    toolBar->AddTool(wxID_UNDO, _T("Undo"), wxBitmap( undo_xpm ), _T("Undo last operation"), wxITEM_NORMAL);
-    toolBar->AddTool(wxID_REDO, _T("Redo"), wxBitmap( redo_xpm ), _T("Redo last operation"), wxITEM_NORMAL);
+    toolBar->AddTool(wxID_UNDO, _("Undo"), wxBitmap( undo_xpm ), _("Undo last operation"), wxITEM_NORMAL);
+    toolBar->AddTool(wxID_REDO, _("Redo"), wxBitmap( redo_xpm ), _("Redo last operation"), wxITEM_NORMAL);
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_GLASS_N, _T("Zoom out"), wxBitmap(glassntool_xpm), _T("Zoom out the Document"), wxITEM_NORMAL);
-    toolBar->AddTool(TIMING_ID_GLASS_P, _T("Zoom in"), wxBitmap(glassptool_xpm), _T("Zoom in the Document"), wxITEM_NORMAL);
+    toolBar->AddTool(TIMING_ID_GLASS_N, _("Zoom out"), wxBitmap(glassntool_xpm), _("Zoom out the Document"), wxITEM_NORMAL);
+    toolBar->AddTool(TIMING_ID_GLASS_P, _("Zoom in"), wxBitmap(glassptool_xpm), _("Zoom in the Document"), wxITEM_NORMAL);
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_ADD_CLOCK, _T("Add Clock"), wxBitmap(clockedge_xpm), _T("Add a clock to the Document"));
-    toolBar->AddTool(TIMING_ID_ADD_SIGNAL, _T("Add Signal"), wxBitmap(risingedge_xpm), _T("Add a signal to the Document"));
-    toolBar->AddTool(TIMING_ID_ADD_BUS, _T("Add Bus"), wxBitmap(busedge_xpm), _T("Add a bus to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_CLOCK, _("Add Clock"), wxBitmap(clockedge_xpm), _("Add a clock to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_SIGNAL, _("Add Signal"), wxBitmap(risingedge_xpm), _("Add a signal to the Document"));
+    toolBar->AddTool(TIMING_ID_ADD_BUS, _("Add Bus"), wxBitmap(busedge_xpm), _("Add a bus to the Document"));
     toolBar->AddSeparator();
-    toolBar->AddTool(TIMING_ID_EDIT, _T("Select"), wxBitmap(cross_xpm), _T(" Select something or change signal/bus"));
-    toolBar->AddTool(TIMING_ID_DISCONTINUITY, _T("Edit time compressors"), wxBitmap(tri_xpm), _T("Add/Remove time compressors by clicking on the top axis"));
-    toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), _T("Draw vertical line"));
-    toolBar->AddTool(TIMING_ID_HORIZONTALARROW, _T("Draw horizontal arrow"),  wxBitmap(harrow_cur_xpm), _T("Draw a horizontal arrow") );
-    toolBar->AddTool(TIMING_ID_EDITTEXT, _T("Edit text label"), wxBitmap(textedit_cur_xpm), _T("Edit text labels") );
+    toolBar->AddTool(TIMING_ID_EDIT, _("Select"), wxBitmap(cross_xpm), _(" Select something or change signal/bus"));
+    toolBar->AddTool(TIMING_ID_DISCONTINUITY, _("Edit time compressors"), wxBitmap(tri_xpm), _("Add/Remove time compressors by clicking on the top axis"));
+    toolBar->AddTool(TIMING_ID_RULER, _T("Draw vertical line"), wxBitmap(ruler_cur_xpm), _("Draw vertical line"));
+    toolBar->AddTool(TIMING_ID_HORIZONTALARROW, _("Draw horizontal arrow"),  wxBitmap(harrow_cur_xpm), _("Draw a horizontal arrow") );
+    toolBar->AddTool(TIMING_ID_EDITTEXT, _("Edit text label"), wxBitmap(textedit_cur_xpm), _("Edit text labels") );
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_ABOUT, _T("Help"), wxBitmap( help_xpm ), _T("Show info about this application"));
+    toolBar->AddTool(wxID_ABOUT, _("Help"), wxBitmap( help_xpm ), _("Show info about this application"));
     toolBar->Realize();
 
     toolBar->Realize();
@@ -402,7 +401,7 @@ void TimingMainFrame::InitToolBar()
 
 
     m_manager->AddPane(toolBar, wxAuiPaneInfo().
-                  Name(wxT("tb1")).Caption(wxT("Big Toolbar")).
+                  Name("tb1").Caption(_("Big Toolbar")).
                   ToolbarPane().Top().
                   LeftDockable(false).RightDockable(false));
 
@@ -419,19 +418,19 @@ void TimingMainFrame::ShowTip(bool force)
 
     bool ShowTipsAtStartup = true;
     wxInt32 TipNumber = 0;
-    config->Read(_T("/StartupTips/ShowTipsAtStarup"), &ShowTipsAtStartup);
-    config->Read(_T("/StartupTips/TipNumber"), &TipNumber);
+    config->Read("/StartupTips/ShowTipsAtStarup", &ShowTipsAtStartup);
+    config->Read("/StartupTips/TipNumber", &TipNumber);
 
     if ( ShowTipsAtStartup || force )
     {
-        //wxTipProvider *tipProvider = wxCreateFileTipProvider(_T("tips"), TipNumber);
+        //wxTipProvider *tipProvider = wxCreateFileTipProvider("tips", TipNumber);
         wxTipProvider *tipProvider = new myTipProvider(TipNumber);;
         ShowTipsAtStartup = wxShowTip(this, tipProvider, ShowTipsAtStartup);
         TipNumber = tipProvider->GetCurrentTip();
         delete tipProvider;
 
-        config->Write(_T("/StartupTips/ShowTipsAtStarup"), ShowTipsAtStartup);
-        config->Write(_T("/StartupTips/TipNumber"), TipNumber);
+        config->Write("/StartupTips/ShowTipsAtStarup", ShowTipsAtStartup);
+        config->Write("/StartupTips/TipNumber", TipNumber);
     }
 }
 
@@ -468,19 +467,19 @@ void TimingMainFrame::SaveFramePositions(wxConfig *config)
         s= -1;
     if ( s == 0 )
     {
-        config->Write(_T("/MainFrame/x"), (long) x);
-        config->Write(_T("/MainFrame/y"), (long) y);
-        config->Write(_T("/MainFrame/w"), (long) w);
-        config->Write(_T("/MainFrame/h"), (long) h);
+        config->Write("/MainFrame/x", (long) x);
+        config->Write("/MainFrame/y", (long) y);
+        config->Write("/MainFrame/w", (long) w);
+        config->Write("/MainFrame/h", (long) h);
     }
-    config->Write(_T("/MainFrame/s"), (long) s);
+    config->Write("/MainFrame/s", (long) s);
 }
 void TimingMainFrame::SaveAuiPerspective(wxConfig *config)
 {
     wxString str = m_manager->SavePerspective();
-    config->Write( _T( "/MainFrame/AuiPerspective" ), str );
+    config->Write("/MainFrame/AuiPerspective", str );
     /// store version to let newer versions of gui a cahnce to build a new valid perspective
-    config->Write( _T( "/MainFrame/AuiPerspectiveVersion" ), 3);
+    config->Write("/MainFrame/AuiPerspectiveVersion", 3);
 }
 void TimingMainFrame::LoadAuiPerspective(wxConfig *config)
 {
@@ -488,10 +487,10 @@ void TimingMainFrame::LoadAuiPerspective(wxConfig *config)
     long v;
 
     /// if version stored is older than current do not load old perspective
-    config->Read(_T( "/MainFrame/AuiPerspectiveVersion" ), &v, 0);
+    config->Read("/MainFrame/AuiPerspectiveVersion", &v, 0);
     if ( v == 3 )
     {
-        config->Read(_T( "/MainFrame/AuiPerspective" ), &str);
+        config->Read("/MainFrame/AuiPerspective", &str);
         m_manager->LoadPerspective(str);
     }
 }
@@ -499,11 +498,11 @@ void TimingMainFrame::LoadFramePositions(wxConfig *config)
 {
     /// restore frame position and size
         wxInt32 x, y, w, h, s;
-        x = config->Read(_T("/MainFrame/x"), 50);
-        y = config->Read(_T("/MainFrame/y"), 50);
-        w = config->Read(_T("/MainFrame/w"), 600);
-        h = config->Read(_T("/MainFrame/h"), 500);
-        s = config->Read(_T("/MainFrame/s"), (long)0);
+        x = config->Read("/MainFrame/x", 50);
+        y = config->Read("/MainFrame/y", 50);
+        w = config->Read("/MainFrame/w", 600);
+        h = config->Read("/MainFrame/h", 500);
+        s = config->Read("/MainFrame/s", (long)0);
         Move(x, y);
         SetClientSize(w, h);
         if ( s > 0 )
