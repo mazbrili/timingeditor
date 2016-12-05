@@ -35,7 +35,7 @@
     #include <wx/wx.h>
 #endif
 
-#include <wx/svg/dcsvg.h>
+//#include <wx/svg/dcsvg.h>
 #include <wx/dcps.h>
 #include <wx/filename.h>
 
@@ -874,7 +874,7 @@ bool TimingView::IsSignalSelected(void)const
 
 void TimingView::OnExportBitmap(wxCommandEvent& event)
 {
-    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"),_T(""),_T(""),_T("PNG files (*.png)|*.png"),wxSAVE | wxOVERWRITE_PROMPT );
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _("Choose a file for exporting into it"), "", "", _("PNG files (*.png)|*.png"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
     if ( dlg.ShowModal() != wxID_OK )
         return;
 
@@ -923,7 +923,7 @@ void TimingView::OnExportBitmap(wxCommandEvent& event)
 
 void TimingView::OnExportSVG(wxCommandEvent& event)
 {
-    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("SVG files (*.svg)|*.svg"), wxSAVE | wxOVERWRITE_PROMPT);
+    /*wxFileDialog dlg( wxGetApp().GetMainFrame(), _("Choose a file for exporting into it"), "", "", _("SVG files (*.svg)|*.svg"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if ( dlg.ShowModal() != wxID_OK )
         return;
     wxString filename = dlg.GetPath();
@@ -954,12 +954,12 @@ void TimingView::OnExportSVG(wxCommandEvent& event)
     svgdc->SetDeviceOrigin(labelswidth, axisheight);
     splitterwindow->GetRightWindow()->GetWavesWindow()->Draw(*svgdc);
 
-    delete svgdc;
+    delete svgdc;*/
 }
 
 void TimingView::OnExportPS(wxCommandEvent& event)
 {
-    wxFileDialog dlg( wxGetApp().GetMainFrame(), _T("Choose a file for exporting into it"), _T(""), _T(""), _T("PostScrip files (*.ps)|*.ps"), wxSAVE | wxOVERWRITE_PROMPT);
+    wxFileDialog dlg( wxGetApp().GetMainFrame(), _("Choose a file for exporting into it"), "", "", _("PostScrip files (*.ps)|*.ps"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if ( dlg.ShowModal() != wxID_OK )
         return;
     wxString filename = dlg.GetPath();

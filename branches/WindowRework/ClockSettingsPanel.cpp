@@ -135,12 +135,9 @@ ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, w
     view(NULL)
 {
     wxStaticText *staticText;
-	wxBoxSizer* bSizer1;
+	wxBoxSizer* bSizer1 = new wxBoxSizer( wxVERTICAL );
 
-	bSizer1 = new wxBoxSizer( wxVERTICAL );
-
-	wxFlexGridSizer* gSizer1;
-	gSizer1 = new wxFlexGridSizer( 2, 2, 0, 0 );
+	wxFlexGridSizer* gSizer1 = new wxFlexGridSizer( 2, 0, 0 );
 
 	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Legth of half period [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
 	gSizer1->Add( staticText, 0, wxALL, 5 );
@@ -156,11 +153,9 @@ ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, w
 	bSizer1->Add( gSizer1, 1, wxEXPAND, 5 );
 
 
-    wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer* bSizer5 = new wxBoxSizer( wxVERTICAL );
 
-    wxBoxSizer* bSizer2;
-	bSizer2 = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer* bSizer2 = new wxBoxSizer( wxHORIZONTAL );
 	m_checkShadow = new wxCheckBox(this, TIMING_ID_PANEL_CLK_SHADOW, _T("generate vertical shadow"));
 	m_checkPeriodCount = new wxCheckBox(this, TIMING_ID_PANEL_CLK_PERIOD, _T("show numbering clock periods"));
 
@@ -172,8 +167,7 @@ ClockSettingsPanel::ClockSettingsPanel( wxWindow* parent, int id, wxPoint pos, w
 	bSizer1->Add( bSizer2, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizer3 = new wxBoxSizer( wxHORIZONTAL );
 	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_CLK_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer3->Add( m_buttonApply, 0, wxALL, 5 );
 	bSizer1->Add( bSizer3, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );

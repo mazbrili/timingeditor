@@ -53,13 +53,13 @@ bool TimingApp::OnInit()
     wxCmdLineParser parser(argc, argv);
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
-        /*{ wxCMD_LINE_SWITCH, _T("v"), _T("verbose"), _T("be verbose") },
-        { wxCMD_LINE_SWITCH, _T("q"), _T("quiet"),   _T("be quiet") },
-        { wxCMD_LINE_OPTION, _T("o"), _T("output"),  _T("output file") },
-        { wxCMD_LINE_OPTION, _T("i"), _T("input"),   _T("input dir") },
-        { wxCMD_LINE_OPTION, _T("s"), _T("size"),    _T("output block size"), wxCMD_LINE_VAL_NUMBER },
-        { wxCMD_LINE_OPTION, _T("d"), _T("date"),    _T("output file date"), wxCMD_LINE_VAL_DATE },*/
-        { wxCMD_LINE_PARAM,  NULL, NULL, _T("input file"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_MULTIPLE|wxCMD_LINE_PARAM_OPTIONAL },
+      /*{ wxCMD_LINE_SWITCH, "v", "verbose", "be verbose" },
+        { wxCMD_LINE_SWITCH, "q", "quiet",   "be quiet" },
+        { wxCMD_LINE_OPTION, "o", "output",  "output file" },
+        { wxCMD_LINE_OPTION, "i", "input",   "input dir" },
+        { wxCMD_LINE_OPTION, "s", "size",    "output block size", wxCMD_LINE_VAL_NUMBER },
+        { wxCMD_LINE_OPTION, "d", "date",    "output file date", wxCMD_LINE_VAL_DATE },*/
+        { wxCMD_LINE_PARAM,  NULL, NULL, "input file", wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_MULTIPLE|wxCMD_LINE_PARAM_OPTIONAL },
         { wxCMD_LINE_NONE }
     };
     parser.SetDesc(cmdLineDesc);
