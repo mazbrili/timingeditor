@@ -15,12 +15,12 @@ END_EVENT_TABLE()
 
 
 HorizontalArrowText::HorizontalArrowText(wxPanel *parent, TimingView *view):
-TimingTextCtrl(parent, view, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxBORDER_NONE ), //wxBORDER_NONE| wxTE_DONTWRAP | wxBORDER_SIMPLE
+TimingTextCtrl(parent, view, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER | wxBORDER_NONE ), //wxBORDER_NONE| wxTE_DONTWRAP | wxBORDER_SIMPLE
 m_horizontalArrow(-1),
 m_activeTask(NULL)
 {
     //ctor
-    //ChangeValue(_("[") + value + _("]"));
+    //ChangeValue("[" + value + "]");
 }
 
 HorizontalArrowText::~HorizontalArrowText()
@@ -55,7 +55,7 @@ wxCommand *HorizontalArrowText::GetChangedCommand()
 }
 //void HorizontalArrowText::RestoreText()
 //{
-//    ChangeValue(_("[") + unchanged + _("]"));
+//    ChangeValue("[" + unchanged + "]");
 //    ChangeValue( unchanged );
 //
 //    should not fail, because labels, axis and waves are panels

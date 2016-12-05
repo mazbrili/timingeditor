@@ -50,7 +50,7 @@ void Task::Init()
     m_waveWin->SetCursor(*wxCROSS_CURSOR);
     m_labelsWin->SetCursor(wxNullCursor);
 
-    SetStatusText(_(""));
+    SetStatusText("");
 }
 
 Task::~Task()
@@ -76,7 +76,7 @@ void Task::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
         {
             wxInt32 tick = GetTickFromPosition(pos);
 
-            wxString str = wxString::Format(_T("tick: %d, t: "), m_view->VisibleTicks[tick]);
+            wxString str = wxString::Format("tick: %d, t: ", m_view->VisibleTicks[tick]);
             str += m_view->GetTimeString( m_view->VisibleTicks[tick] );
 
             m_axisWin->SetDrawlet(
@@ -107,7 +107,7 @@ void Task::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
         wxInt32 tick = GetTickFromPosition(pos);
         if ( pos.x < m_view->GetWavesLeftSpace() + m_view->GridStepWidth*((int)m_view->VisibleTicks.size() - 1))
         {
-            wxString str = wxString::Format(_T("tick: %d, t: "), m_view->VisibleTicks[tick]);
+            wxString str = wxString::Format("tick: %d, t: ", m_view->VisibleTicks[tick]);
             str += m_view->GetTimeString( m_view->VisibleTicks[tick] );
             m_axisWin->SetDrawlet(
                 new HoverCombo(

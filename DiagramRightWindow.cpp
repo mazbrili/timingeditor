@@ -21,7 +21,7 @@ bool DiagramRightWindow::Create(TimingView *view, wxWindow *parent, DiagramLabel
 
     SetTargetWindow( m_waves );
 
-    SetBackgroundColour( wxT("WHITE") );
+    SetBackgroundColour( *wxWHITE );
 
     wxBoxSizer *mainsizer = new wxBoxSizer(wxVERTICAL);
     mainsizer->Add(m_axis, 0, wxEXPAND);
@@ -59,9 +59,9 @@ void DiagramRightWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
     wxSize size( GetClientSize() );
 
     long w,h;
-    dc.GetTextExtent( wxT("Headline"), &w, &h );
+    dc.GetTextExtent( "Headline", &w, &h );
 
-    dc.DrawText( wxT("Headline"), long (size.x / 2 - w / 2), 10 );
+    dc.DrawText( "Headline", long (size.x / 2 - w / 2), 10 );
 */
 }
 

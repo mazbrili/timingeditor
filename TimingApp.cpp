@@ -71,11 +71,11 @@ bool TimingApp::OnInit()
     m_docManager = new wxDocManager;
 
     /// Create a config
-    m_config = new wxConfig(_T("TimingEditor"));
+    m_config = new wxConfig("TimingEditor");
 
     /// Create a template relating documents to their views
-    (void) new wxDocTemplate(m_docManager, _T("Timing Diagrams"), _T("*.tdg"), _T(""), _T("tdg"),
-            _T("Timing Diagrams"), _T("Timing Diagram"),
+    (void) new wxDocTemplate(m_docManager, _("Timing Diagrams"), "*.tdg", "", "tdg",
+            "Timing Diagrams", "Timing Diagram",
             CLASSINFO(TimingDocument), CLASSINFO(TimingView));
 
     /// Create the main frame window
@@ -98,9 +98,9 @@ bool TimingApp::OnInit()
 
 int TimingApp::OnExit(void)
 {
-    m_config->SetPath(_T("/FileHistory"));
+    m_config->SetPath("/FileHistory");
     m_docManager->FileHistorySave(*m_config);
-    m_config->SetPath(_T("/"));
+    m_config->SetPath("/");
     delete m_docManager;
     delete m_config;
     return 0;

@@ -50,7 +50,7 @@ void MainTask::LabelsMouse(const wxMouseEvent &event, const wxPoint &pos)
         else
         {
             m_labelsWin->SetCursor(wxNullCursor);
-            SetStatusText(_(""));
+            SetStatusText("");
         }
 
         m_axisWin->RemoveDrawlet();
@@ -149,7 +149,7 @@ void MainTask::WavesMouse(const wxMouseEvent &event, const wxPoint &pos)
 
             return;
         }
-        SetStatusText(_(""));
+        SetStatusText("");
     }
 }
 void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
@@ -180,7 +180,7 @@ void MainTask::AxisMouse(const wxMouseEvent &event, const wxPoint &pos)
             return;
         }
         else
-            SetStatusText(_(""));
+            SetStatusText("");
     }
 
     if (event.ButtonDown(wxMOUSE_BTN_LEFT))

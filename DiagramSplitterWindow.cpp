@@ -95,7 +95,7 @@ wxDragResult DiagramSplitterWindow::OnDragOver(wxPoint pt, wxDragResult def)
     CalcUnscrolledPosition( p.x, p.y, &xx, &yy);
     dc.SetFont(font);
     wxCoord dx, dy;
-    //dc.GetTextExtent(_T("H"), &dx, &dy);
+    //dc.GetTextExtent("H", &dx, &dy);
     dx = dc.GetCharWidth();
     dy = dc.GetCharHeight();
 

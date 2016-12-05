@@ -218,11 +218,11 @@ void ActiveSignalTask::UpdateClockSettingsPanel(bool attach)
         wxString str;
 
         n = doc->signals[m_sig].delay;
-        str = wxString::Format ( _( "%d" ) , n);
+        str = wxString::Format ("%d" , n);
         ClockSettingsPanel::GetInstance()->SetDelayText(str);
 
         n = doc->signals[m_sig].ticks;
-        str = wxString::Format ( _( "%d" ) , n);
+        str = wxString::Format ("%d" , n);
         ClockSettingsPanel::GetInstance()->SetTicksText(str);
 
         ClockSettingsPanel::GetInstance()->SetShadowed(doc->signals[m_sig].GenerateBackground);

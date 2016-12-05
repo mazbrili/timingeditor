@@ -16,7 +16,7 @@ TimingTextCtrl(parent, view, value, pos, size, wxTE_PROCESS_ENTER | wxBORDER_NON
 m_signalNumber(signalNumber)
 {
     //ctor
-    //ChangeValue(_("[") + value + _("]"));
+    //ChangeValue("[" + value + "]");
 }
 
 BusWidthText::~BusWidthText()
@@ -44,7 +44,7 @@ wxCommand *BusWidthText::GetChangedCommand()
 }
 //void BusWidthText::RestoreText()
 //{
-//    ChangeValue(_("[") + unchanged + _("]"));
+//    ChangeValue("[" + unchanged + "]");
 //    ChangeValue( unchanged );
 //
 //    should not fail, because labels, axis and waves are panels

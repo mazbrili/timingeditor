@@ -123,10 +123,10 @@ TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPo
 
 	wxBoxSizer* bSizer3 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText1 = new wxStaticText( this, ID_DEFAULT, wxT("Transition width (% of a Tick)"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1 = new wxStaticText( this, ID_DEFAULT, _("Transition width (% of a Tick)"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer3->Add( m_staticText1, 0, wxALL, 5 );
 
-	m_spinCtrl1 = new wxSpinCtrl( this, TIMING_ID_PANEL_TRANS_WIDTH, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
+	m_spinCtrl1 = new wxSpinCtrl( this, TIMING_ID_PANEL_TRANS_WIDTH, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
 	bSizer3->Add( m_spinCtrl1, 1, wxALL, 5 );
 
 	bSizer1->Add( bSizer3, 0, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
@@ -137,12 +137,12 @@ TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPo
 
 	wxBoxSizer* bSizer2 = new wxBoxSizer( wxVERTICAL );
 
-	//m_checkBox1 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK, wxT("Allow vertical lines after 50% and 90% of a transition"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_check10 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK10, wxT("Snap vertical lines at 10% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	//m_checkBox1 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK, _("Allow vertical lines after 50% and 90% of a transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_check10 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK10, _("Snap vertical lines at 10% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_check10->SetValue(true);
 	m_check10->Enable(false);
-	m_check50 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK50, wxT("Snap vertical lines at 50% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_check90 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK90, wxT("Snap vertical lines at 90% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_check50 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK50, _("Snap vertical lines at 50% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_check90 = new wxCheckBox( this, TIMING_ID_PANEL_TRANS_CHECK90, _("Snap vertical lines at 90% of transition"), wxDefaultPosition, wxDefaultSize, 0 );
 
 	//bSizer2->Add( m_checkBox1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 	bSizer2->Add(m_check10,  0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
@@ -151,7 +151,7 @@ TransitionSettingsPanel::TransitionSettingsPanel( wxWindow* parent, int id, wxPo
 
 	bSizer1->Add( bSizer2, 0, wxEXPAND, 5 );
 
-	m_button4 = new wxButton( this, TIMING_ID_PANEL_TRANS_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button4 = new wxButton( this, TIMING_ID_PANEL_TRANS_APPLY, _("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer1->Add( m_button4, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
 
 	this->SetSizer( bSizer1 );

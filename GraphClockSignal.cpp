@@ -74,7 +74,7 @@ void GraphClockSignal::DrawBackground(wxDC &dc)const
                 {
                     wxUint32 per = m_view->VisibleTicks[k]/2/m_sig->ticks+1;
                     positions.push_back(offset.x);
-                    texts.push_back( wxString::Format(_T("%d"),per) );
+                    texts.push_back( wxString::Format("%d", per) );
                     //dc.DrawText( , , heightOffsets[0]);
                 }
                 ++n;

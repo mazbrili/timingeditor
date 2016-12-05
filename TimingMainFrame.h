@@ -37,8 +37,7 @@ class TimingView;
 class TimingMainFrame: public wxDocMDIParentFrame//wxFrame
 {
     public:
-        //TimingMainFrame( wxWindow* parent, wxString title = wxT("Timing"), wxPoint pos = wxDefaultPosition, wxSize size = wxSize( 481,466 ), int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-        TimingMainFrame(wxDocManager *manager , wxFrame *frame, int id = wxID_ANY, const wxString& title = _T("TimingEditor"), wxPoint pos = wxDefaultPosition, wxSize size = wxDefaultSize, int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+        TimingMainFrame(wxDocManager *manager , wxFrame *frame, int id = wxID_ANY, const wxString& title = _("TimingEditor"), wxPoint pos = wxDefaultPosition, wxSize size = wxDefaultSize, int style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
         ~TimingMainFrame();
     ///member vars
     private:

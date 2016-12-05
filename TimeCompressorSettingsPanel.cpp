@@ -56,16 +56,16 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
 
 	wxFlexGridSizer* fgSizer1 = new wxFlexGridSizer( 2, 0, 0 );
 
-	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Length of gap [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
+	staticText = new wxStaticText( this, ID_DEFAULT, _("Length of gap [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer1->Add( staticText, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	m_textTime = new wxTextCtrl( this, TIMING_ID_PANEL_TC_TXTFIELD, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
+	m_textTime = new wxTextCtrl( this, TIMING_ID_PANEL_TC_TXTFIELD, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	fgSizer1->Add( m_textTime, 0, wxALL, 5 );
 
 	bSizer3->Add( fgSizer1, 1, wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer4 = new wxBoxSizer( wxVERTICAL );
-	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_TC_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_TC_APPLY, _("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer4->Add( m_buttonApply, 0, wxALL/*|wxALIGN_CENTER_HORIZONTAL*/, 5 );
 
 	bSizer3->Add( bSizer4, 0, wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );

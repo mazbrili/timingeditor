@@ -139,6 +139,6 @@ void EditTimeCompressorTask::UpdateTimeCompressorPanel(bool attach)const
     TimeCompressorSettingsPanel::GetInstance()->view = m_view;
     if(doc->compressors.find(m_tick) != doc->compressors.end())
         TimeCompressorSettingsPanel::GetInstance()->SetTimeText(
-            wxString::Format( _("%d"), doc->compressors[m_tick].length )
+            wxString::Format("%d", doc->compressors[m_tick].length )
         );
 }
