@@ -161,19 +161,16 @@ AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxS
     view(NULL)
 {
     wxStaticText* staticText;
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer3 = new wxBoxSizer( wxVERTICAL );
 
-	wxGridSizer* gSizer2;
-	gSizer2 = new wxFlexGridSizer( 2, 2, 0, 0 );
+	wxGridSizer* gSizer2 = new wxFlexGridSizer( 2, 0, 0 );
 
-	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Length of a Tick"), wxDefaultPosition, wxDefaultSize, 0 );
+	staticText = new wxStaticText( this, ID_DEFAULT, _("Length of a Tick"), wxDefaultPosition, wxDefaultSize, 0 );
 	gSizer2->Add( staticText, 0, wxALL, 5 );
 
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizer5 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_textTickLenght = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_TICKLENGTH, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
+	m_textTickLenght = new wxTextCtrl( this, TIMING_ID_PANEL_AXIS_TICKLENGTH, "", wxDefaultPosition, wxDefaultSize, 0, wxTextValidator( wxFILTER_NUMERIC ) );
 	bSizer5->Add( m_textTickLenght, 0, wxALL, 5 );
 
 	wxString m_choice1Choices[] = { wxT("fs"), wxT("ps"), wxT("ns"), wxT("us"), wxT("ms"), wxT("s"),  wxT("ks"), };
@@ -204,8 +201,7 @@ AxisSettingsPanel::AxisSettingsPanel( wxWindow* parent, int id, wxPoint pos, wxS
 
 	bSizer3->Add( gSizer2, 1, wxEXPAND, 5 );
 
-	wxBoxSizer* bSizer4;
-	bSizer4 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer4 = new wxBoxSizer( wxVERTICAL );
 
 	m_applyButton = new wxButton( this, TIMING_ID_PANEL_AXIS_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer4->Add( m_applyButton, 0, wxALL, 5 );

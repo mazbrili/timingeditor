@@ -14,7 +14,7 @@ HoverCheckbox::~HoverCheckbox()
 
 bool HoverCheckbox::Draw(wxDC &dc)
 {
-    int old_lf = dc.GetLogicalFunction();
+    wxRasterOperationMode old_lf = dc.GetLogicalFunction();
     dc.SetLogicalFunction(wxXOR);
 
     wxPen old_pen = dc.GetPen();

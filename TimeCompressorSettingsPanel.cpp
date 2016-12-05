@@ -52,11 +52,9 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
 {
     wxStaticText* staticText;
 
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer3 = new wxBoxSizer( wxVERTICAL );
 
-	wxFlexGridSizer* fgSizer1;
-	fgSizer1 = new wxFlexGridSizer( 2, 2, 0, 0 );
+	wxFlexGridSizer* fgSizer1 = new wxFlexGridSizer( 2, 0, 0 );
 
 	staticText = new wxStaticText( this, ID_DEFAULT, wxT("Length of gap [Ticks]"), wxDefaultPosition, wxDefaultSize, 0 );
 	fgSizer1->Add( staticText, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
@@ -66,8 +64,7 @@ TimeCompressorSettingsPanel::TimeCompressorSettingsPanel
 
 	bSizer3->Add( fgSizer1, 1, wxEXPAND, 5 );
 
-	wxBoxSizer* bSizer4;
-	bSizer4 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer4 = new wxBoxSizer( wxVERTICAL );
 	m_buttonApply = new wxButton( this, TIMING_ID_PANEL_TC_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer4->Add( m_buttonApply, 0, wxALL/*|wxALIGN_CENTER_HORIZONTAL*/, 5 );
 
